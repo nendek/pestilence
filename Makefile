@@ -17,8 +17,9 @@ NC = nasm
 NASMFLAGS = -f elf64
 
 NAME = pestilence
-FILES_C = pestilence.c
-FILES_S = ft_memcpy.s ft_bzero.s
+FILES_C = parsing.c pestilence.c
+FILES_S = loader.s ft_memcpy.s ft_bzero.s
+#LAST_FILE = exit_vir.s
 
 SRCS_DIR_C = srcs_c
 SRCS_C = $(addprefix $(SRCS_DIR_C)/,$(FILES_C))
@@ -38,7 +39,7 @@ OBJS_S = $(addprefix $(OBJS_DIR_S)/,$(FILES_S:%.s=%.o))
 all: $(NAME)
 
 $(NAME): $(OBJS_DIR_C) $(OBJS_C) $(OBJS_DIR_S) $(OBJS_S)
-		$(CC) $(CFLAGS) -I $(INCS) -o $(NAME) $(OBJS_C) $(OBJS_S)
+		$(CC) $(CFLAGS) -I $(INCS) -o $(NAME) $(OBJS_S) $(OBJS_C)
 
 $(OBJS_DIR_C):
 		mkdir -p $(OBJS_DIR_C)
