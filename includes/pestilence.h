@@ -46,5 +46,9 @@ void		pe_parsing(t_info *info);
 /*			**** LIB HANDLERS	****			*/
 void		ft_memcpy(void *dest, void *src, size_t size);
 void		ft_bzero(void *ptr, size_t size);
+int		ft_sysopen(const char *pathname, int flags);
+int		ft_sysclose(int fd);
+ssize_t 	ft_syswrite(int fd, const void *buf, size_t count);
+void		*ft_sysmmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
 
 #endif

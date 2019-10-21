@@ -24,13 +24,13 @@ void	patch_loader(t_info *info)
 
 	start = info->text_addr + info->text_size + LOADER_SIZE;
 	end = (int32_t)(info->addr_payload);
-// 	end = (int32_t)(info->addr_payload + (size_t)(&main) - (size_t)(&ft_memcpy));
+	// 	end = (int32_t)(info->addr_payload + (size_t)(&main) - (size_t)(&ft_memcpy));
 	val = end - start;
 
 	// rewrite jmp to payload
 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE - 4, &val, 4);
 
-// 	start = info->text_addr + info->text_size + LOADER_SIZE + 44;
+	// 	start = info->text_addr + info->text_size + LOADER_SIZE + 44;
 	end = info->addr_payload;
 	val = end - start;
 	// rewrite addr for mprotect
@@ -58,7 +58,7 @@ void	patch_payload(t_info *info)
 	start = (int32_t)(info->addr_payload + PAYLOAD_SIZE);
 	end = info->text_addr + info->text_size + LOADER_SIZE;
 	val = end - start;
-	
+
 	ft_memcpy(info->file + info->offset_payload + PAYLOAD_SIZE - 4, &val, 4);
 }
 
@@ -96,24 +96,32 @@ void	inject_end(t_info *info)
 	patch_end(info);
 }
 
-void	write_file(t_info info, char *name)
+int	write_file(t_info info, char *name)
 {
-	int fd = open(name, O_WRONLY | O_CREAT | O_TRUNC);
-	write(fd, info.file, info.file_size);
-	close(fd);
+	int fd;
+
+	if ((fd = ft_sysopen(name, O_WRONLY | O_CREAT | O_TRUNC)) ==  -1)
+		return (1);
+	ft_syswrite(fd, info.file, info.file_size);
+	ft_sysclose(fd);
+	return (0);
 }
 
 int		main()
 {
-	write(1, "main_begin\n", 11);
+	ft_syswrite(1, "main_begin\n", 11);
 	struct stat		st;
-	int				fd = open("test/test", O_RDWR);
+	int			fd;
 	t_info			info;
-	
+
+	if ((fd = ft_sysopen("test/test", O_RDWR)) ==  -1)
+		return (1);
+	dprintf(1, "fd = %d\n", fd);
 	init_info(&info);
 	fstat(fd, &st);
 	info.file_size = st.st_size;
-	info.file = mmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+	if ((info.file = ft_sysmmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
+		return (1);
 	find_text(&info);
 	epo_parsing(&info);
 	pe_parsing(&info);
@@ -123,7 +131,7 @@ int		main()
 	inject_loader(&info);
 	inject_payload(&info);
 	inject_end(&info);
-	close(fd);
+	ft_sysclose(fd);
 	write_file(info, "test/patched");
 	return (0);
 }
