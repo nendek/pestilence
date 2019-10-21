@@ -10,8 +10,9 @@
 # include <sys/stat.h>
 # include <fcntl.h>
 
-# define PAYLOAD_SIZE 0x53 + 0x5
-# define LOADER_SIZE 0x42
+# define END_SIZE 0x1B + 0x5
+# define PAYLOAD_SIZE 0x38 + 0x5
+# define LOADER_SIZE 0x43
 
 typedef struct		s_info
 {
@@ -34,6 +35,7 @@ typedef struct		s_info
 
 void		loader();
 int			main();
+void		ft_end();
 void		woody();
 
 /*			**** PARSING ****					*/
