@@ -20,10 +20,10 @@ loader:
     push r15
 	push r15
     mov rdx, 0x7 ;EXEC | READ
-    mov rsi, 0x2000; size payload + 1 page
+    mov rsi, 0x1038; size payload + 1 page
 p1:
     lea rdi, [$ + 0x10000000] ; adresse du payload
     and rdi, 0xFFFFFFFFFFFFF000
     mov rax, 0xa
     syscall
-    call 0xFFFFFFFF ; addresse du payload
+    jmp 0xFFFFFFFF ; addresse du payload

@@ -10,7 +10,7 @@
 # include <sys/stat.h>
 # include <fcntl.h>
 
-# define PAYLOAD_SIZE 0x800
+# define PAYLOAD_SIZE 0x53 + 0x5
 # define LOADER_SIZE 0x42
 
 typedef struct		s_info
@@ -21,8 +21,8 @@ typedef struct		s_info
 	size_t		text_size;
 	size_t		text_addr;
 
-	void		*call_to_replace;
-	void		*addr_to_jump;
+	void		*addr_call_to_replace;
+	void		*addr_hooked_func;
 
 	size_t		bss_size;
 	size_t		begin_bss;
@@ -34,6 +34,7 @@ typedef struct		s_info
 
 void		loader();
 int			main();
+void		woody();
 
 /*			**** PARSING ****					*/
 void		find_text(t_info *info);

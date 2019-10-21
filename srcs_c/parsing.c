@@ -38,7 +38,7 @@ int			valid_call(t_info *info, int pos)
 	prolog = *((int32_t *)(info->text_begin + dest + pos + 4));
 	if (prolog == 0xe5894855)
 	{
-		info->addr_to_jump = info->text_begin + dest + pos + 4;
+		info->addr_hooked_func = info->text_begin + dest + pos + 4;
 		return (0);
 	}
 	return (1);
@@ -55,7 +55,7 @@ void		epo_parsing(t_info *info)
 		c = *((uint8_t *)(info->text_begin + i));
 		if (c == 0xe8 && i + 4 < info->text_size && (valid_call(info, i + 1) == 0))
 		{
-			info->call_to_replace = info->text_begin + i;
+			info->addr_call_to_replace = info->text_begin + i;
 			return ;
 		}
 		i++;
