@@ -120,8 +120,11 @@ int		main()
 	init_info(&info);
 	fstat(fd, &st);
 	info.file_size = st.st_size;
+// 	if ((info.file = mmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
+// 		return (1);
 	if ((info.file = ft_sysmmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
 		return (1);
+	dprintf(1, "info.file = %p\n", info.file);
 	find_text(&info);
 	epo_parsing(&info);
 	pe_parsing(&info);

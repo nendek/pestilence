@@ -23,11 +23,13 @@ ft_sysopen:
 ft_sysmmap:
 	xor rax, rax
 	mov rax, 0x9
+	mov r10, rcx
 	jmp call
 
 call:
 	push rbp
 	mov rbp, rsp
+	and rsp, -0x10
 	syscall
 	jc error
 	jmp end
@@ -38,5 +40,6 @@ end:
 	ret
 
 error:
+	xor rax, rax
 	mov rax, -1
 	jmp end
