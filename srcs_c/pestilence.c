@@ -104,6 +104,31 @@ void	inject_end(t_info *info)
 	patch_end(info);
 }
 
+void	patch_addresses(t_info *info)
+{
+	int32_t		start;
+	int32_t		end;
+	int32_t		val;
+	
+	// &loader
+	start = info->addr_payload + OFFSET_1 + 4;
+	end = (int32_t)((size_t)(info->text_begin) + (size_t)(info->text_size) - (size_t)(info->file));
+	val = end - start;
+	ft_memcpy(info->file + info->offset_payload + OFFSET_1, &val, 4);
+
+	// &ft_memcpy
+	start = info->addr_payload + OFFSET_2 + 4;
+	end = (int32_t)(info->addr_payload);
+	val = end - start;
+	ft_memcpy(info->file + info->offset_payload + OFFSET_2, &val, 4);
+
+	// &ft_end
+	start = info->addr_payload + OFFSET_3 + 4;
+	end = (int32_t)((size_t)(info->addr_hooked_func) - (size_t)(info->text_begin) + info->text_addr + LOADER_SIZE);
+	val = end - start;
+	ft_memcpy(info->file + info->offset_payload + OFFSET_3, &val, 4);
+}
+
 int	write_file(t_info info, char *name)
 {
 	int fd;
@@ -141,6 +166,7 @@ int		main()
 	inject_loader(&info);
 	inject_payload(&info);
 	inject_end(&info);
+	patch_addresses(&info);
 	ft_sysclose(fd);
 	write_filename_dest(buf);
 	ft_syswrite(1, buf, 12);

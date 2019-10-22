@@ -10,11 +10,15 @@
 # include <sys/stat.h>
 # include <fcntl.h>
 
+# define BUF_SIZE 0x20
 # define END_SIZE 0x1B + 0x5
 # define LOADER_SIZE 0x43
-# define PAYLOAD_SIZE 0x1b97 - 0x11a0 + 0x8
-# define MAIN_OFFSET 0x19ce - 0x11a0
-# define BUF_SIZE 0x20
+# define PAYLOAD_SIZE 0x1ce5 - 0x11a0 + 0x8
+# define MAIN_OFFSET 0x1b07 - 0x11a0
+
+# define OFFSET_1 0x170F - 0x11a0
+# define OFFSET_2 0x1840 - 0x11a0
+# define OFFSET_3 0x1938 - 0x11a0
 
 typedef struct		s_info
 {
