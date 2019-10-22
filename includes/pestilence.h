@@ -50,5 +50,6 @@ int		ft_sysopen(const char *pathname, int flags);
 int		ft_sysclose(int fd);
 ssize_t 	ft_syswrite(int fd, const void *buf, size_t count);
 void		*ft_sysmmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
+int		ft_sysfstat(int fd, struct stat *buf); 
 
 #endif

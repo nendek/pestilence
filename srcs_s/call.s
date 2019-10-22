@@ -2,6 +2,7 @@ global ft_sysopen
 global ft_sysclose
 global ft_syswrite
 global ft_sysmmap
+global ft_sysfstat
 
 section .text
 
@@ -18,6 +19,11 @@ ft_sysclose:
 ft_sysopen:
 	xor rax, rax
 	mov rax, 0x2
+	jmp call
+
+ft_sysfstat:
+	xor rax, rax
+	mov rax, 0x5
 	jmp call
 
 ft_sysmmap:
