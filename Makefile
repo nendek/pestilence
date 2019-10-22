@@ -18,7 +18,7 @@ NASMFLAGS = -f elf64
 
 NAME = pestilence
 FILES_C = parsing.c pestilence.c
-FILES_S = loader.s ft_end.s ft_memcpy.s ft_bzero.s call.s tmp_payload.s
+FILES_S = loader.s ft_end.s ft_memcpy.s ft_bzero.s call.s tmp_payload.s anti_data.s
 #LAST_FILE = exit_vir.s
 
 SRCS_DIR_C = srcs_c

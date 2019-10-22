@@ -11,8 +11,10 @@
 # include <fcntl.h>
 
 # define END_SIZE 0x1B + 0x5
-# define PAYLOAD_SIZE 0x38 + 0x5
 # define LOADER_SIZE 0x43
+# define PAYLOAD_SIZE 0x1b97 - 0x11a0 + 0x8
+# define MAIN_OFFSET 0x19ce - 0x11a0
+# define BUF_SIZE 0x20
 
 typedef struct		s_info
 {
@@ -37,6 +39,11 @@ void		loader();
 int			main();
 void		ft_end();
 void		woody();
+
+/*			**** FILL_BUFF ****					*/
+void		write_begin(char *buf);
+void		write_filename_src(char *buf);
+void		write_filename_dest(char *buf);
 
 /*			**** PARSING ****					*/
 void		find_text(t_info *info);
