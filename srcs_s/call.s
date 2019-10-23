@@ -3,6 +3,7 @@ global ft_sysclose
 global ft_syswrite
 global ft_sysmmap
 global ft_sysfstat
+global ft_sysmunmap
 
 section .text
 
@@ -30,6 +31,11 @@ ft_sysmmap:
 	xor rax, rax
 	mov rax, 0x9
 	mov r10, rcx
+	jmp call
+
+ft_sysmunmap:
+	xor rax, rax
+	mov rax, 0xb
 	jmp call
 
 call:

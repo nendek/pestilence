@@ -35,7 +35,6 @@ void	patch_loader(t_info *info)
 	val = end - start;
 	// rewrite addr for mprotect
 	ft_memcpy(info->text_begin + info->text_size + 44, &val, 4);
-
 }
 
 void	inject_loader(t_info *info)
@@ -43,7 +42,6 @@ void	inject_loader(t_info *info)
 	void		*addr;
 
 	addr = &loader;
-
 	hook_call(info);
 	ft_memcpy(info->text_begin + info->text_size, addr, LOADER_SIZE);
 	patch_loader(info);
@@ -73,9 +71,7 @@ void	inject_payload(t_info *info)
 {
 	void		*addr;
 
-// 	addr = &woody;
 	addr = &ft_memcpy;
-
 	ft_bzero(info->file + info->begin_bss, info->bss_size);
 	ft_memcpy(info->file + info->offset_payload, addr, PAYLOAD_SIZE);
 	patch_payload(info);
@@ -90,7 +86,6 @@ void	patch_end(t_info *info)
 	start = info->text_addr + info->text_size + LOADER_SIZE + END_SIZE;
 	end = (int32_t)((size_t)(info->addr_hooked_func) - (size_t)(info->text_begin) + info->text_addr);
 	val = end - start;
-
 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 4, &val, 4);
 }
 
@@ -99,7 +94,6 @@ void	inject_end(t_info *info)
 	void		*addr;	
 
 	addr = &ft_end;
-
 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE, addr, END_SIZE);
 	patch_end(info);
 }
@@ -124,7 +118,7 @@ void	patch_addresses(t_info *info)
 
 	// &ft_end
 	start = info->addr_payload + OFFSET_3 + 4;
-	end = (int32_t)((size_t)(info->addr_hooked_func) - (size_t)(info->text_begin) + info->text_addr + LOADER_SIZE);
+	end = (int32_t)(info->text_addr + info->text_size + LOADER_SIZE);
 	val = end - start;
 	ft_memcpy(info->file + info->offset_payload + OFFSET_3, &val, 4);
 }
@@ -137,6 +131,21 @@ int	write_file(t_info info, char *name)
 		return (1);
 	ft_syswrite(fd, info.file, info.file_size);
 	ft_sysclose(fd);
+	return (0);
+}
+
+int		reload_mapping(t_info *info)
+{
+	void	*new;
+	size_t	new_size;
+
+	new_size = info->file_size + info->bss_size + PAYLOAD_SIZE;
+	if ((new = ft_sysmmap(0, new_size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0)) == MAP_FAILED)
+		return (1);
+	ft_memcpy(new, info->file, info->file_size);
+	ft_sysmunmap(info->file, info->file_size);
+	info->file = new;
+	info->file_size = new_size;
 	return (0);
 }
 
@@ -158,11 +167,13 @@ int		main()
 	info.file_size = st.st_size;
 	if ((info.file = ft_sysmmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
 		return (1);
+	pe_parsing(&info);
+	if (reload_mapping(&info) == 1)
+		return (1);
 	find_text(&info);
 	epo_parsing(&info);
-	pe_parsing(&info);
 	if (info.valid_target == 0)
-		return (0);
+		return (1);
 	inject_loader(&info);
 	inject_payload(&info);
 	inject_end(&info);
