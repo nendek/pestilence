@@ -17,13 +17,13 @@
 # define BUF_SIZE 0x20
 # define END_SIZE 0x1B + 0x5
 # define LOADER_SIZE 0x43
-# define PAYLOAD_SIZE 0x1fcd - 0x11A0 + 0x7
-# define MAIN_OFFSET 0x1db3 - 0x11A0
+# define PAYLOAD_SIZE 0x200d - 0x11A0 + 0x7
+# define MAIN_OFFSET 0x1df3 - 0x11A0
 # define INJECT_SIZE LOADER_SIZE + END_SIZE + SIGN_SIZE + 4
 
-# define OFFSET_1 0x1896 - 0x11a0
-# define OFFSET_2 0x19c7 - 0x11a0
-# define OFFSET_3 0x1abf - 0x11a0
+# define OFFSET_1 0x18d6 - 0x11a0
+# define OFFSET_2 0x1a07 - 0x11a0
+# define OFFSET_3 0x1aff - 0x11a0
 
 typedef struct		s_info
 {
