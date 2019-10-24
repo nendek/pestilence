@@ -17,4 +17,12 @@ ft_end:
 	pop rdi
 	mov rsp, rbp
 	pop rbp
+	add rsp, 4
+	cmp DWORD [rsp - 4], 1
+	je jmp1
+	cmp DWORD [rsp - 4], 2
+	je jmp2
+jmp1:
+	jmp -1
+jmp2:
 	jmp -1

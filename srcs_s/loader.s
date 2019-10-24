@@ -2,6 +2,12 @@ default rel
 global loader
 
 loader:
+	push DWORD 1
+	jmp common_loader
+	push DWORD 2
+	jmp common_loader
+
+common_loader:
     push rbp
     mov rbp, rsp
 	and rsp, 0xFFFFFFFFFFFFFFF0

