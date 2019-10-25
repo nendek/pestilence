@@ -77,10 +77,11 @@ void	patch_end(t_info *info, int32_t nb)
 	start -= (5 * (nb - 1));
 	end = (int32_t)((size_t)(info->addr_hooked_func) - (size_t)(info->text_begin) + info->text_addr);
 	val = end - start;
-	if (nb == 1)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 9, &val, 4);
-	if (nb == 2)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 4, &val, 4);
+// 	if (nb == 1)
+// 		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 9, &val, 4);
+// 	if (nb == 2)
+// 		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 4, &val, 4);
+	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 4 - (5 * (nb - 1)), &val, 4);
 }
 
 static void	inject_end(t_info *info)

