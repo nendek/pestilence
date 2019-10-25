@@ -19,13 +19,13 @@
 # define BUF_SIZE 0x20
 # define END_SIZE 0x5B
 # define LOADER_SIZE 0x57
-# define PAYLOAD_SIZE 0x23ae - FT_MEMCPY_ADDR + 0x7
-# define MAIN_OFFSET 0x233e - FT_MEMCPY_ADDR
+# define PAYLOAD_SIZE 0x2351 - FT_MEMCPY_ADDR + 0x7
+# define MAIN_OFFSET 0x22e1 - FT_MEMCPY_ADDR
 # define INJECT_SIZE LOADER_SIZE + END_SIZE + SIGN_SIZE + 4
 
-# define OFFSET_1 0x1b55 - FT_MEMCPY_ADDR
-# define OFFSET_2 0x1c7a - FT_MEMCPY_ADDR
-# define OFFSET_3 0x1dc5 - FT_MEMCPY_ADDR
+# define OFFSET_1 0x1b2a - FT_MEMCPY_ADDR
+# define OFFSET_2 0x1c4f - FT_MEMCPY_ADDR
+# define OFFSET_3 0x1d9a - FT_MEMCPY_ADDR
 
 typedef struct		s_info
 {

