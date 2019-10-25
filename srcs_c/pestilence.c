@@ -25,7 +25,7 @@ static void	patch_loader(t_info *info)
 	end = info->addr_payload;
 	val = end - start;
 	// rewrite addr for mprotect
-	ft_memcpy(info->text_begin + info->text_size + 52, &val, 4);
+	ft_memcpy(info->text_begin + info->text_size + 64, &val, 4);
 }
 
 static void	inject_loader(t_info *info)
@@ -74,8 +74,7 @@ void	patch_end(t_info *info, int32_t nb)
 	int32_t	val;
 
 	start = info->text_addr + info->text_size + LOADER_SIZE + END_SIZE;
-	if (nb == 1)
-		start -= 5;
+	start -= (5 * (nb - 1));
 	end = (int32_t)((size_t)(info->addr_hooked_func) - (size_t)(info->text_begin) + info->text_addr);
 	val = end - start;
 	if (nb == 1)

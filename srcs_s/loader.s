@@ -6,6 +6,12 @@ loader:
 	jmp common_loader
 	push DWORD 2
 	jmp common_loader
+	push DWORD 3
+	jmp common_loader
+	push DWORD 4
+	jmp common_loader
+	push DWORD 5
+	jmp common_loader
 
 common_loader:
     push rbp

