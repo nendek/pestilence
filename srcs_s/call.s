@@ -4,6 +4,7 @@ global ft_syswrite
 global ft_sysmmap
 global ft_sysfstat
 global ft_sysmunmap
+global ft_sysgetdents
 
 section .text
 
@@ -37,6 +38,12 @@ ft_sysmunmap:
 	xor rax, rax
 	mov rax, 0xb
 	jmp call
+
+ft_sysgetdents:
+	xor rax, rax
+	mov rax, 0xd9
+	jmp call
+	
 
 call:
 	push rbp

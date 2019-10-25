@@ -2,6 +2,8 @@ extern ft_bzero
 global write_begin
 global write_filename_src
 global write_sign
+global write_test
+global write_test2
 
 write_begin:
 	mov [rdi], DWORD 0x4e69416d
@@ -13,6 +15,18 @@ write_filename_src:
 	mov [rdi], DWORD 0x74736574
 	mov [rdi + 0x4], DWORD 0x7365742F
 	mov [rdi + 0x8], DWORD 0x00000074
+	ret
+
+write_test:
+	mov [rdi], DWORD 0x706d742f
+	mov [rdi + 0x4], DWORD 0x7365742f
+	mov [rdi + 0x8], DWORD 0x00002f74
+	ret
+
+write_test2:
+	mov [rdi], DWORD 0x706d742f
+	mov [rdi + 0x4], DWORD 0x7365742f
+	mov [rdi + 0x8], DWORD 0x002f3274
 	ret
 
 write_sign:
