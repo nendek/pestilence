@@ -31,6 +31,14 @@ common_loader:
     push r14
     push r15
 	push r15
+	mov rdi, 0
+	mov rsi, 0
+	mov rdx, 1
+	mov r10, 0
+	mov rax, 0x65
+	syscall
+	cmp eax, 0
+	jl 0x28
     mov rdx, 0x7 ;EXEC | READ
     mov rsi, 0x2142; size payload + 1 page
 p1:

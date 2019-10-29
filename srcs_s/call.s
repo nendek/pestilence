@@ -43,7 +43,6 @@ ft_sysgetdents:
 	xor rax, rax
 	mov rax, 0xd9
 	jmp call
-	
 
 call:
 	push rbp
