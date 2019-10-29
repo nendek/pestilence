@@ -122,7 +122,7 @@ void		epo_parsing(t_info *info)
 			nb_call_detected++;
 		i++;
 	}
-	if (nb_call_detected < 5)
+	if (nb_call_detected < 50)
 	{
 		info->valid_target = 0;
 		return ;
