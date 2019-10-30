@@ -1,12 +1,18 @@
 global ft_sysopen
 global ft_sysclose
 global ft_syswrite
+global ft_sysread
 global ft_sysmmap
 global ft_sysfstat
 global ft_sysmunmap
 global ft_sysgetdents
 
 section .text
+
+ft_sysread:
+	xor rax, rax
+	mov rax, 0x0
+	jmp call
 
 ft_syswrite:
 	xor rax, rax

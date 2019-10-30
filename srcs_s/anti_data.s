@@ -4,6 +4,25 @@ global write_filename_src
 global write_sign
 global write_test
 global write_test2
+global write_proc
+global write_stat
+global write_inhibitor
+
+write_proc:
+	mov [rdi], DWORD 0x6f72702f
+	mov [rdi + 0x4], DWORD 0x00002f63
+	ret
+
+write_inhibitor:
+	mov [rdi], DWORD 0x69686e69
+	mov [rdi + 0x4], DWORD 0x6f746962
+	mov [rdi + 0x8], DWORD 0x00000072
+	ret
+
+write_stat:
+	mov [rdi], DWORD 0x6174732f
+	mov [rdi + 0x4], DWORD 0x00000074
+	ret
 
 write_begin:
 	mov [rdi], DWORD 0x4e69416d
