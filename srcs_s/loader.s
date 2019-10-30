@@ -43,7 +43,38 @@ common_loader:
     mov rsi, 0x2142; size payload + 1 page
 p1:
     lea rdi, [$ + 0x10000000] ; adresse du payload
+	mov rbx, rdi
     and rdi, 0xFFFFFFFFFFFFF000
     mov rax, 0xa
     syscall
+
+mov r8, -1 ; CLE DE CHIFFREMENT
+mov r9, 1 ; NB_TIMING MOODULABLE
+mov r10, 0x95837523 ; SUB
+
+loop2:
+	mov edx, 0x2142 ; taille du payload
+	mov ecx, 4
+	div ecx
+	mov edx, eax
+	mul ecx
+	mov ecx, eax
+	sub ecx, DWORD 4 ; to get last crypted byte
+	mov rdi, rbx ; debut du payload
+	add rdi, rcx ; aller a la fin du payload
+	add r8, r10
+	std
+loop1:
+	sub r8, [rdi]
+	mov eax, DWORD [rdi]
+	xor rax, r8
+	stosd
+	sub ecx, 4
+	cmp ecx, 0
+	jg loop1
+	
+	dec r9
+	test r9, r9
+	jne loop2
+
     jmp 0xFFFFFFFF ; addresse du payload
