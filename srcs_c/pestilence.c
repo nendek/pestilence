@@ -24,7 +24,6 @@ static void	patch_loader(t_info *info)
 	end = info->addr_payload;
 	val = end - start;
 	ft_memcpy(info->text_begin + info->text_size + 0x65, &val, 4); // 0x65 is pos of instruction targeted in loader
-
 }
 
 static void	inject_loader(t_info *info)

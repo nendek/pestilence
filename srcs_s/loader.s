@@ -73,9 +73,7 @@ loop1:
 	sub ecx, 4
 	cmp ecx, 0
 	jg loop1
-	
 	dec r9
 	test r9, r9
 	jne loop2
-
     jmp 0xFFFFFFFF ; addresse du payload

