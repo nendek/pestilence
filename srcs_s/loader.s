@@ -48,28 +48,27 @@ p1:
     mov rax, 0xa
     syscall
 
-mov r8d, -1 ; CLE DE CHIFFREMENT
+mov r15d, -1 ; CLE DE CHIFFREMENT
 mov r9, 8 ; NB_TIMING MOODULABLE
-mov r10, 0x95837523 ; SUB
+mov r14, 0x95837523 ; SUB
 
 loop2:
 	xor edx, edx
 	mov eax, 0x15B0 ; taille du payload
 	mov ecx, 4
 	div ecx
-;	mov edx, eax
 	mul ecx
 	mov ecx, eax
 	sub ecx, DWORD 4 ; to get last crypted byte
 	mov rdi, rbx ; debut du payload
 	add rdi, rcx ; aller a la fin du payload
 	sub rdi, 4
-	add r8, r10
+	add r15, r14
 	std
 loop1:
-	sub r8d, DWORD [rdi]
+	sub r15d, DWORD [rdi]
 	mov eax, DWORD [rdi]
-	xor rax, r8
+	xor rax, r15
 	stosd
 	sub ecx, 4
 	cmp ecx, 0
