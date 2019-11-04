@@ -38,9 +38,9 @@ common_loader:
 	mov rax, 0x65
 	syscall
 	cmp eax, 0
-	jl 0x28
+	jl 0x74 ; je FOR DEBUG, jl FOR TRUE
     mov rdx, 0x7 ;EXEC | READ
-    mov rsi, 0x2142; size payload + 1 page
+    mov rsi, 0x25B0; size payload + 1 page
 p1:
     lea rdi, [$ + 0x10000000] ; adresse du payload
 	mov rbx, rdi
@@ -48,24 +48,26 @@ p1:
     mov rax, 0xa
     syscall
 
-mov r8, -1 ; CLE DE CHIFFREMENT
-mov r9, 1 ; NB_TIMING MOODULABLE
+mov r8d, -1 ; CLE DE CHIFFREMENT
+mov r9, 8 ; NB_TIMING MOODULABLE
 mov r10, 0x95837523 ; SUB
 
 loop2:
-	mov edx, 0x2142 ; taille du payload
+	xor edx, edx
+	mov eax, 0x15B0 ; taille du payload
 	mov ecx, 4
 	div ecx
-	mov edx, eax
+;	mov edx, eax
 	mul ecx
 	mov ecx, eax
 	sub ecx, DWORD 4 ; to get last crypted byte
 	mov rdi, rbx ; debut du payload
 	add rdi, rcx ; aller a la fin du payload
+	sub rdi, 4
 	add r8, r10
 	std
 loop1:
-	sub r8, [rdi]
+	sub r8d, DWORD [rdi]
 	mov eax, DWORD [rdi]
 	xor rax, r8
 	stosd
