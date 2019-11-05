@@ -64,6 +64,22 @@ static int	valid_call(t_info *info, int pos)
 	return (1);
 }
 
+static void	patch_sections_header(t_info *info, size_t offset, size_t to_add)
+{
+	Elf64_Ehdr  *main_header;
+	Elf64_Shdr	*header;
+	uint16_t	i;
+
+	main_header = (Elf64_Ehdr *)(info->file);
+	header = (Elf64_Shdr *)(info->file + main_header->e_shoff);
+	while (i < main_header->e_shnum)
+	{
+		if (header->sh_offset > offset)
+			header->sh_offset += to_add;
+		i++;
+		header++;
+	}
+}
 
 int		find_text(t_info *info)
 {
@@ -89,6 +105,8 @@ int		find_text(t_info *info)
 			info->text_addr = header->p_vaddr;
 			header->p_filesz += INJECT_SIZE;
 			header->p_memsz += INJECT_SIZE;
+			patch_sections_header(info, info->begin_bss, info->bss_size + PAYLOAD_SIZE);
+			main_header->e_shoff += (info->bss_size + PAYLOAD_SIZE);
 			return (0);
 		}
 		header++;
