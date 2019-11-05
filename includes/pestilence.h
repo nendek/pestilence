@@ -80,6 +80,7 @@ int			check_process(char *buf_path);
 
 /*			**** LIB HANDLERS	****			*/
 void		ft_memcpy(void *dest, void *src, size_t size);
+void		ft_memcpy_r(void *dest, void *src, size_t size);
 void		ft_bzero(void *ptr, size_t size);
 char		*ft_strcat(char *dest, const char *src);
 int			ft_sysopen(const char *pathname, int flags);

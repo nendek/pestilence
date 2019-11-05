@@ -40,7 +40,7 @@ common_loader:
 	cmp eax, 0
 	jl 0xB5 ; je FOR DEBUG, jl FOR TRUE
     mov rdx, 0x7 ;EXEC | READ
-    mov rsi, 0x25B0; size payload + 1 page
+    mov rsi, 0x25B0 ; size payload + 1 page
 p1:
     lea rdi, [$ + 0x10000000] ; adresse du payload
 	mov rbx, rdi

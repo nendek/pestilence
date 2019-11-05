@@ -1,4 +1,5 @@
 global ft_memcpy
+;global ft_memcpy_r
 
 section .text
 
@@ -9,3 +10,15 @@ ft_memcpy:
 	rep movsb
 	pop rax
 	ret
+
+;ft_memcpy:
+;	mov rcx, rdx
+;
+;	add rdi, rdx
+;	dec rdi
+;	add rsi, rdx
+;	dec rsi
+;
+;	std
+;	rep movsb
+;	ret
