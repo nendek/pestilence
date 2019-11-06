@@ -29,7 +29,15 @@ for i in range(0, 4):
     offset_3 = offset_3[offset_3.find("\n") + 1:-1]
 offset_3 = offset_3[0:offset_3.find(":")].strip()
 offset_3 = hex(int(offset_3, 16) + 3)
-print(main_start, main_end, offset_1, offset_2, offset_3)
+
+offset_4 = dump[dump.find("<main>:") + 8:]
+offset_4 = offset_4[offset_4.find(":") + 1:]
+offset_4 = offset_4[offset_4.find(":") + 1:]
+offset_4 = offset_4[offset_4.find(":") + 1:]
+offset_4 = offset_4[offset_4.find(":") - 5: offset_4.find(":")]
+offset_4 = hex(int(offset_4, 16))
+
+print(main_start, main_end, offset_1, offset_2, offset_3, offset_4)
 
 f = open("includes/pestilence.h", "r")
 content = f.readlines()
@@ -48,6 +56,8 @@ for i in range(0, len(content)):
         content[i] = content[i][0:18] + offset_2 + content[i][24:-1] + "\n"
     if content[i].find("OFFSET_3") != -1: 
         content[i] = content[i][0:18] + offset_3 + content[i][24:-1] + "\n"
+    if content[i].find("OFFSET_4") != -1: 
+        content[i] = content[i][0:18] + offset_4 + content[i][24:-1] + "\n"
 
     f.write(content[i])
 f.close()
