@@ -3,6 +3,7 @@ global ft_sysclose
 global ft_syswrite
 global ft_sysread
 global ft_sysmmap
+global ft_sysptrace
 global ft_sysfstat
 global ft_sysmunmap
 global ft_sysgetdents
@@ -37,6 +38,12 @@ ft_sysfstat:
 ft_sysmmap:
 	xor rax, rax
 	mov rax, 0x9
+	mov r10, rcx
+	jmp call
+
+ft_sysptrace:
+	xor rax, rax
+	mov rax, 0x65
 	mov r10, rcx
 	jmp call
 

