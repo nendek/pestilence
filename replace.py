@@ -104,3 +104,5 @@ for i in range(0, len(content)):
         content[i] = content[i][0:place] + payload_size + content[i][place + 6:]
     f.write(content[i])
 f.close()
+
+print("full loader_size : {}".format(int(loader_size, 16) + int(end_size, 16)))

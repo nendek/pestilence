@@ -3,141 +3,159 @@ global loader
 global ft_end
 
 loader:
-push DWORD 1
-jmp common_loader
-push DWORD 2
-jmp common_loader
-push DWORD 3
-jmp common_loader
-push DWORD 4
-jmp common_loader
-push DWORD 5
-jmp common_loader
+push DWORD 1 ; entree
+jmp common_loader ; entree
+push DWORD 2 ; entree
+jmp common_loader ; entree
+push DWORD 3 ; entree
+jmp common_loader ; entree
+push DWORD 4 ; entree
+jmp common_loader ; entree
+push DWORD 5 ; entree
+jmp common_loader ; entree
 
 common_loader:
-    push rbp
-    mov rbp, rsp
-	and rsp, 0xFFFFFFFFFFFFFFF0
-    push rdi
-    push rsi
-    push rax
-	push rbx
-    push rcx
-    push rdx
-    push r8
-    push r9
-    push r10
-    push r11
-    push r12
-    push r13
-    push r14
-    push r15
-	mov rdi, 0
-	mov rsi, 0
-	mov rdx, 1
-	mov r10, 0
-	mov rax, 0x65
-	syscall
-	cmp eax, 0
-	jg 0xB5 ; jg FOR DEBUG, jl FOR TRUE, je FOR REVERSE
-    mov rdx, 0x7 ;EXEC | READ
-    mov rsi, 0x2847;|REPLACE1| size payload + 1 page
-p1:
-	lea rdi, [$ + 0x10000000] ; adresse du payload
-	mov rbx, rdi
-	and rdi, 0xFFFFFFFFFFFFF000
-	mov rax, 0xa
-	syscall
+    push rbp ; push
+    mov rbp, rsp ; push
+	and rsp, 0xFFFFFFFFFFFFFFF0 ; push
+    push rdi ; push
+    push rsi ; push
+    push rax ; push
+	push rbx ; push
+    push rcx ; push
+    push rdx ; push
+    push r8 ; push
+    push r9 ; push
+    push r10 ; push
+    push r11 ; push
+    push r12 ; push
+    push r13 ; push
+    push r14 ; push
+    push r15 ; push
+syscalls:
+	mov rdi, 0 ; syscalls
+	mov rsi, 0 ; syscalls
+	mov rdx, 1 ; syscalls
+	mov r10, 0 ; syscalls
+	mov rax, 0x65 ; syscalls
+	syscall ; syscalls
+	cmp eax, 0 ; syscalls
+	jg 0xB5 ; jg FOR DEBUG, jl FOR TRUE, je FOR REVERSE ; syscalls
+    mov rdx, 0x7 ;EXEC | READ ; syscalls
+    mov rsi, 0x2847;|REPLACE1| size payload + 1 page ; syscalls
+	lea rdi, [$ + 0x10000000] ; adresse du payload ; syscalls
+	mov rbx, rdi ; syscalls
+	and rdi, 0xFFFFFFFFFFFFF000 ; syscalls
+	mov rax, 0xa ; syscalls
+	syscall ; syscalls
 
-mov r15d, -1 ; CLE DE CHIFFREMENT
-mov r9, 8 ; NB_TIMING MOODULABLE
-mov r14, 0x95837523 ; SUB
+chiffrement:
+	mov r15d, -1 ; CLE DE CHIFFREMENT ; chiffrement
+	mov r9, 8 ; NB_TIMING MOODULABLE ; chiffrement
+	mov r14, 0x95837523 ; SUB ; chiffrement
 
-loop2:
-	xor edx, edx
-	mov eax, 0x1847;|REPLACE2| taille du 0x1847d
-	mov ecx, 4
-	div ecx
-	mul ecx
-	mov ecx, eax
-	sub ecx, DWORD 4 ; to get last crypted byte
-	mov rdi, rbx ; debut du payload
-	add rdi, rcx ; aller a la fin du payload
-	sub rdi, 4
-	add r15, r14
-	std
-loop1:
-	sub r15d, DWORD [rdi]
-	mov eax, DWORD [rdi]
-	xor rax, r15
-	stosd
-	sub ecx, 4
-	cmp ecx, 0
-	jg loop1
-	dec r9
-	test r9, r9
-	jne loop2
-jmp 0xFFFFFFFF ; addresse du payload
+	mov r13, 1 ; mark this zone as loader ; chiffrement
+chiffrement_loop2:
+	jmp dechiffrement_loop2 ; going to save size and pos of encryption zone ; chiffrement
+chiffrement_loop2_a:
+	add rdi, rcx ; aller a la fin du payload ; chiffrement
+	sub rdi, 4 ; chiffrement
+	add r15, r14 ; chiffrement
+	std ; chiffrement
+	jmp chiffrement_loop1
+dechiffrement_loop1:
+	mov eax, DWORD [rdi] ; dechiffrement
+	xor rax, r15 ; dechiffrement
+	jmp label_a
+label_1:
+	stosd ; chiffrement
+	jmp label_b
+label_2:
+	sub ecx, 4 ; chiffrement
+	cmp ecx, 0 ; chiffrement
+	jmp label_c
+label_3:
+	jg chiffrement_loop1 ; chiffrement
+chiffrement_loop1_a:
+	dec r9 ; chiffrement & dechiffrement
+	test r9, r9 ; chiffrement & dechiffrement
+	jne chiffrement_loop2 ; chiffrement & dechiffrement
+	cmp r13, 2 ; chiffrement & dechiffrement
+	je end_ft_end ; chiffrement & dechiffrement
+
+
+jmp 0xFFFFFFFF ; addresse du payload ; jmp_to_payload
 
 ft_end:
-mov r9, 8 ; NB_TIMING MOODULABLE
-loop2_ft_end:
-	xor edx, edx
-	mov eax, 0x1847;|REPLACE2| taille du 0x1847d
-	mov ecx, 4
-	div ecx
-	mul ecx
-	mov ecx, eax
-	sub ecx, DWORD 4
-	mov rdi, rbx ; debut du payload
-	sub r15, r14
-	cld
-loop1_ft_end:
-	mov eax, DWORD [rdi]
-	xor rax, r15
-	stosd
-	add r15d, DWORD [rdi - 4]
- 	sub ecx, 4
-	cmp ecx, 0
-	jg loop1_ft_end
-	dec r9
-	test r9, r9
-	jne loop2_ft_end
+mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
+mov r13, 2 ; mark this zone as end ; dechiffrement
+dechiffrement_loop2:
+	mov eax, 0x1847;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	shr eax, 2 ; dechiffrement & chiffrement
+	shl eax, 2 ; dechiffrement & chiffrement
+	mov ecx, eax ; dechiffrement & chiffrement
+	sub ecx, DWORD 4 ; dechiffrement & chiffrement
+	mov rdi, rbx ; debut du payload ; dechiffrement & chiffrement
+	cmp r13, 1 ; cmp to get back in loader if necessary ; dechiffrement & chiffrement
+	je chiffrement_loop2_a ; dechiffrement & chiffrement
+	sub r15, r14 ; dechiffrement
+	cld ; dechiffrement
+	jmp dechiffrement_loop1
+chiffrement_loop1:
+	sub r15d, DWORD [rdi] ; chiffrement
+	mov eax, DWORD [rdi] ; chiffrement
+	xor rax, r15 ; chiffrement
+	jmp label_1
+
+label_a:
+	stosd ; dechiffrement
+	add r15d, DWORD [rdi - 4] ; dechiffrement
+	jmp label_2
+label_b:
+ 	sub ecx, 4 ; dechiffrement
+	cmp ecx, 0 ; dechiffrement
+	jmp label_3
+label_c:
+	jg dechiffrement_loop1 ; dechiffrement
+	jmp chiffrement_loop1_a ; dechiffrement
+
+
+
 end_ft_end:
-	pop r15
-	pop r14
-	pop r13
-	pop r12
-	pop r11
-	pop r10
-	pop r9
-	pop r8
-	pop rdx
-	pop rcx
-	pop rbx
-	pop rax
-	pop rsi
-	pop rdi
-	mov rsp, rbp
-	pop rbp
-	add rsp, 8
-	cmp DWORD [rsp - 8], 5
-	je jmp1
-	cmp DWORD [rsp - 8], 4
-	je jmp2
-	cmp DWORD [rsp - 8], 3
-	je jmp3
-	cmp DWORD [rsp - 8], 2
-	je jmp4
-	cmp DWORD [rsp - 8], 1
-	je jmp5
+	pop r15 ; pop
+	pop r14 ; pop
+	pop r13 ; pop
+	pop r12 ; pop
+	pop r11 ; pop
+	pop r10 ; pop
+	pop r9 ; pop
+	pop r8 ; pop
+	pop rdx ; pop
+	pop rcx ; pop
+	pop rbx ; pop
+	pop rax ; pop
+	pop rsi ; pop
+	pop rdi ; pop
+	mov rsp, rbp ; pop
+	pop rbp ; pop
+	add rsp, 8 ; pop
+	cmp DWORD [rsp - 8], 5 ; sortie
+	je jmp1 ; sortie
+	cmp DWORD [rsp - 8], 4 ; sortie
+	je jmp2 ; sortie
+	cmp DWORD [rsp - 8], 3 ; sortie
+	je jmp3 ; sortie
+	cmp DWORD [rsp - 8], 2 ; sortie
+	je jmp4 ; sortie
+	cmp DWORD [rsp - 8], 1 ; sortie
+	je jmp5 ; sortie
 jmp1:
-	jmp -1
+	jmp -1 ; sortie
 jmp2:
-	jmp -1
+	jmp -1 ; sortie
 jmp3:
-	jmp -1
+	jmp -1 ; sortie
 jmp4:
-	jmp -1
+	jmp -1 ; sortie
 jmp5:
-	jmp -1
+	jmp -1 ; sortie
