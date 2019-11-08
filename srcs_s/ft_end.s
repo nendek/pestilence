@@ -26,7 +26,6 @@ loop1_ft_end:
 	jne loop2_ft_end
 end_ft_end:
 	pop r15
-	pop r15
 	pop r14
 	pop r13
 	pop r12
@@ -36,6 +35,7 @@ end_ft_end:
 	pop r8
 	pop rdx
 	pop rcx
+	pop rbx
 	pop rax
 	pop rsi
 	pop rdi
