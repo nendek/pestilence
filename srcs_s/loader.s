@@ -20,6 +20,7 @@ common_loader:
     push rdi
     push rsi
     push rax
+	push rbx
     push rcx
     push rdx
     push r8
@@ -30,7 +31,6 @@ common_loader:
     push r13
     push r14
     push r15
-	push r15
 	mov rdi, 0
 	mov rsi, 0
 	mov rdx, 1
@@ -38,7 +38,7 @@ common_loader:
 	mov rax, 0x65
 	syscall
 	cmp eax, 0
-	jl 0xB5 ; jg FOR DEBUG, jl FOR TRUE
+	jg 0xB5 ; jg FOR DEBUG, jl FOR TRUE, je FOR REVERSE
     mov rdx, 0x7 ;EXEC | READ
     mov rsi, 0x2847 ; size payload + 1 page
 p1:

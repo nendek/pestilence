@@ -20,10 +20,10 @@ static void	patch_loader(t_info *info)
 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE - 4, &val, 4);
 
 	// rewrite addr for mprotect
-	start = info->text_addr + info->text_size + 0x69;
+	start = info->text_addr + info->text_size + 0x68;
 	end = info->addr_payload;
 	val = end - start;
-	ft_memcpy(info->text_begin + info->text_size + 0x65, &val, 4); // 0x65 is pos of instruction targeted in loader
+	ft_memcpy(info->text_begin + info->text_size + 0x64, &val, 4); // 0x65 is pos of instruction targeted in loader
 }
 
 static void	inject_loader(t_info *info)
@@ -172,7 +172,7 @@ void			patch_key(t_info *info, uint32_t key)
 	uint32_t val;
 	// Key in loader
 	val = key;
-	ft_memcpy(info->text_begin + info->text_size + 0x7C, &val, 4); // 0x7D is pos of instruction targeted in loader
+	ft_memcpy(info->text_begin + info->text_size + 0x7B, &val, 4); // 0x7D is pos of instruction targeted in loader
 }
 
 
