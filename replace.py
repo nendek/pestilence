@@ -6,10 +6,11 @@ memcpy_addr = dump[dump.find("<ft_memcpy>:") + 13:]
 memcpy_addr = memcpy_addr[:memcpy_addr.find(":")]
 memcpy_addr = hex(int(memcpy_addr, 16))
 
-end = dump[dump.find("<ft_end>:") + 10 :dump.find("<ft_memcpy>:") - 19]
+end = dump[dump.find("<ft_end>:") + 10 :dump.find("<last_instr_of_end>:") + 100]
 end_start = end[:end.find(":")]
 end_start = int(end_start, 16)
-end_end = end[end.find("<jmp5>:") + 8:]
+
+end_end = end[end.find("<last_instr_of_end>:") + 21:]
 end_end = end_end[:end_end.find(":")]
 end_end = int(end_end, 16)
 end_size = hex(end_end + 5 - end_start)

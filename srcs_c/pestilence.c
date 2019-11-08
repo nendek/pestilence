@@ -20,10 +20,10 @@ static void	patch_loader(t_info *info)
 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE - 4, &val, 4);
 
 	// rewrite addr for mprotect
-	start = info->text_addr + info->text_size + 0x5a;
+	start = info->text_addr + info->text_size + 0x68;
 	end = info->addr_payload;
 	val = end - start;
-	ft_memcpy(info->text_begin + info->text_size + 0x56, &val, 4); // 0x65 is pos of instruction targeted in loader
+	ft_memcpy(info->text_begin + info->text_size + 0x64, &val, 4); // 0x65 is pos of instruction targeted in loader
 }
 
 static void	inject_loader(t_info *info)
@@ -72,11 +72,30 @@ void	patch_end(t_info *info, int32_t nb)
 	int32_t	end;
 	int32_t	val;
 
+	// get addr of end of end
 	start = info->text_addr + info->text_size + LOADER_SIZE + END_SIZE;
-	start -= (5 * (nb - 1));
+	if (nb == 1)
+		start -= 0x158;
+	if (nb == 2)
+		start -= 0xB5;
+	if (nb == 3)
+		start -= 0xB0;
+	if (nb == 4)
+		start -= 0x13e;
+	if (nb == 5)
+		start -= 0x21;
 	end = (int32_t)((size_t)(info->addr_hooked_func) - (size_t)(info->text_begin) + info->text_addr);
 	val = end - start;
-	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 4 - (5 * (nb - 1)), &val, 4);
+	if (nb == 1)
+		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0x158 - 4, &val, 4);
+	if (nb == 2)
+		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0xB5 - 4, &val, 4);
+	if (nb == 3)
+		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0xB0 - 4, &val, 4);
+	if (nb == 4)
+		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0x13e - 4, &val, 4);
+	if (nb == 5)
+		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0x21 - 4, &val, 4);
 }
 
 static void	inject_end(t_info *info)
@@ -172,7 +191,7 @@ void			patch_key(t_info *info, uint32_t key)
 	uint32_t val;
 	// Key in loader
 	val = key;
-	ft_memcpy(info->text_begin + info->text_size + 0x73, &val, 4); // 0x73 is pos of instruction targeted in loader
+	ft_memcpy(info->text_begin + info->text_size + 0x81, &val, 4); // 0x73 is pos of instruction targeted in loader
 }
 
 

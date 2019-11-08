@@ -129,13 +129,13 @@ static void	hook_call(t_info *info, int32_t nb)
 	if (nb == 1)
 		new_jmp += 0x3A;	// addr in loader
 	if (nb == 2)
-		new_jmp += 0x66;		// addr in loader
+		new_jmp += 0x74;		// addr in loader
 	if (nb == 3)
-		new_jmp += 0x127;		// addr in loader
+		new_jmp += 0x149;		// addr in loader
 	if (nb == 4)
-		new_jmp += 0xDA;		// addr in loader
+		new_jmp += 0xF6;		// addr in loader
 	if (nb == 5)
-		new_jmp += 0xDE;		// addr in loader
+		new_jmp += 0xFA;		// addr in loader
 // 	new_jmp += (4 *(nb - 1));
 	ft_memcpy(info->addr_call_to_replace + 1, &new_jmp, sizeof(new_jmp));
 }
