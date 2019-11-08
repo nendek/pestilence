@@ -127,16 +127,15 @@ static void	hook_call(t_info *info, int32_t nb)
 	new_jmp = (int32_t)(info->text_size - (size_t)((size_t)(info->addr_call_to_replace) - (size_t)(info->text_begin)) - 5);
 	// Add offset depending of nb
 	if (nb == 1)
-		new_jmp += 0x3A;	// addr in loader
+		new_jmp += 0x3a;//REPLACE1
 	if (nb == 2)
-		new_jmp += 0x74;		// addr in loader
+		new_jmp += 0x74;//REPLACE2
 	if (nb == 3)
-		new_jmp += 0x149;		// addr in loader
+		new_jmp += 0x149;//REPLACE3
 	if (nb == 4)
-		new_jmp += 0xF6;		// addr in loader
+		new_jmp += 0xf6;//REPLACE4
 	if (nb == 5)
-		new_jmp += 0xFA;		// addr in loader
-// 	new_jmp += (4 *(nb - 1));
+		new_jmp += 0xfa;//REPLACE5
 	ft_memcpy(info->addr_call_to_replace + 1, &new_jmp, sizeof(new_jmp));
 }
 

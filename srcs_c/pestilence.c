@@ -75,27 +75,27 @@ void	patch_end(t_info *info, int32_t nb)
 	// get addr of end of end
 	start = info->text_addr + info->text_size + LOADER_SIZE + END_SIZE;
 	if (nb == 1)
-		start -= 0x158;
+		start -= 0x158;//REPLACE1
 	if (nb == 2)
-		start -= 0xB5;
+		start -= 0xb5;//REPLACE2
 	if (nb == 3)
-		start -= 0xB0;
+		start -= 0xb0;//REPLACE3
 	if (nb == 4)
-		start -= 0x13e;
+		start -= 0x13e;//REPLACE4
 	if (nb == 5)
-		start -= 0x21;
+		start -= 0x21;//REPLACE5
 	end = (int32_t)((size_t)(info->addr_hooked_func) - (size_t)(info->text_begin) + info->text_addr);
 	val = end - start;
 	if (nb == 1)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0x158 - 4, &val, 4);
+		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0x158/*REPLACE1*/ - 4, &val, 4);
 	if (nb == 2)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0xB5 - 4, &val, 4);
+		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0xb5/*REPLACE2*/ - 4, &val, 4);
 	if (nb == 3)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0xB0 - 4, &val, 4);
+		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0xb0/*REPLACE3*/ - 4, &val, 4);
 	if (nb == 4)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0x13e - 4, &val, 4);
+		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0x13e/*REPLACE4*/ - 4, &val, 4);
 	if (nb == 5)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0x21 - 4, &val, 4);
+		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0x21/*REPLACE5*/ - 4, &val, 4);
 }
 
 static void	inject_end(t_info *info)
