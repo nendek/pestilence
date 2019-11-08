@@ -20,7 +20,7 @@
 # define FT_MEMCPY_ADDR 0x12a0
 # define BUF_SIZE 0x20
 # define END_SIZE 0x96
-# define LOADER_SIZE 0xCC
+# define LOADER_SIZE 0xcc
 # define PAYLOAD_SIZE 0x2ae0 - FT_MEMCPY_ADDR + 0x7
 # define MAIN_OFFSET 0x2a1e - FT_MEMCPY_ADDR
 # define INJECT_SIZE LOADER_SIZE + END_SIZE + SIGN_SIZE + 4

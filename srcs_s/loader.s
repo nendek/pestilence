@@ -41,7 +41,7 @@ common_loader:
 	cmp eax, 0
 	jg 0xB5 ; jg FOR DEBUG, jl FOR TRUE, je FOR REVERSE
     mov rdx, 0x7 ;EXEC | READ
-    mov rsi, 0x2847 ; size payload + 1 page
+    mov rsi, 0x2847;|REPLACE1| size payload + 1 page
 p1:
 	lea rdi, [$ + 0x10000000] ; adresse du payload
 	mov rbx, rdi
@@ -55,7 +55,7 @@ mov r14, 0x95837523 ; SUB
 
 loop2:
 	xor edx, edx
-	mov eax, 0x1847 ; taille du payload
+	mov eax, 0x1847;|REPLACE2| taille du 0x1847d
 	mov ecx, 4
 	div ecx
 	mul ecx
@@ -83,7 +83,7 @@ ft_end:
 mov r9, 8 ; NB_TIMING MOODULABLE
 loop2_ft_end:
 	xor edx, edx
-	mov eax, 0x1847 ; taille du payload
+	mov eax, 0x1847;|REPLACE2| taille du 0x1847d
 	mov ecx, 4
 	div ecx
 	mul ecx
