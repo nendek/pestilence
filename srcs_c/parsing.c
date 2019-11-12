@@ -131,11 +131,11 @@ static void	hook_call(t_info *info, int32_t nb)
 	if (nb == 2)
 		new_jmp += 0x74;//REPLACE2
 	if (nb == 3)
-		new_jmp += 0x149;//REPLACE3
+		new_jmp += 0x174;//REPLACE3
 	if (nb == 4)
-		new_jmp += 0xf6;//REPLACE4
+		new_jmp += 0x10e;//REPLACE4
 	if (nb == 5)
-		new_jmp += 0xfa;//REPLACE5
+		new_jmp += 0x112;//REPLACE5
 	ft_memcpy(info->addr_call_to_replace + 1, &new_jmp, sizeof(new_jmp));
 }
 
