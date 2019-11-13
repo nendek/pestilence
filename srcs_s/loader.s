@@ -33,11 +33,14 @@ common_loader:
     push r15 ; push
 
     mov rdx, 0x7 ;EXEC | READ ; syscalls
-    mov rsi, 0x29e7;|REPLACE1| size payload + 1 page ; syscalls
+    mov rsi, 0x2a94;|REPLACE1| size payload + 1 page ; syscalls
 	lea rdi, [$ + 0x10000000] ; adresse du payload ; syscalls
 	mov rbx, rdi ; syscalls
 	and rdi, 0xFFFFFFFFFFFFF000 ; syscalls
 	mov rax, 0xa ; syscalls
 	syscall ; syscalls
 
+	add rbx, 0x137
 	jmp -1
+last_instr_of_loader:
+	nop

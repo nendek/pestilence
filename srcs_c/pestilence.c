@@ -20,10 +20,10 @@ static void	patch_loader(t_info *info)
 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE - 4, &val, 4);
 
 	// rewrite addr for mprotect
-	start = info->text_addr + info->text_size + 0x68;
+	start = info->text_addr + info->text_size + 0x43;
 	end = info->addr_bis;
 	val = end - start;
-	ft_memcpy(info->text_begin + info->text_size + 0x64, &val, 4); // 0x65 is pos of instruction targeted in loader
+	ft_memcpy(info->text_begin + info->text_size + 0x3F, &val, 4); // 0x3F is pos of instruction targeted in loader
 }
 
 static void	inject_loader(t_info *info)
@@ -43,7 +43,7 @@ static void	patch_payload(t_info *info)
 	int32_t	val;
 
 	start = (int32_t)(info->addr_bis + PAYLOAD_SIZE + BIS_SIZE);
-	end = info->addr_bis; // TODO ajouter l'addresse du milieu du bis
+	end = info->addr_bis + 0xE3; // TODO ajouter l'addresse du milieu du bis
 	val = end - start;
 
 	// replace jmp addr
@@ -74,28 +74,29 @@ void	patch_bis(t_info *info, int32_t nb)
 
 	// get addr of end of end
 	start = info->addr_bis + BIS_SIZE;
+	start += 4;
 	if (nb == 1)
-		start -= 0x183;//REPLACE1
+		start -= 0x119;//REPLACE1
 	if (nb == 2)
-		start -= 0xc8;//REPLACE2
+		start -= 0x96;//REPLACE2
 	if (nb == 3)
-		start -= 0xc3;//REPLACE3
+		start -= 0x91;//REPLACE3
 	if (nb == 4)
-		start -= 0x169;//REPLACE4
+		start -= 0x109;//REPLACE4
 	if (nb == 5)
-		start -= 0x21;//REPLACE5
+		start -= 0x1d;//REPLACE5
 	end = (int32_t)((size_t)(info->addr_hooked_func) - (size_t)(info->text_begin) + info->text_addr);
 	val = end - start;
 	if (nb == 1)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x183/*REPLACE1*/ - 4, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x119/*REPLACE1*/ + 1, &val, 4);
 	if (nb == 2)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0xc8/*REPLACE2*/ - 4, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x96/*REPLACE2*/ + 1, &val, 4);
 	if (nb == 3)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0xc3/*REPLACE3*/ - 4, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x91/*REPLACE3*/ + 1, &val, 4);
 	if (nb == 4)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x169/*REPLACE4*/ - 4, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x109/*REPLACE4*/ + 1, &val, 4);
 	if (nb == 5)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x21/*REPLACE5*/ - 4, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x1d/*REPLACE5*/ + 1, &val, 4);
 }
 
 static void	inject_bis(t_info *info)
@@ -130,8 +131,8 @@ static void	patch_addresses(t_info *info)
 	val = end - start;
 	ft_memcpy(info->file + info->offset_bis + OFFSET_3, &val, 4);
 
-	// &ptrace in man
-	ft_memset(info->file + info->offset_bis + OFFSET_4, 40, '\x90');
+	// &ptrace in main
+	ft_memset(info->file + info->offset_bis + OFFSET_4, 42, '\x90');
 	
 }
 
@@ -169,8 +170,8 @@ uint32_t    encrypt(t_info *info, void *ptr, size_t size)
 
     file = (uint32_t *)ptr;
 
-	uint32_t start = info->text_addr + info->text_size + LOADER_SIZE;
-	uint32_t end = (int32_t)(info->addr_bis + MAIN_OFFSET);
+	uint32_t start = info->addr_bis + 0x89;
+	uint32_t end = (int32_t)(info->addr_bis + BIS_SIZE + MAIN_OFFSET);
 	key = end - start; // key is now offset to jump payload from loader
 // 	dprintf(1, "%#x\n", key);
 //     key = KEY;
@@ -219,7 +220,7 @@ void			patch_key(t_info *info, uint32_t key)
 	hash = 0;
 	// Key in loader
 	val = key - hash;
-	ft_memcpy(info->file + info->offset_bis + 0x81, &val, 4); // 0x73 is pos of instruction targeted in loader
+	ft_memcpy(info->file + info->offset_bis + 0x35, &val, 4); // 0x35 is pos of instruction targeted in bis
 }
 
 

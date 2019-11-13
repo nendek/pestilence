@@ -6,25 +6,22 @@ memcpy_addr = dump[dump.find("<ft_memcpy>:") + 13:]
 memcpy_addr = memcpy_addr[:memcpy_addr.find(":")]
 memcpy_addr = hex(int(memcpy_addr, 16))
 
-end = dump[dump.find("<ft_end>:") + 10 :dump.find("<last_instr_of_end>:") + 100]
-end_start = end[:end.find(":")]
-end_start = int(end_start, 16)
+bis = dump[dump.find("<syscalls>:") + 12 :dump.find("<last_instr_of_end>:") + 100]
+bis_start = bis[:bis.find(":")]
+bis_start = int(bis_start, 16)
 
-end_end = end[end.find("<last_instr_of_end>:") + 21:]
-end_end = end_end[:end_end.find(":")]
-end_end = int(end_end, 16)
-#print(hex(end_start), hex(end_end))
-end_size = hex(end_end + 5 - end_start)
+bis_end = bis[bis.find("<last_instr_of_end>:") + 21:]
+bis_end = bis_end[:bis_end.find(":")]
+bis_end = int(bis_end, 16)
+bis_size = hex(bis_end - bis_start)
 
 loader = dump[dump.find("<loader>:") + 10:]
 loader = loader[:loader.find("<ft_end>:")]
 loader_start = loader[:loader.find(":")]
 loader_start = int(loader_start, 16)
-loader_end = dump[dump.find("<ft_end>:") + 10:]
+loader_end = dump[dump.find("<last_instr_of_loader>:") + 24:]
 loader_end = loader_end[:loader_end.find(":")]
 loader_end = int(loader_end, 16)
-#print(hex(loader_start), hex(loader_end))
-#exit()
 loader_size = hex(loader_end - loader_start)
 
 main_start = dump[dump.find("<main>:") + 8:-1]
@@ -42,14 +39,13 @@ for i in range(0, 4):
 offset_1 = offset_1[0:offset_1.find(":")].strip()
 offset_1 = hex(int(offset_1, 16) + 3)
 
-
 offset_2 = dump[dump.find("<inject_payload>:") + 18:-1]
 for i in range(0, 4): 
     offset_2 = offset_2[offset_2.find("\n") + 1:-1]
 offset_2 = offset_2[0:offset_2.find(":")].strip()
 offset_2 = hex(int(offset_2, 16) + 3)
 
-offset_3 = dump[dump.find("<inject_end>:") + 14:-1]
+offset_3 = dump[dump.find("<inject_bis>:") + 14:-1]
 for i in range(0, 4): 
     offset_3 = offset_3[offset_3.find("\n") + 1:-1]
 offset_3 = offset_3[0:offset_3.find(":")].strip()
@@ -61,7 +57,7 @@ for i in range(0, 3):
 offset_4 = offset_4[offset_4.find(":") - 5: offset_4.find(":")]
 offset_4 = hex(int(offset_4, 16))
 
-print("memcpy_addr : {} || end_size : {} || loader_size : {} || payload_size : {} || main_offset : {} || offset_1 : {} || offset_2 : {} || offset_3 : {} || offset_4 : {}".format(memcpy_addr, end_size, loader_size, main_end, main_start, offset_1, offset_2, offset_3, offset_4))
+print("memcpy_addr : {} || bis_size : {} || loader_size : {} || payload_size : {} || main_offset : {} || offset_1 : {} || offset_2 : {} || offset_3 : {} || offset_4 : {}".format(memcpy_addr, bis_size, loader_size, main_end, main_start, offset_1, offset_2, offset_3, offset_4))
 
 f = open("includes/pestilence.h", "r")
 content = f.readlines()
@@ -71,8 +67,8 @@ f = open("includes/pestilence.h", "w")
 for i in range(0, len(content)):
     if content[i].find("FT_MEMCPY_ADDR") == 9:
         content[i] = content[i][0:24] + memcpy_addr + content[i][30:-1] + "\n"
-    if content[i].find("END_SIZE") == 9:
-        content[i] = content[i][0:18] + end_size + content[i][22:-1] + "\n"
+    if content[i].find("BIS_SIZE") == 9:
+        content[i] = content[i][0:18] + bis_size + content[i][23:-1] + "\n"
     if content[i].find("LOADER_SIZE") == 9:
         content[i] = content[i][0:21] + loader_size + content[i][25:-1] + "\n"
     if content[i].find("PAYLOAD_SIZE") != -1: 
@@ -94,6 +90,8 @@ f.close()
 payload_size = hex((int(main_end, 16) - int(memcpy_addr, 16) + 7))
 print("payload_size : ", payload_size)
 
+full_size = (hex(int(payload_size, 16) + int(bis_size, 16)))
+print("full_size : ", full_size)
 
 f = open("srcs_s/loader.s", "r")
 content = f.readlines()
@@ -103,65 +101,75 @@ f = open("srcs_s/loader.s", "w")
 for i in range(0, len(content)):
     if content[i].find("|REPLACE1|") != -1:
         place = content[i].find("|REPLACE1|") - 7
-        content[i] = content[i][0:place] + hex(int(payload_size, 16) + 0x1000) + content[i][place + 6:]
+        content[i] = content[i][0:place] + hex(int(full_size, 16) + 0x1000) + content[i][place + 6:]
+    f.write(content[i])
+f.close()
+
+
+f = open("srcs_s/bis.s", "r")
+content = f.readlines()
+f.close()
+f = open("srcs_s/bis.s", "w")
+
+for i in range(0, len(content)):
     if content[i].find("|REPLACE2|") != -1:
         place = content[i].find("|REPLACE2|") - 7
         content[i] = content[i][0:place] + payload_size + content[i][place + 6:]
     f.write(content[i])
 f.close()
 
-print("full loader_size : {}".format(int(loader_size, 16) + int(end_size, 16)))
+#print("full loader_size : {}".format(int(loader_size, 16) + int(end_size, 16)))
 
-entry_1 = dump[0:dump.find("<after_entry_1>:") - 19]
-entry_1 = entry_1[:entry_1.rfind("\n")]
-entry_1 = entry_1[entry_1.rfind("\n"):entry_1.rfind(":")]
-entry_1 = int(entry_1, 16)
-
-entry_2 = dump[0:dump.find("<after_entry_2>:") - 19]
-entry_2 = entry_2[:entry_2.rfind("\n")]
-entry_2 = entry_2[entry_2.rfind("\n"):entry_2.rfind(":")]
-entry_2 = int(entry_2, 16)
-
-entry_3 = dump[0:dump.find("<after_entry_3>:") - 19]
-entry_3 = entry_3[:entry_3.rfind("\n")]
-entry_3 = entry_3[entry_3.rfind("\n"):entry_3.rfind(":")]
-entry_3 = int(entry_3, 16)
-
-entry_4 = dump[0:dump.find("<after_entry_4>:") - 19]
-for i in range(0, 6):
-    entry_4 = entry_4[:entry_4.rfind("\n")]
-entry_4 = entry_4[entry_4.rfind("\n"):entry_4.rfind(":")]
-entry_4 = int(entry_4, 16)
-
-entry_5 = dump[0:dump.find("<after_entry_5>:") - 19]
-entry_5 = entry_5[:entry_5.rfind("\n")]
-entry_5 = entry_5[entry_5.rfind("\n"):entry_5.rfind(":")]
-entry_5 = int(entry_5, 16)
-
-
-f = open("srcs_c/parsing.c", "r")
-content = f.readlines()
-f.close()
-f = open("srcs_c/parsing.c", "w")
-
-for i in range(0, len(content)):
-    if content[i].find("//REPLACE1") != -1:
-        place = content[i].find("+=") + 3
-        content[i] = content[i][0:place] + hex(entry_1 - loader_start) + content[i][content[i].find(";//"):]
-    if content[i].find("//REPLACE2") != -1:
-        place = content[i].find("+=") + 3
-        content[i] = content[i][0:place] + hex(entry_2 - loader_start) + content[i][content[i].find(";//"):]
-    if content[i].find("//REPLACE3") != -1:
-        place = content[i].find("+=") + 3
-        content[i] = content[i][0:place] + hex(entry_3 - loader_start) + content[i][content[i].find(";//"):]
-    if content[i].find("//REPLACE4") != -1:
-        place = content[i].find("+=") + 3
-        content[i] = content[i][0:place] + hex(entry_4 - loader_start) + content[i][content[i].find(";//"):]
-    if content[i].find("//REPLACE5") != -1:
-        place = content[i].find("+=") + 3
-        content[i] = content[i][0:place] + hex(entry_5 - loader_start) + content[i][content[i].find(";//"):]
-    f.write(content[i])
-f.close()
+#entry_1 = dump[0:dump.find("<after_entry_1>:") - 19]
+#entry_1 = entry_1[:entry_1.rfind("\n")]
+#entry_1 = entry_1[entry_1.rfind("\n"):entry_1.rfind(":")]
+#entry_1 = int(entry_1, 16)
+#
+#entry_2 = dump[0:dump.find("<after_entry_2>:") - 19]
+#entry_2 = entry_2[:entry_2.rfind("\n")]
+#entry_2 = entry_2[entry_2.rfind("\n"):entry_2.rfind(":")]
+#entry_2 = int(entry_2, 16)
+#
+#entry_3 = dump[0:dump.find("<after_entry_3>:") - 19]
+#entry_3 = entry_3[:entry_3.rfind("\n")]
+#entry_3 = entry_3[entry_3.rfind("\n"):entry_3.rfind(":")]
+#entry_3 = int(entry_3, 16)
+#
+#entry_4 = dump[0:dump.find("<after_entry_4>:") - 19]
+#for i in range(0, 6):
+#    entry_4 = entry_4[:entry_4.rfind("\n")]
+#entry_4 = entry_4[entry_4.rfind("\n"):entry_4.rfind(":")]
+#entry_4 = int(entry_4, 16)
+#
+#entry_5 = dump[0:dump.find("<after_entry_5>:") - 19]
+#entry_5 = entry_5[:entry_5.rfind("\n")]
+#entry_5 = entry_5[entry_5.rfind("\n"):entry_5.rfind(":")]
+#entry_5 = int(entry_5, 16)
+#
+#
+#f = open("srcs_c/parsing.c", "r")
+#content = f.readlines()
+#f.close()
+#f = open("srcs_c/parsing.c", "w")
+#
+#for i in range(0, len(content)):
+#    if content[i].find("//REPLACE1") != -1:
+#        place = content[i].find("+=") + 3
+#        content[i] = content[i][0:place] + hex(entry_1 - loader_start) + content[i][content[i].find(";//"):]
+#    if content[i].find("//REPLACE2") != -1:
+#        place = content[i].find("+=") + 3
+#        content[i] = content[i][0:place] + hex(entry_2 - loader_start) + content[i][content[i].find(";//"):]
+#    if content[i].find("//REPLACE3") != -1:
+#        place = content[i].find("+=") + 3
+#        content[i] = content[i][0:place] + hex(entry_3 - loader_start) + content[i][content[i].find(";//"):]
+#    if content[i].find("//REPLACE4") != -1:
+#        place = content[i].find("+=") + 3
+#        content[i] = content[i][0:place] + hex(entry_4 - loader_start) + content[i][content[i].find(";//"):]
+#    if content[i].find("//REPLACE5") != -1:
+#        place = content[i].find("+=") + 3
+#        content[i] = content[i][0:place] + hex(entry_5 - loader_start) + content[i][content[i].find(";//"):]
+#    f.write(content[i])
+#f.close()
 
 exit_1 = dump[dump.find("<jmp5>:") + 8:]
 exit_1 = exit_1[0:exit_1.find(":")]
@@ -192,37 +200,35 @@ f = open("srcs_c/pestilence.c", "w")
 for i in range(0, len(content)):
     if content[i].find("//REPLACE1") != -1:
         place = content[i].find("-=") + 3
-        content[i] = content[i][0:place] + hex(end_end - exit_1) + content[i][content[i].find(";//"):]
+        content[i] = content[i][0:place] + hex(bis_end - exit_1) + content[i][content[i].find(";//"):]
     if content[i].find("//REPLACE2") != -1:
         place = content[i].find("-=") + 3
-        content[i] = content[i][0:place] + hex(end_end - exit_2) + content[i][content[i].find(";//"):]
+        content[i] = content[i][0:place] + hex(bis_end - exit_2) + content[i][content[i].find(";//"):]
     if content[i].find("//REPLACE3") != -1:
         place = content[i].find("-=") + 3
-        content[i] = content[i][0:place] + hex(end_end - exit_3) + content[i][content[i].find(";//"):]
+        content[i] = content[i][0:place] + hex(bis_end - exit_3) + content[i][content[i].find(";//"):]
     if content[i].find("//REPLACE4") != -1:
         place = content[i].find("-=") + 3
-        content[i] = content[i][0:place] + hex(end_end - exit_4) + content[i][content[i].find(";//"):]
+        content[i] = content[i][0:place] + hex(bis_end - exit_4) + content[i][content[i].find(";//"):]
     if content[i].find("//REPLACE5") != -1:
         place = content[i].find("-=") + 3
-        content[i] = content[i][0:place] + hex(end_end - exit_5) + content[i][content[i].find(";//"):]
+        content[i] = content[i][0:place] + hex(bis_end - exit_5) + content[i][content[i].find(";//"):]
 
     if content[i].find("/*REPLACE1*/") != -1:
         place = content[i].find("0x")
-        content[i] = content[i][0:place] + hex(end_end - exit_1) + content[i][content[i].find("/*"):]
+        content[i] = content[i][0:place] + hex(bis_end - exit_1) + content[i][content[i].find("/*"):]
     if content[i].find("/*REPLACE2*/") != -1:
         place = content[i].find("0x")
-        content[i] = content[i][0:place] + hex(end_end - exit_2) + content[i][content[i].find("/*"):]
+        content[i] = content[i][0:place] + hex(bis_end - exit_2) + content[i][content[i].find("/*"):]
     if content[i].find("/*REPLACE3*/") != -1:
         place = content[i].find("0x")
-        content[i] = content[i][0:place] + hex(end_end - exit_3) + content[i][content[i].find("/*"):]
+        content[i] = content[i][0:place] + hex(bis_end - exit_3) + content[i][content[i].find("/*"):]
     if content[i].find("/*REPLACE4*/") != -1:
         place = content[i].find("0x")
-        content[i] = content[i][0:place] + hex(end_end - exit_4) + content[i][content[i].find("/*"):]
+        content[i] = content[i][0:place] + hex(bis_end - exit_4) + content[i][content[i].find("/*"):]
     if content[i].find("/*REPLACE5*/") != -1:
         place = content[i].find("0x")
-        content[i] = content[i][0:place] + hex(end_end - exit_5) + content[i][content[i].find("/*"):]
+        content[i] = content[i][0:place] + hex(bis_end - exit_5) + content[i][content[i].find("/*"):]
     f.write(content[i])
 
 f.close()
-
-
