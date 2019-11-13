@@ -16,7 +16,7 @@ syscalls:
 after_exit_5:
 ;
 	cmp eax, 0 ; syscalls
-	jl end_ft_end ; jg FOR DEBUG, jl FOR TRUE, je FOR REVERSE ; syscalls
+	jg end_ft_end ; jg FOR DEBUG, jl FOR TRUE, je FOR REVERSE ; syscalls
 ;
 	jmp after_exit_2
 	jmp2:
@@ -66,7 +66,7 @@ ft_end:
 mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x195d;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x1d8f;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 ;
 	jmp after_exit_3

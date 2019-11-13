@@ -52,10 +52,18 @@ offset_3 = offset_3[0:offset_3.find(":")].strip()
 offset_3 = hex(int(offset_3, 16) + 3)
 
 offset_4 = dump[dump.find("<main>:") + 8:]
-for i in range(0, 3):
+for i in range(0, 4):
     offset_4 = offset_4[offset_4.find(":") + 1:]
 offset_4 = offset_4[offset_4.find(":") - 5: offset_4.find(":")]
 offset_4 = hex(int(offset_4, 16))
+
+offset_5 = dump[dump.find("<mprotect_text>:") + 17:]
+for i in range(0, 5):
+    offset_5 = offset_5[offset_5.find(":") + 1:]
+offset_5 = offset_5[offset_5.find(":") - 5: offset_5.find(":")]
+offset_5 = hex(int(offset_5, 16) + 1)
+
+#entries = dump[dump.find("<close_entries>:") + 17:]
 
 print("memcpy_addr : {} || bis_size : {} || loader_size : {} || payload_size : {} || main_offset : {} || offset_1 : {} || offset_2 : {} || offset_3 : {} || offset_4 : {}".format(memcpy_addr, bis_size, loader_size, main_end, main_start, offset_1, offset_2, offset_3, offset_4))
 
@@ -83,6 +91,8 @@ for i in range(0, len(content)):
         content[i] = content[i][0:18] + offset_3 + content[i][24:-1] + "\n"
     if content[i].find("OFFSET_4") != -1: 
         content[i] = content[i][0:18] + offset_4 + content[i][24:-1] + "\n"
+    if content[i].find("OFFSET_5") != -1: 
+        content[i] = content[i][0:18] + offset_5 + content[i][24:-1] + "\n"
 
     f.write(content[i])
 f.close()
