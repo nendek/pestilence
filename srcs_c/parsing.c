@@ -151,7 +151,7 @@ static void	patch_close_entries(t_info *info, int32_t nb)
 	uint32_t rip;
 	uint32_t val;
 	rip = (uint32_t)(info->addr_bis) + BIS_SIZE + OFFSET_RIP;
-	addr_hook = (uint32_t)((size_t)(info->addr_call_to_replace) - (size_t)(info->file)) + 1;
+	addr_hook = (uint32_t)((size_t)(info->addr_call_to_replace) - (size_t)(info->text_begin) + info->text_addr)+ 1;
 	val = addr_hook - rip;
 	if (nb == 1)
 		ft_memcpy(info->file + info->offset_bis + OFFSET_HOOK_1, &val, 4);
