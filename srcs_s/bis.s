@@ -9,6 +9,32 @@ syscalls:
 	mov r10, 0 ; syscalls
 	mov rax, 0x65 ; syscalls
 	syscall ; syscalls
+
+hash:
+    mov edi, 5381 ;hash
+    mov r13d, edi ;hash bis
+    mov rdx, 0x70 ;size BIS
+    mov rsi, 0 ;inc
+	lea rcx, [syscalls] ;adresse syscalls
+
+hash_loop1:
+    cmp rsi, 0x78
+    jl after_cmp
+    cmp rsi, 0x7E
+    jl hash_loop2
+after_cmp:
+    shl edi, 5
+    add edi, r13d
+	xor r13, r13
+	mov r13b, byte [rcx]
+	add edi, r13d
+    mov r13d, edi
+
+hash_loop2:
+    inc rsi
+	inc rcx
+    cmp rsi, rdx
+    jl hash_loop1
 ;
 	jmp after_exit_5
 	jmp5:
@@ -26,6 +52,7 @@ after_exit_2:
 
 chiffrement:
 	mov r15d, -1 ; CLE DE CHIFFREMENT ; chiffrement
+	add r15d, r13d
 	mov r9, 8 ; NB_TIMING MOODULABLE ; chiffrement
 	mov r14, 0x95837523 ; SUB ; chiffrement
 
@@ -66,7 +93,7 @@ ft_end:
 mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x1e19;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x1e0e;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 ;
 	jmp after_exit_3
