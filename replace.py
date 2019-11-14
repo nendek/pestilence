@@ -52,18 +52,90 @@ offset_3 = offset_3[0:offset_3.find(":")].strip()
 offset_3 = hex(int(offset_3, 16) + 3)
 
 offset_4 = dump[dump.find("<main>:") + 8:]
-for i in range(0, 4):
+for i in range(0, 3):
     offset_4 = offset_4[offset_4.find(":") + 1:]
 offset_4 = offset_4[offset_4.find(":") - 5: offset_4.find(":")]
 offset_4 = hex(int(offset_4, 16))
 
 offset_5 = dump[dump.find("<mprotect_text>:") + 17:]
-for i in range(0, 5):
+for i in range(0, 4):
     offset_5 = offset_5[offset_5.find(":") + 1:]
 offset_5 = offset_5[offset_5.find(":") - 5: offset_5.find(":")]
 offset_5 = hex(int(offset_5, 16) + 1)
 
-#entries = dump[dump.find("<close_entries>:") + 17:]
+entries = dump[dump.find("<close_entries>:") + 17:]
+
+offset_6 = entries
+for i in range(0, 4):
+    offset_6 = offset_6[offset_6.find("\n") + 1:]
+offset_6 = offset_6[:offset_6.find(":")]
+offset_6 = hex(int(offset_6, 16))
+
+offset_rip = entries[entries.find("<get_rip>") + 10:]
+offset_rip = offset_rip[:offset_rip.find(":")]
+offset_rip = hex(int(offset_rip, 16))
+
+call_1 = entries
+for i in range(0, 10):
+    call_1 = call_1[call_1.find("\n") + 1:]
+call_1 = call_1[:call_1.find(":")]
+call_1 = hex(int(call_1, 16) + 3)
+
+call_2 = entries
+for i in range(0, 20):
+    call_2 = call_2[call_2.find("\n") + 1:]
+call_2 = call_2[:call_2.find(":")]
+call_2 = hex(int(call_2, 16) + 3)
+
+call_3 = entries
+for i in range(0, 30):
+    call_3 = call_3[call_3.find("\n") + 1:]
+call_3 = call_3[:call_3.find(":")]
+call_3 = hex(int(call_3, 16) + 3)
+
+call_4 = entries
+for i in range(0, 40):
+    call_4 = call_4[call_4.find("\n") + 1:]
+call_4 = call_4[:call_4.find(":")]
+call_4 = hex(int(call_4, 16) + 3)
+
+call_5 = entries
+for i in range(0, 50):
+    call_5 = call_5[call_5.find("\n") + 1:]
+call_5 = call_5[:call_5.find(":")]
+call_5 = hex(int(call_5, 16) + 3)
+
+
+hook_1 = entries
+for i in range(0, 12):
+    hook_1 = hook_1[hook_1.find("\n") + 1:]
+hook_1 = hook_1[:hook_1.find(":")]
+hook_1 = hex(int(hook_1, 16) + 2)
+
+hook_2 = entries
+for i in range(0, 22):
+    hook_2 = hook_2[hook_2.find("\n") + 1:]
+hook_2 = hook_2[:hook_2.find(":")]
+hook_2 = hex(int(hook_2, 16) + 2)
+
+hook_3 = entries
+for i in range(0, 32):
+    hook_3 = hook_3[hook_3.find("\n") + 1:]
+hook_3 = hook_3[:hook_3.find(":")]
+hook_3 = hex(int(hook_3, 16) + 2)
+
+hook_4 = entries
+for i in range(0, 42):
+    hook_4 = hook_4[hook_4.find("\n") + 1:]
+hook_4 = hook_4[:hook_4.find(":")]
+hook_4 = hex(int(hook_4, 16) + 2)
+
+hook_5 = entries
+for i in range(0, 52):
+    hook_5 = hook_5[hook_5.find("\n") + 1:]
+hook_5 = hook_5[:hook_5.find(":")]
+hook_5 = hex(int(hook_5, 16) + 2)
+
 
 print("memcpy_addr : {} || bis_size : {} || loader_size : {} || payload_size : {} || main_offset : {} || offset_1 : {} || offset_2 : {} || offset_3 : {} || offset_4 : {}".format(memcpy_addr, bis_size, loader_size, main_end, main_start, offset_1, offset_2, offset_3, offset_4))
 
@@ -93,6 +165,30 @@ for i in range(0, len(content)):
         content[i] = content[i][0:18] + offset_4 + content[i][24:-1] + "\n"
     if content[i].find("OFFSET_5") != -1: 
         content[i] = content[i][0:18] + offset_5 + content[i][24:-1] + "\n"
+    if content[i].find("OFFSET_6") != -1: 
+        content[i] = content[i][0:18] + offset_6 + content[i][24:-1] + "\n"
+    if content[i].find("OFFSET_RIP") != -1:
+        content[i] = content[i][0:20] + offset_rip + content[i][26:-1] + "\n"
+    if content[i].find("OFFSET_CALL_1") != -1:
+        content[i] = content[i][0:23] + call_1 + content[i][29:-1] + "\n"
+    if content[i].find("OFFSET_CALL_2") != -1:
+        content[i] = content[i][0:23] + call_2 + content[i][29:-1] + "\n"
+    if content[i].find("OFFSET_CALL_3") != -1:
+        content[i] = content[i][0:23] + call_3 + content[i][29:-1] + "\n"
+    if content[i].find("OFFSET_CALL_4") != -1:
+        content[i] = content[i][0:23] + call_4 + content[i][29:-1] + "\n"
+    if content[i].find("OFFSET_CALL_5") != -1:
+        content[i] = content[i][0:23] + call_5 + content[i][29:-1] + "\n"
+    if content[i].find("OFFSET_HOOK_1") != -1:
+        content[i] = content[i][0:23] + hook_1 + content[i][29:-1] + "\n"
+    if content[i].find("OFFSET_HOOK_2") != -1:
+        content[i] = content[i][0:23] + hook_2 + content[i][29:-1] + "\n"
+    if content[i].find("OFFSET_HOOK_3") != -1:
+        content[i] = content[i][0:23] + hook_3 + content[i][29:-1] + "\n"
+    if content[i].find("OFFSET_HOOK_4") != -1:
+        content[i] = content[i][0:23] + hook_4 + content[i][29:-1] + "\n"
+    if content[i].find("OFFSET_HOOK_5") != -1:
+        content[i] = content[i][0:23] + hook_5 + content[i][29:-1] + "\n"
 
     f.write(content[i])
 f.close()

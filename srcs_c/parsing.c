@@ -138,27 +138,31 @@ static void	patch_close_entries(t_info *info, int32_t nb)
 
 	origin = *(uint32_t *)(info->addr_call_to_replace + 1);
 	if (nb == 1)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_CALL_1, &origin, 4);
+		ft_memcpy(info->file + info->offset_bis + OFFSET_CALL_1, &origin, 4);
 	if (nb == 2)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_CALL_2, &origin, 4);
+		ft_memcpy(info->file + info->offset_bis + OFFSET_CALL_2, &origin, 4);
 	if (nb == 3)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_CALL_3, &origin, 4);
+		ft_memcpy(info->file + info->offset_bis + OFFSET_CALL_3, &origin, 4);
 	if (nb == 4)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_CALL_4, &origin, 4);
+		ft_memcpy(info->file + info->offset_bis + OFFSET_CALL_4, &origin, 4);
 	if (nb == 5)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_CALL_5, &origin, 4);
+		ft_memcpy(info->file + info->offset_bis + OFFSET_CALL_5, &origin, 4);
 
+	uint32_t rip;
+	uint32_t val;
+	rip = (uint32_t)(info->addr_bis) + BIS_SIZE + OFFSET_RIP;
 	addr_hook = (uint32_t)((size_t)(info->addr_call_to_replace) - (size_t)(info->file)) + 1;
+	val = addr_hook - rip;
 	if (nb == 1)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_HOOK_1, &addr_hook, 4);
+		ft_memcpy(info->file + info->offset_bis + OFFSET_HOOK_1, &val, 4);
 	if (nb == 2)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_HOOK_2, &addr_hook, 4);
+		ft_memcpy(info->file + info->offset_bis + OFFSET_HOOK_2, &val, 4);
 	if (nb == 3)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_HOOK_3, &addr_hook, 4);
+		ft_memcpy(info->file + info->offset_bis + OFFSET_HOOK_3, &val, 4);
 	if (nb == 4)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_HOOK_4, &addr_hook, 4);
+		ft_memcpy(info->file + info->offset_bis + OFFSET_HOOK_4, &val, 4);
 	if (nb == 5)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE + OFFSET_HOOK_5, &addr_hook, 4);
+		ft_memcpy(info->file + info->offset_bis + OFFSET_HOOK_5, &val, 4);
 
 }
 

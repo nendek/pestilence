@@ -2,7 +2,6 @@ default rel
 global mprotect_text
 
 mprotect_text:
-	ret
 	push rbp
 	mov rbp, rsp
 	and rsp, -16
