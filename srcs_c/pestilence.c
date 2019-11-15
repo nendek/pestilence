@@ -43,7 +43,7 @@ static void	patch_payload(t_info *info)
 	int32_t	val;
 
 	start = (int32_t)(info->addr_bis + PAYLOAD_SIZE + BIS_SIZE);
-	end = info->addr_bis + 0x128; // TODO ajouter l'addresse du milieu du bis
+	end = info->addr_bis + /*A*/0x128/*A`*/; // TODO ajouter l'addresse du milieu du bis
 	val = end - start;
 
 	// replace jmp addr
@@ -182,7 +182,7 @@ uint32_t    encrypt(t_info *info, void *ptr, size_t size)
 
     file = (uint32_t *)ptr;
 
-	uint32_t start = info->addr_bis + 0xce;
+	uint32_t start = info->addr_bis + /*B*/0xce/*B`*/;
 	uint32_t end = (int32_t)(info->addr_bis + BIS_SIZE + MAIN_OFFSET);
 	key = end - start; // key is now offset to jump payload from loader
 // 	dprintf(1, "%#x\n", key);
@@ -235,7 +235,7 @@ void			patch_key(t_info *info, uint32_t key)
 // 	hash = 1;
 	// Key in loader
 	val = key - hash;
-	ft_memcpy(info->file + info->offset_bis + 0x77, &val, 4); // 0x78 is addr of key in bis
+	ft_memcpy(info->file + info->offset_bis + /*C*/0x77/*C`*/, &val, 4); // 0x78 is addr of key in bis
 }
 
 

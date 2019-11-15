@@ -297,6 +297,19 @@ exit_5 = dump[dump.find("<jmp1>:") + 8:]
 exit_5 = exit_5[0:exit_5.find(":")]
 exit_5 = int(exit_5, 16)
 
+
+key_addr = bis[bis.find("<after_exit_2>:") + 16:]
+key_addr = key_addr[:key_addr.find(":")]
+key_addr = hex(int(key_addr, 16) + 2 - bis_start)
+
+jmpr15 = bis[bis.find("<ft_end>:") + 10:]
+jmpr15 = jmpr15[:jmpr15.find(":")]
+jmpr15 = hex(int(jmpr15, 16) - bis_start)
+
+end_ft_end = bis[bis.find("<end_ft_end>:") + 14:]
+end_ft_end = end_ft_end[:end_ft_end.find(":")]
+end_ft_end = hex(int(end_ft_end, 16) - bis_start)
+
 f = open("srcs_c/pestilence.c", "r")
 content = f.readlines()
 f.close()
@@ -335,6 +348,16 @@ for i in range(0, len(content)):
     if content[i].find("/*REPLACE5*/") != -1:
         place = content[i].find("0x")
         content[i] = content[i][0:place] + hex(bis_end - exit_5) + content[i][content[i].find("/*"):]
+
+    if content[i].find("/*A*/") != -1:
+        place = content[i].find("/*A*/") + 5
+        content[i] = content[i][0:place] + end_ft_end + content[i][content[i].find("/*A`*/"):]
+    if content[i].find("/*B*/") != -1:
+        place = content[i].find("/*B*/") + 5
+        content[i] = content[i][0:place] + jmpr15 + content[i][content[i].find("/*B`*/"):]
+    if content[i].find("/*C*/") != -1:
+        place = content[i].find("/*C*/") + 5
+        content[i] = content[i][0:place] + key_addr + content[i][content[i].find("/*C`*/"):]
     f.write(content[i])
 
 f.close()
