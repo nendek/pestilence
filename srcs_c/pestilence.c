@@ -211,12 +211,12 @@ uint32_t	hash_loader(t_info *info)
 	unsigned char	*str;
 
 	str = (unsigned char *)(info->file + info->offset_bis);
-	size = 0x70;
+	size = 0x1F8A; // BIS _SIZE + PAYLOAD SIZE
 	
 	size_t i = 0;
 	while (i < size)
 	{
-		if (i < 0x78 || i > 0x7E)
+		if (i < 0x75 || i > 0x7B)
 		{
 			hash = ((hash << 5) + hash) + str[i];
 		}

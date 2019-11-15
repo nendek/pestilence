@@ -13,15 +13,15 @@ syscalls:
 hash:
     mov edi, 5381 ;hash
     mov r13d, edi ;hash bis
-    mov rdx, 0x70 ;size BIS
+    mov rdx, 0x1F8A ;size BIS
     mov rsi, 0 ;inc
 	lea rcx, [syscalls] ;adresse syscalls
 
 hash_loop1:
-    cmp rsi, 0x78
+	cmp rsi, 0x75
     jl after_cmp
-    cmp rsi, 0x7E
-    jl hash_loop2
+    cmp rsi, 0x7B
+    jle hash_loop2
 after_cmp:
     shl edi, 5
     add edi, r13d
