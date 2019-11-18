@@ -33,14 +33,33 @@ common_loader:
     push r15 ; push
 
     mov rdx, 0x7 ;EXEC | READ ; syscalls
-    mov rsi, 0x2f8a;|REPLACE1| size payload + 1 page ; syscalls
+    mov rsi, 0x2feb;|REPLACE1| size payload + 1 page ; syscalls
 	lea rdi, [$ + 0x10000000] ; adresse du payload ; syscalls
 	mov rbx, rdi ; syscalls
 	and rdi, 0xFFFFFFFFFFFFF000 ; syscalls
 	mov rax, 0xa ; syscalls
 	syscall ; syscalls
 
-	add rbx, 0x17c ; BIS_SIZE
+	add rbx, 0x177 ; BIS_SIZE
+
+	mov edi, 5381
+	mov r13d, edi ;hash bis
+    mov rdx, 0x96 ;size BIS
+    mov rsi, 0 ;inc
+    lea rcx, [loader] ;adresse syscalls
+hash_loop1:
+    shl edi, 5
+    add edi, r13d
+    xor r13, r13
+    mov r13b, byte [rcx]
+    add edi, r13d
+    mov r13d, edi
+hash_loop2:
+    inc rsi
+    inc rcx
+    cmp rsi, rdx
+    jl hash_loop1
+
 	jmp -1
 last_instr_of_loader:
 	nop

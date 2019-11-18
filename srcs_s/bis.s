@@ -11,18 +11,27 @@ syscalls:
 	syscall ; syscalls
 
 hash:
-    mov edi, 5381 ;hash
-    mov r13d, edi ;hash bis
-    mov rdx, 0x1F8A ;size BIS
+;    mov edi, 5381 ;hash
+	mov edi, r13d ; r13 got result of hash loader
+;    mov r13d, edi ;hash bis
+    mov rdx, 0x1FEB ;size BIS
     mov rsi, 0 ;inc
 	lea rcx, [syscalls] ;adresse syscalls
 
 hash_loop1:
-	cmp rsi, 0x75
+	cmp rsi, 0x72
     jl after_cmp
-    cmp rsi, 0x7B
+    cmp rsi, 0x76
     jle hash_loop2
 after_cmp:
+;	push rdx
+;	rdtsc
+;	mov r12, rax
+;	rdtsc
+;	sub rax, r12
+;	pop rdx
+;	cmp rax, 0xffff
+;	jg end_ft_end
     shl edi, 5
     add edi, r13d
 	xor r13, r13
@@ -93,7 +102,7 @@ ft_end:
 mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x1e0e;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x1e74;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 ;
 	jmp after_exit_3

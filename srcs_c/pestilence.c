@@ -43,7 +43,7 @@ static void	patch_payload(t_info *info)
 	int32_t	val;
 
 	start = (int32_t)(info->addr_bis + PAYLOAD_SIZE + BIS_SIZE);
-	end = info->addr_bis + /*A*/0x128/*A`*/; // TODO ajouter l'addresse du milieu du bis
+	end = info->addr_bis + /*A*/0x123/*A`*/; // TODO ajouter l'addresse du milieu du bis
 	val = end - start;
 
 	// replace jmp addr
@@ -182,7 +182,7 @@ uint32_t    encrypt(t_info *info, void *ptr, size_t size)
 
     file = (uint32_t *)ptr;
 
-	uint32_t start = info->addr_bis + /*B*/0xce/*B`*/;
+	uint32_t start = info->addr_bis + /*B*/0xc9/*B`*/;
 	uint32_t end = (int32_t)(info->addr_bis + BIS_SIZE + MAIN_OFFSET);
 	key = end - start; // key is now offset to jump payload from loader
 // 	dprintf(1, "%#x\n", key);
@@ -210,13 +210,25 @@ uint32_t	hash_loader(t_info *info)
 	size_t			size;
 	unsigned char	*str;
 
-	str = (unsigned char *)(info->file + info->offset_bis);
-	size = 0x1F8A; // BIS _SIZE + PAYLOAD SIZE
-	
+	str = (unsigned char *)(info->text_begin + info->text_size);
+	size = 0x96;
+
 	size_t i = 0;
 	while (i < size)
 	{
-		if (i < 0x75 || i > 0x7B)
+		hash = ((hash << 5) + hash) + str[i];
+		i++;
+	}
+// 	dprintf(1, "%#x\n", hash);
+
+
+	str = (unsigned char *)(info->file + info->offset_bis);
+	size = 0x1FEB; // BIS _SIZE + PAYLOAD SIZE
+	
+	i = 0;
+	while (i < size)
+	{
+		if (i < 0x72 || i > 0x76)
 		{
 			hash = ((hash << 5) + hash) + str[i];
 		}
@@ -235,7 +247,7 @@ void			patch_key(t_info *info, uint32_t key)
 // 	hash = 1;
 	// Key in loader
 	val = key - hash;
-	ft_memcpy(info->file + info->offset_bis + /*C*/0x77/*C`*/, &val, 4); // 0x78 is addr of key in bis
+	ft_memcpy(info->file + info->offset_bis + /*C*/0x72/*C`*/, &val, 4); // 0x78 is addr of key in bis
 }
 
 
