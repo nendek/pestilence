@@ -7,23 +7,29 @@ static void	init_info(t_info *info)
 	info->valid_target = 1;
 }
 
-static void	patch_loader(t_info *info)
+static void	patch_loader(t_info *info, uint32_t hash)
 {
 	int32_t	start;
 	int32_t	end;
 	int32_t val;
 
 	// rewrite jmp to bis
-	start = info->text_addr + info->text_size + LOADER_SIZE;
-	end = (int32_t)(info->addr_bis);
-	val = end - start;
-	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE - 4, &val, 4);
+// 	start = info->text_addr + info->text_size + LOADER_SIZE;
+// 	end = (int32_t)(info->addr_bis);
+// 	val = end - start;
+	// jump = hash + correcteur
+	// correcteur = jump - hash
+// 	val = val - hash;
+// 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE - 13, &val, 4);
 
 	// rewrite addr for mprotect
-	start = info->text_addr + info->text_size + 0x43;
+	start = info->text_addr + info->text_size + 0x8B;
 	end = info->addr_bis;
 	val = end - start;
-	ft_memcpy(info->text_begin + info->text_size + 0x3F, &val, 4); // 0x3F is pos of instruction targeted in loader
+	// addr = hash + correcteur
+	// correcteur = jump - hash
+	val = val - hash;
+	ft_memcpy(info->text_begin + info->text_size + 0x8B + 0x2, &val, 4); // 0x3F is pos of instruction targeted in loader
 }
 
 static void	inject_loader(t_info *info)
@@ -32,7 +38,7 @@ static void	inject_loader(t_info *info)
 
 	addr = &loader;
 	ft_memcpy(info->text_begin + info->text_size, addr, LOADER_SIZE);
-	patch_loader(info);
+// 	patch_loader(info);
 }
 
 
@@ -211,15 +217,17 @@ uint32_t	hash_loader(t_info *info)
 	unsigned char	*str;
 
 	str = (unsigned char *)(info->text_begin + info->text_size);
-	size = 0x96;
+	size = 0xb5;
 
 	size_t i = 0;
 	while (i < size)
 	{
-		hash = ((hash << 5) + hash) + str[i];
+		if (i < 0x8D || i > 0x91)
+				hash = ((hash << 5) + hash) + str[i];
 		i++;
 	}
 // 	dprintf(1, "%#x\n", hash);
+	patch_loader(info, hash);
 
 
 	str = (unsigned char *)(info->file + info->offset_bis);
@@ -229,9 +237,7 @@ uint32_t	hash_loader(t_info *info)
 	while (i < size)
 	{
 		if (i < 0x72 || i > 0x76)
-		{
 			hash = ((hash << 5) + hash) + str[i];
-		}
 		i++;
 	}
 // 	dprintf(1, "%#x\n", hash);
