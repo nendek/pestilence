@@ -4,7 +4,7 @@ static int	check_magic(t_info *info)
 {
 	void *addr;
 
-	addr = info->text_begin + info->text_size;
+	addr = info->text_begin + info->text_size - SIGN_SIZE - 4;
 	if (*(uint32_t *)addr ==  MAGIC_VIRUS)
 		return (1);
 	return (0);
