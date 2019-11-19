@@ -14,14 +14,16 @@ hash:
 ;    mov edi, 5381 ;hash
 	mov edi, r13d ; r13 got result of hash loader
 ;    mov r13d, edi ;hash bis
-    mov rdx, 0x1FEB ;size BIS
+    mov rdx, 0x1FCE ;size payload + bis_size a modifier
+    pushfq ; verif step by step
     mov rsi, 0 ;inc
 	lea rcx, [syscalls] ;adresse syscalls
+	pop r12
 
 hash_loop1:
-	cmp rsi, 0x72
-    jl after_cmp
-    cmp rsi, 0x76
+	cmp rsi, 0x75
+	jl after_cmp
+    cmp rsi, 0x79
     jle hash_loop2
 after_cmp:
     shl edi, 5
@@ -83,6 +85,8 @@ chiffrement_loop1_a:
 	dec r9 ; chiffrement & dechiffrement
 	test r9, r9 ; chiffrement & dechiffrement
 	jne chiffrement_loop2 ; chiffrement & dechiffrement
+	cmp r12, 0x100; verif step by step
+	je end_ft_end
 	cmp r13, 2 ; chiffrement & dechiffrement
 	je end_ft_end ; chiffrement & dechiffrement
 
@@ -119,6 +123,7 @@ after_exit_3:
 	jmp dechiffrement_loop1
 chiffrement_loop1:
 	sub r15d, DWORD [rdi] ; chiffrement
+	and r12, 0x100 ; verif step by step
 	mov eax, DWORD [rdi] ; chiffrement
 	xor rax, r15 ; chiffrement
 	jmp label_1
