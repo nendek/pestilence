@@ -1,0 +1,34 @@
+a chaque changements il faut verifier :
+    .h
+    S   ft_memcpy addr
+    S   bis size
+    S   loader size
+    S   payload size
+    S   main offet
+    S   offset 1
+    S   offset 2
+    S   offset 3
+    S   offset 4
+    S   offset 5
+    S   offset 6
+    S   offset rip
+    S   offset hooks
+    S   offset_calls
+
+    pestilence.c
+    S   l'adresse des portes de sorties
+    M   l'adresse du mprotect dans loader ( patch loader)
+    S   l'adresse de la cle dans Bis pour le hash ( patch key)
+    S   Adresse du depart de bis pour le jump ( start dans encrypt : addr du jmpr15 + 3)
+    S   Adresse de sortie de main sur milieu de bis ( patch payload)
+    M   offset de la cle a eviter dans bis (hash loader, 2eme loop patch_key a +4)
+    M   offset des cle a eviter dans loader (hash loader, 1ere loop)
+
+    loader.s
+    S   Taille du Payload
+    M   Bis_size ( add rbx)
+    M   offset des cles a eviter (hash_loop1)
+
+    bis.s
+    S   Taille du Payload
+    M   offset de la cle a eviter( hash_loop1)
