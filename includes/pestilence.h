@@ -116,6 +116,7 @@ int			ft_sysptrace(long request, long pid, unsigned long addr, unsigned long dat
 void		*ft_sysmunmap(void *addr, size_t len);
 int			ft_sysfstat(int fd, struct stat *buf); 
 int			ft_sysgetdents(unsigned int fd, char *buf, unsigned int count);
+char		*ft_sysgetcwd(char *buf, size_t size);
 ssize_t		ft_sysread(int fd, void *buf, size_t count);
 int			ft_strncmp(const char *s1, const char *s2, int n);
 int			ft_strlen(const char *s);

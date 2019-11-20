@@ -7,6 +7,7 @@ global ft_sysptrace
 global ft_sysfstat
 global ft_sysmunmap
 global ft_sysgetdents
+global ft_sysgetcwd
 
 section .text
 
@@ -55,6 +56,11 @@ ft_sysmunmap:
 ft_sysgetdents:
 	xor rax, rax
 	mov rax, 0xd9
+	jmp call
+
+ft_sysgetcwd:
+	xor rax, rax
+	mov rax, 0x4f
 	jmp call
 
 call:
