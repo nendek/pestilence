@@ -65,5 +65,3 @@ write_sign:
 	mov [rdi + 0x20], DWORD 0x302e3276
 	mov [rdi + 0x24], DWORD 0x0000003e
 	ret
-
-

