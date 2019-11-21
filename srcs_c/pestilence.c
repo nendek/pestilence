@@ -7,39 +7,6 @@ static void	init_info(t_info *info)
 	info->valid_target = 1;
 }
 
-static void	patch_loader(t_info *info, uint32_t hash)
-{
-	int32_t	start;
-	int32_t	end;
-	int32_t val;
-
-	// rewrite addr for mprotect
-	start = info->text_addr + info->text_size + 0x9B; // a modifier adresse de pos_rdi dans loader
-	end = info->addr_bis;
-	val = end - start;
-	val = val - hash;
-	ft_memcpy(info->text_begin + info->text_size + 0x9B + 0x2, &val, 4); // 0x8c is pos of instruction targeted in loader;;; a modifier adresse de pos_rdi dans loader
-}
-
-static void	patch_payload(t_info *info)
-{
-	int32_t	start;
-	int32_t	end;
-	int32_t	val;
-
-	start = (int32_t)(info->addr_bis + PAYLOAD_SIZE + BIS_SIZE);
-	end = info->addr_bis + /*A*/0x180/*A`*/; // ajouter l'addresse du milieu du bis
-	val = end - start;
-
-	// replace jmp addr
-	ft_memcpy(info->file + info->offset_bis + PAYLOAD_SIZE + BIS_SIZE - 4, &val, 4);
-	// replace ret by jmp
-	val = 0xe9;
-	ft_memcpy(info->file + info->offset_bis + PAYLOAD_SIZE + BIS_SIZE - 5, &val, 1);
-	// replace leave by pop rbp
-	val = 0x5dec8948;
-	ft_memcpy(info->file + info->offset_bis + PAYLOAD_SIZE + BIS_SIZE - 9, &val, 4);
-}
 
 static void	inject_payload(t_info *info)
 {
@@ -51,38 +18,6 @@ static void	inject_payload(t_info *info)
 	patch_payload(info);
 }
 
-void		patch_bis(t_info *info, int32_t nb)
-{
-	int32_t	start;
-	int32_t	end;
-	int32_t	val;
-
-	// get addr of end of end
-	start = info->addr_bis + BIS_SIZE;
-	start += 5;
-	if (nb == 1)
-		start -= 0x15e;//REPLACE1
-	if (nb == 2)
-		start -= 0xb4;//REPLACE2
-	if (nb == 3)
-		start -= 0xaf;//REPLACE3
-	if (nb == 4)
-		start -= 0x14e;//REPLACE4
-	if (nb == 5)
-		start -= 0x21;//REPLACE5
-	end = (int32_t)((size_t)(info->addr_hooked_func) - (size_t)(info->text_begin) + info->text_addr);
-	val = end - start;
-	if (nb == 1)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x15e/*REPLACE1*/ + 1, &val, 4);
-	if (nb == 2)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0xb4/*REPLACE2*/ + 1, &val, 4);
-	if (nb == 3)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0xaf/*REPLACE3*/ + 1, &val, 4);
-	if (nb == 4)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x14e/*REPLACE4*/ + 1, &val, 4);
-	if (nb == 5)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x21/*REPLACE5*/ + 1, &val, 4);
-}
 
 static void	inject_loader(t_info *info)
 {
@@ -100,46 +35,6 @@ static void	inject_bis(t_info *info)
 	ft_memcpy(info->file + info->offset_bis, addr, BIS_SIZE);
 }
 
-static void	patch_addresses(t_info *info)
-{
-	int32_t		start;
-	int32_t		end;
-	int32_t		val;
-
-	// &loader
-	start = info->addr_bis + OFFSET_1 + 4;
-	end = (int32_t)(info->text_addr + info->text_size);
-	val = end - start;
-	ft_memcpy(info->file + info->offset_bis + OFFSET_1, &val, 4);
-
-	// &ft_memcpy
-	start = info->addr_bis + OFFSET_2 + 4;
-	end = (int32_t)(info->addr_bis + BIS_SIZE);
-	val = end - start;
-	ft_memcpy(info->file + info->offset_bis + OFFSET_2, &val, 4);
-
-	// &syscalls
-	start = info->addr_bis + OFFSET_3 + 4;
-	end = (int32_t)(info->addr_bis);
-	val = end - start;
-	ft_memcpy(info->file + info->offset_bis + OFFSET_3, &val, 4);
-
-	// &ptrace in main
-	ft_memset(info->file + info->offset_bis + OFFSET_4, 40, '\x90');
-
-	// size_text in mprotect_text
-	val = info->text_size + 0x1000;
-	ft_memcpy(info->file + info->offset_bis + OFFSET_5, &val, 4);
-
-	// addr text in mprotect_text
-	start = (size_t)(info->file) + info->addr_bis + OFFSET_5 + 0xb;
-	end = (size_t)(info->file) + info->text_addr;
-	val = end - start;
-	ft_memcpy(info->file + info->offset_bis + OFFSET_5 + 0x7, &val, 4); // 0x3F is pos of instruction targeted in loader
-
-	// open close_entries
-	ft_memset(info->file + info->offset_bis + OFFSET_6, 5, '\x90');
-}
 
 static int		reload_mapping(t_info *info)
 {
@@ -170,74 +65,6 @@ static int		inject_sign(t_info *info, t_fingerprint *fingerprint)
 	//index
 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE - 5, &(fingerprint->index), 4);
 	return (0);
-}
-
-uint32_t    encrypt(t_info *info, void *ptr, size_t size, uint32_t fingerprint)
-{
-	uint32_t    *file;
-	uint32_t    key;
-	size_t      i;  
-	uint32_t start = info->addr_bis + /*B*/0x10c/*B`*/;
-	uint32_t end = (int32_t)(info->addr_bis + BIS_SIZE + MAIN_OFFSET);
-
-	file = (uint32_t *)ptr;
-	key = end - start; // key is now offset to jump payload from loader
-	key += fingerprint;
-	ft_memcpy(info->file + info->offset_bis + /*D*/0xFB/*D`*/, &fingerprint, 4); //0xfb is pos of fingerprint sub in bis
-	int nb = 0;
-	size = (size / 4 ) * 4;
-	while (nb < 8)
-	{   
-		i = 0;
-		while (i * 4 < size - 4)
-		{   
-			file[i] ^= key;
-			key += file[i];
-			i++;
-		}   
-		key -= SUB;
-		nb++;
-	}
-	return (key);
-}
-
-uint32_t	hash_loader(t_info *info)
-{
-	uint32_t	hash = 5381;
-	size_t		size;
-	unsigned char	*str;
-	size_t		i = 0;
-
-	str = (unsigned char *)(info->text_begin + info->text_size);
-	size = 0xc5; //a modifier taille du loader 0xc5 (0xca - 5)
-	while (i < size)
-	{
-		if (i < 0x9D || i > 0xa1) //a modifier debut et fin pos adresse apres pos_rdi dans loader
-			hash = ((hash << 5) + hash) + str[i];
-		i++;
-	}
-	patch_loader(info, hash);
-	str = (unsigned char *)(info->file + info->offset_bis);
-	size = 0x29f0; // BIS _SIZE + PAYLOAD SIZE a modifier 0x1f4f
-	i = 0;
-	while (i < size)
-	{
-		if (i < 0x91 || i > 0x95) // modifier debut et fin pos adresse apres ... dans bis
-			hash = ((hash << 5) + hash) + str[i];
-		i++;
-	}
-	return (hash);
-}
-
-void		patch_key(t_info *info, uint32_t key)
-{
-	uint32_t val;
-	uint32_t hash;
-
-	hash = hash_loader(info);
-	// Key in loader
-	val = key - hash;
-	ft_memcpy(info->file + info->offset_bis + /*C*/0x91/*C`*/, &val, 4); // 0x78 is addr of key in bis
 }
 
 /*
@@ -436,27 +263,6 @@ void		close_entries(void)
 	addr_origin = -5;
 	addr_hook = addr + 0x12345678;
 	ft_memcpy(addr_hook, &addr_origin, 4);
-}
-
-void		itoa(char *buf, int32_t	nb)
-{
-	int32_t		i = 0;
-	int32_t		j = 0;
-	char		res[16];
-
-	while (nb >= 10)
-	{
-		res[i] = nb % 10 + '0';
-		i++;
-		nb /= 10;
-	}
-	res[i] = nb + '0';
-	while (i >= 0)
-	{
-		buf[j] = res[i];
-		j++;
-		i--;
-	}
 }
 
 void		get_path_own_file(char *buf)

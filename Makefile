@@ -17,7 +17,7 @@ NC = nasm
 NASMFLAGS = -f elf64
 
 NAME = pestilence
-FILES_C = parsing.c pestilence.c
+FILES_C = parsing.c utils.c patch.c crypto.c pestilence.c
 FILES_S = loader.s bis.s ft_memcpy.s ft_memset.s ft_strcat.s ft_strncmp.s ft_strlen.s call.s anti_data.s mprotect.s get_rip.s
 
 SRCS_DIR_C = srcs_c

