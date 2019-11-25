@@ -79,10 +79,9 @@ struct linux_dirent64 {
 };
 
 void		loader();
-int			main();
+int		main();
 void		ft_end();
 void		syscalls();
-// void		woody();
 
 /*			**** FILL_BUFF ****				*/
 void		write_begin(char *buf);
@@ -100,6 +99,14 @@ void		update_own_index(t_fingerprint *fingerprint);
 
 /*			**** UTILS ****					*/
 void		itoa(char *buf, int32_t nb);
+void		ft_memcpy(void *dest, void *src, size_t size);
+void		ft_memcpy_r(void *dest, void *src, size_t size);
+void		ft_memset(void *ptr, size_t size, unsigned char val);
+char		*ft_strcat(char *dest, const char *src);
+int		ft_strncmp(const char *s1, const char *s2, int n);
+int		ft_strlen(const char *s);
+void		*get_rip();
+void		double_ret();
 
 /*			**** CRYPTO ****				*/
 uint32_t	encrypt(t_info *info, void *ptr, size_t size, uint32_t fingerprint);
@@ -117,31 +124,22 @@ int		find_text(t_info *info, t_fingerprint *fingerprint);
 void		epo_parsing(t_info *info);
 int		pe_parsing(t_info *info);
 void		patch_bis(t_info *info, int32_t nb);
-int			check_process(char *buf_path);
-
+int		check_process(char *buf_path);
 void		mprotect_text(int prot);
 
-/*			**** LIB HANDLERS	****			*/
-void		ft_memcpy(void *dest, void *src, size_t size);
-void		ft_memcpy_r(void *dest, void *src, size_t size);
-void		ft_memset(void *ptr, size_t size, unsigned char val);
-char		*ft_strcat(char *dest, const char *src);
-int			ft_sysopen(const char *pathname, int flags);
-int			ft_sysopenmode(const char *pathname, int flags, int mode);
-int			ft_sysclose(int fd);
+/*			**** LIB SYSCALL ****				*/
+int		ft_sysopen(const char *pathname, int flags);
+int		ft_sysopenmode(const char *pathname, int flags, int mode);
+int		ft_sysclose(int fd);
 ssize_t 	ft_syswrite(int fd, const void *buf, size_t count);
 void		*ft_sysmmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
-int			ft_sysptrace(long request, long pid, unsigned long addr, unsigned long data);
+int		ft_sysptrace(long request, long pid, unsigned long addr, unsigned long data);
 void		*ft_sysmunmap(void *addr, size_t len);
-int			ft_sysfstat(int fd, struct stat *buf); 
-int			ft_sysgetdents(unsigned int fd, char *buf, unsigned int count);
+int		ft_sysfstat(int fd, struct stat *buf); 
+int		ft_sysgetdents(unsigned int fd, char *buf, unsigned int count);
 pid_t		ft_sysgetpid();
 void		ft_sysreadlink(char *sym_path, char *real_path, size_t size);
 int		ft_sysunlink(char *path);
 ssize_t		ft_sysread(int fd, void *buf, size_t count);
-int			ft_strncmp(const char *s1, const char *s2, int n);
-int			ft_strlen(const char *s);
-void		*get_rip();
-void		double_ret();
 
 #endif
