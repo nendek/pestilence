@@ -36,7 +36,6 @@ syscalls:
 	nop ; 28 nop to replace ptrace syscall
 	nop ; 28 nop to replace ptrace syscall
 	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
 	;	mov rdi, 0 ; syscalls
 	;	mov rsi, 0 ; syscalls
 	;	mov rdx, 1 ; syscalls
@@ -47,15 +46,15 @@ hash:
 	;    mov edi, 5381 ;hash
 	mov edi, r13d ; r13 got result of hash loader
 	;    mov r13d, edi ;hash bis
-	mov rdx, 0x2954 ;size payload + bis_size a modifier 0x1f4f
+	mov rdx, 0x10 ;size payload + bis_size a modifier 0x1f4f
 	pushfq ; verif step by step
 	mov rsi, 0 ;inc
 	lea rcx, [syscalls] ;adresse syscalls
 	pop r12
 hash_loop1:
-	cmp rsi, 0x91;|REPLACE3| offset key a eviter
+	cmp rsi, 0x90;|REPLACE3| offset key a eviter
 	jl after_cmp
-	cmp rsi, 0x95;|REPLACE4| offset key a eviter
+	cmp rsi, 0x94;|REPLACE4| offset key a eviter
 	jle hash_loop2
 after_cmp:
 	shl edi, 5

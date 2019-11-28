@@ -21,7 +21,7 @@ void		patch_payload(t_info *info)
 	int32_t	val;
 
 	start = (int32_t)(info->addr_bis + PAYLOAD_SIZE + BIS_SIZE);
-	end = info->addr_bis + /*A*/0x180/*A`*/; // ajouter l'addresse du milieu du bis
+	end = info->addr_bis + /*A*/0x17f/*A`*/; // ajouter l'addresse du milieu du bis
 	val = end - start;
 
 	// replace jmp addr

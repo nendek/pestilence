@@ -16,6 +16,7 @@ a chaque changements il faut verifier :
     S   offset_calls
 
     crypto.c
+    S   l'adresse du fingerprint dans le bis (encrypt, D)
     S   l'adresse de la cle dans Bis pour le hash ( patch key, C)
     S   Adresse du depart de bis pour le jump ( start dans encrypt : addr du jmpr15 + 3, B)
     M   Taille du loader (hash loader, F)

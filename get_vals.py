@@ -191,4 +191,10 @@ pos_neg_bis = hex(int(pos_neg_bis, 16) + 2)
 addr_index = loader[loader.find("<index>:") + 9:]
 addr_index = addr_index[:addr_index.find(":")]
 addr_index = hex(int(addr_index, 16))
-print(addr_index)
+
+fingerprint_bis = bis[bis.find("<chiffrement_loop1_a>:") + 23:]
+for i in range(0, 7):
+    fingerprint_bis = fingerprint_bis[fingerprint_bis.find("\n") + 1:]
+fingerprint_bis = fingerprint_bis[:fingerprint_bis.find(":")]
+fingerprint_bis = hex(int(fingerprint_bis, 16) + 3 - bis_start)
+print(fingerprint_bis)
