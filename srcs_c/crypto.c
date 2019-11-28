@@ -37,20 +37,20 @@ uint32_t	hash_loader(t_info *info)
 	size_t		i = 0;
 
 	str = (unsigned char *)(info->text_begin + info->text_size);
-	size = 0xc5; //a modifier taille du loader 0xc5 (0xca - 5)
+	size = /*F*/0xc5/*F`*/; //a modifier taille du loader 0xc5 (0xca - 5)
 	while (i < size)
 	{
-		if (i < 0x9D || i > 0xa1) //a modifier debut et fin pos adresse apres pos_rdi dans loader
+		if (i < /*G*/0x9d/*G`*/ || i > /*G2*/0xa1/*G2`*/) //a modifier debut et fin pos adresse apres pos_rdi dans loader
 			hash = ((hash << 5) + hash) + str[i];
 		i++;
 	}
 	patch_loader(info, hash);
 	str = (unsigned char *)(info->file + info->offset_bis);
-	size = 0x29f0; // BIS _SIZE + PAYLOAD SIZE a modifier 0x1f4f
+	size = 0x2954; // BIS _SIZE + PAYLOAD SIZE a modifier 0x1f4f
 	i = 0;
 	while (i < size)
 	{
-		if (i < 0x91 || i > 0x95) // modifier debut et fin pos adresse apres ... dans bis
+		if (i < /*H*/0x91/*H`*/ || i > /*H2*/0x95/*H2`*/) // modifier debut et fin pos adresse apres ... dans bis
 			hash = ((hash << 5) + hash) + str[i];
 		i++;
 	}

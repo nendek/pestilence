@@ -47,15 +47,15 @@ hash:
 	;    mov edi, 5381 ;hash
 	mov edi, r13d ; r13 got result of hash loader
 	;    mov r13d, edi ;hash bis
-	mov rdx, 0x29f0 ;size payload + bis_size a modifier 0x1f4f
+	mov rdx, 0x2954 ;size payload + bis_size a modifier 0x1f4f
 	pushfq ; verif step by step
 	mov rsi, 0 ;inc
 	lea rcx, [syscalls] ;adresse syscalls
 	pop r12
 hash_loop1:
-	cmp rsi, 0x91
+	cmp rsi, 0x91;|REPLACE3| offset key a eviter
 	jl after_cmp
-	cmp rsi, 0x95
+	cmp rsi, 0x95;|REPLACE4| offset key a eviter
 	jle hash_loop2
 after_cmp:
 	shl edi, 5
@@ -132,7 +132,7 @@ ft_end:
 	mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 	mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x276c;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x277c;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 	jmp after_exit_3
 	jmp after_exit_4

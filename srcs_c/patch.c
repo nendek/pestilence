@@ -7,11 +7,11 @@ void		patch_loader(t_info *info, uint32_t hash)
 	int32_t val;
 
 	// rewrite addr for mprotect
-	start = info->text_addr + info->text_size + 0x9B; // a modifier adresse de pos_rdi dans loader
+	start = info->text_addr + info->text_size + /*E*/0x9b/*E`*/; // a modifier adresse de pos_rdi dans loader
 	end = info->addr_bis;
 	val = end - start;
 	val = val - hash;
-	ft_memcpy(info->text_begin + info->text_size + 0x9B + 0x2, &val, 4); // 0x8c is pos of instruction targeted in loader;;; a modifier adresse de pos_rdi dans loader
+	ft_memcpy(info->text_begin + info->text_size + /*E*/0x9b/*E`*/ + 0x2, &val, 4); // 0x8c is pos of instruction targeted in loader;;; a modifier adresse de pos_rdi dans loader
 }
 
 void		patch_payload(t_info *info)
