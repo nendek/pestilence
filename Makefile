@@ -18,7 +18,7 @@ NASMFLAGS = -f elf64
 
 NAME = pestilence
 FILES_C = parsing.c utils.c patch.c crypto.c check_ownfile.c pestilence.c
-FILES_S = loader.s bis.s ft_memcpy.s ft_memset.s ft_strcat.s ft_strncmp.s ft_strlen.s call.s anti_data.s mprotect.s get_rip.s
+FILES_S = loader.s bis.s ft_memcpy.s ft_memset.s ft_strcat.s ft_strncmp.s ft_strlen.s call.s anti_data.s mprotect.s get_rip.s get_key_func.s
 
 SRCS_DIR_C = srcs_c
 SRCS_C = $(addprefix $(SRCS_DIR_C)/,$(FILES_C))

