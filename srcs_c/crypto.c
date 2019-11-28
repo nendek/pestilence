@@ -20,7 +20,7 @@ uint32_t    encrypt(t_info *info, void *ptr, size_t size, uint32_t fingerprint)
 		while (i * 4 < size - 4)
 		{   
 			file[i] ^= key;
-			key += file[i];
+			key += KEY;
 			i++;
 		}   
 		key -= SUB;

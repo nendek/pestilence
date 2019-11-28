@@ -131,7 +131,7 @@ ft_end:
 	mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 	mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x277c;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x276b;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 	jmp after_exit_3
 	jmp after_exit_4
@@ -152,7 +152,7 @@ after_exit_3:
 	cld ; dechiffrement
 	jmp dechiffrement_loop1
 chiffrement_loop1:
-	sub r15d, DWORD [rdi] ; chiffrement
+	sub r15d, 0x62F98A47 ; chiffrement
 	and r12, 0x100 ; verif step by step
 	mov eax, DWORD [rdi] ; chiffrement
 	xor rax, r15 ; chiffrement
