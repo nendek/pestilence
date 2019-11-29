@@ -32,7 +32,7 @@ key_8: ; epo_parsing
 key_9: ; pe_parsing
 	mov eax, 0x8b586bc8
 	jmp near end
-key_10: ; parse_process 29ad
+key_10: ; parse_process 29ad WIP, this one is not done yet
 	mov eax, 0x8b586bc8
 	jmp near end
 key_11: ; check_process 29ad
