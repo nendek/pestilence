@@ -153,7 +153,7 @@ void		save_key(t_info *info, uint32_t hash, int nb)
 	void	*addr;
 
 	addr = &get_key_func - (size_t)(&ft_memcpy);
-	addr = info->file + info->offset_bis + BIS_SIZE + (size_t)addr + 3 + (nb * 10);
+	addr = info->file + info->offset_bis + BIS_SIZE + (size_t)addr + 6 + (nb * 10);
 	ft_memcpy(addr, &hash, 4);
 }
 
@@ -168,7 +168,7 @@ void		crypt_payload(t_info *info, uint32_t fingerprint)
 	// decrypt_func(info, &, info->tab_addr[x + 1] - info->tab_addr[x], x);
 	// reencrypt_func(info, &, info->tab_addr[x + 1] - info->tab_addr[x], key);
 
-	while (i < 4)
+	while (i < 10)
 	{
 		size = info->tab_addr[i + 1] - info->tab_addr[i];
 		offset = info->tab_addr[i] - (size_t)(&ft_memcpy);

