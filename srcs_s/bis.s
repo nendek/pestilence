@@ -131,7 +131,7 @@ ft_end:
 	mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 	mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x2b71;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x2f6a;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 	jmp after_exit_3
 	jmp after_exit_4
