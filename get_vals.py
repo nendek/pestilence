@@ -203,4 +203,9 @@ for i in range(0, 19):
     in_pestilence = in_pestilence[in_pestilence.find("\n") + 1:]
 in_pestilence = in_pestilence[:in_pestilence.find(":")]
 in_pestilence = hex(int(in_pestilence, 16) + 6)
-print(in_pestilence)
+
+in_pestilence2 = dump[dump.find("<main>:") + 7:]
+for i in range(0, 21):
+    in_pestilence2 = in_pestilence2[in_pestilence2.find("\n") + 1:]
+in_pestilence2 = in_pestilence2[:in_pestilence2.find(":")]
+in_pestilence2 = hex(int(in_pestilence2, 16) + 6)
