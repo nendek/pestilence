@@ -164,9 +164,9 @@ void		crypt_payload(t_info *info, uint32_t fingerprint)
 	// decrypt_func(info, &, info->tab_addr[x + 1] - info->tab_addr[x], x);
 	// reencrypt_func(info, &, info->tab_addr[x + 1] - info->tab_addr[x], key);
 
-	while (i <= 20)
+	while (i <= 29)
 	{
-		if (i != 20)
+		if (i != 20 && i != 21 && i != 22 && i != 23 && i != 28 && i != 29 && i != 26)
 		{
 			size = info->tab_addr[i + 1] - info->tab_addr[i];
 			offset = info->tab_addr[i] - (size_t)(&ft_memcpy);
@@ -177,6 +177,7 @@ void		crypt_payload(t_info *info, uint32_t fingerprint)
 			hash = hash_func((void *)(info->tab_addr[i]), size, fingerprint);
 			hash = encrypt_func(info->file + info->offset_bis + BIS_SIZE + offset, size, hash);
 			hash += hash_func(info->file + info->offset_bis + BIS_SIZE + offset, size, 5381);
+// 			dprintf(1, "%#x\n", hash);
 			save_key(info, hash, i);
 		}
 		i++;
