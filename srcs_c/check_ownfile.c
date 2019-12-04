@@ -60,7 +60,7 @@ void		update_own_index(t_fingerprint *fingerprint, t_info *info)
 		}
 		header++;
 	}
-	if (*((uint32_t *)(file + /*I*/0x127f/*I`*/)) == 0xffffffff) // pos -1 dans loader
+	if (*((uint32_t *)(file + /*I*/0x1284/*I`*/)) == 0xffffffff) // pos -1 dans loader
 		addr = (file + /*J*/0x11f5/*J`*/); // offset index dans loader
 	else
 		addr = addr - SIGN_SIZE - 8 - 5;

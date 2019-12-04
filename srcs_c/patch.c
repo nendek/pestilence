@@ -21,7 +21,7 @@ void		patch_payload(t_info *info)
 	int32_t	val;
 
 	start = (int32_t)(info->addr_bis + PAYLOAD_SIZE + BIS_SIZE);
-	end = info->addr_bis + /*A*/0x193/*A`*/; // ajouter l'addresse du milieu du bis
+	end = info->addr_bis + /*A*/0x19b/*A`*/; // ajouter l'addresse du milieu du bis
 	val = end - start;
 
 	// replace jmp addr
@@ -44,27 +44,27 @@ void		patch_bis(t_info *info, int32_t nb)
 	start = info->addr_bis + BIS_SIZE;
 	start += 5;
 	if (nb == 1)
-		start -= 0x256;//REPLACE1
+		start -= 0x265;//REPLACE1
 	if (nb == 2)
-		start -= 0x194;//REPLACE2
+		start -= 0x1a0;//REPLACE2
 	if (nb == 3)
-		start -= 0x18f;//REPLACE3
+		start -= 0x19b;//REPLACE3
 	if (nb == 4)
-		start -= 0x24f;//REPLACE4
+		start -= 0x25e;//REPLACE4
 	if (nb == 5)
-		start -= 0xfd;//REPLACE5
+		start -= 0x109;//REPLACE5
 	end = (int32_t)((size_t)(info->addr_hooked_func) - (size_t)(info->text_begin) + info->text_addr);
 	val = end - start;
 	if (nb == 1)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x256/*REPLACE1*/ + 1, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x265/*REPLACE1*/ + 1, &val, 4);
 	if (nb == 2)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x194/*REPLACE2*/ + 1, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x1a0/*REPLACE2*/ + 1, &val, 4);
 	if (nb == 3)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x18f/*REPLACE3*/ + 1, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x19b/*REPLACE3*/ + 1, &val, 4);
 	if (nb == 4)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x24f/*REPLACE4*/ + 1, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x25e/*REPLACE4*/ + 1, &val, 4);
 	if (nb == 5)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0xfd/*REPLACE5*/ + 1, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x109/*REPLACE5*/ + 1, &val, 4);
 }
 
 void		patch_addresses(t_info *info)

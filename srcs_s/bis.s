@@ -29,14 +29,12 @@ hash:
 	mov edi, r13d ; r13 got result of hash loader
 	;    mov r13d, edi ;hash bis
 	mov rdx, 0x10 ;size payload + bis_size a modifier 0x1f4f
-	pushfq ; verif step by step
 	mov rsi, 0 ;inc
 	lea rcx, [syscalls] ;adresse syscalls
-	pop r12
 hash_loop1:
-	cmp rsi, 0x7f;|REPLACE3| offset key a eviter
+	cmp rsi, 0x84;|REPLACE3| offset key a eviter
 	jl after_cmp
-	cmp rsi, 0x83;|REPLACE4| offset key a eviter
+	cmp rsi, 0x88;|REPLACE4| offset key a eviter
 	jle hash_loop2
 after_cmp:
 	shl edi, 5
@@ -50,6 +48,7 @@ hash_loop2:
 	inc rcx
 	cmp rsi, rdx
 	jl hash_loop1
+	jmp child2
 	jmp after_exit_5
 jmp5:
 	jmp -1 ; sortie
@@ -66,6 +65,8 @@ chiffrement:
 	add r15d, r13d
 	mov r9, 8 ; NB_TIMING MOODULABLE ; chiffrement
 	mov r14, 0x95837523 ; SUB ; chiffrement
+	pushfq ; verif step by step
+	pop r12
 	mov r13, 1 ; mark this zone as loader ; chiffrement
 chiffrement_loop2:
 	jmp dechiffrement_loop2 ; going to save size and pos of encryption zone ; chiffrement
@@ -113,7 +114,7 @@ ft_end:
 	mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 	mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x40f3;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x40f8;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 	jmp after_exit_3
 	jmp after_exit_4
@@ -184,7 +185,7 @@ after_exit_1:
 	je jmp5 ; sortie
 
 wait4:
-	mov rdi, r13
+	mov rdi, r14
 	mov rsi, 0
 	mov rdx, 0
 	mov r10, 0
@@ -193,7 +194,7 @@ wait4:
 	ret
 
 ptrace:
-	mov rsi, r13
+	mov rsi, r14
 	mov rdx, 0
 	mov rax, 0x65
 	syscall
@@ -201,7 +202,7 @@ ptrace:
 child:
 	mov rax, 0x6e
 	syscall
-	mov r13, rax
+	mov r14, rax
 	sub rsp, 0x100 ; struct size = 0xd8
 
 	mov rdi, 0x10
@@ -214,8 +215,13 @@ child:
 	lea r10, [rbp - 0xf0]
 	call ptrace ; PTRACE_GETREGS
 	
-	lea rax, [hash]
+;	mov r14, r13
+	jmp hash
+child2:
+	lea rax, [chiffrement]
 	mov [rbp - 0x70], rax
+	mov [rbp - 0xe0], r13 ; put r13, hash of bis
+;	mov r13, r14
 	mov rdi, 0xd
 	lea r10, [rbp - 0xf0]
 	call ptrace ; PTRACE_SETREGS
