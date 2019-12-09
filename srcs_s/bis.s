@@ -2,6 +2,8 @@ default rel
 global ft_end
 global syscalls
 
+;r14 pid child dans parent et ppid dans child
+
 syscalls:
 	rdtsc
 	mov r12, rax
@@ -10,20 +12,50 @@ syscalls:
 	cmp rax, 0xff
 	jg end_ft_end
 
-fork:
+fork_check:
 	xor rax, rax
 	mov rax, 0x39
-	syscall
+	syscall	;fork
+	mov r14, rax
 	cmp rax, 0
-	je child
-	;	mov rdi, 0 ; syscalls
-	;	mov rsi, 0 ; syscalls
-	;	mov rdx, 1 ; syscalls
-	;	mov r10, 0 ; syscalls
-	;	mov rax, 0x65 ; syscalls
-	;	syscall ; syscalls
+	je child_check
+	jl end_ft_end
+	sub rsp, 0x10 ;status
+	call wait4_for_parent ;wait child_check
+	mov rax, [rbp - 0x10]
+	add rsp, 0x10
+	and rax, 0xff00
+	shr rax, 8
+	cmp rax, 1	;check if ok with WEXITSTATUS
+	je end_ft_end
+
+fork_hash:
+	xor rax, rax
+	mov rax, 0x39
+	syscall	;fork
+	mov r14, rax
+	cmp rax, 0
+	je child_hash
+	jl end_ft_end
+	jmp wait_loop
+
 wait_loop:
 	jmp wait_loop
+
+child_check:
+	call getppid
+	mov r14, rax
+	mov rdi, 0x10
+	mov r10, 0
+	call ptrace ;PTRACE_ATTACH
+	cmp rax, 0
+	jl exit_1
+	call wait4_for_child ;wait for attach
+	mov rdi, 0x11
+	mov r10, 0
+	call ptrace ;PTRACE_DETACH
+	jmp exit_0
+
 hash:
 	;    mov edi, 5381 ;hash
 	mov edi, r13d ; r13 got result of hash loader
@@ -32,9 +64,9 @@ hash:
 	mov rsi, 0 ;inc
 	lea rcx, [syscalls] ;adresse syscalls
 hash_loop1:
-	cmp rsi, 0x84;|REPLACE3| offset key a eviter
+	cmp rsi, 0x109;|REPLACE3| offset key a eviter
 	jl after_cmp
-	cmp rsi, 0x88;|REPLACE4| offset key a eviter
+	cmp rsi, 0x10d;|REPLACE4| offset key a eviter
 	jle hash_loop2
 after_cmp:
 	shl edi, 5
@@ -48,7 +80,7 @@ hash_loop2:
 	inc rcx
 	cmp rsi, rdx
 	jl hash_loop1
-	jmp child2
+	jmp child_hash2
 	jmp after_exit_5
 jmp5:
 	jmp -1 ; sortie
@@ -114,7 +146,7 @@ ft_end:
 	mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 	mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x40f8;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x40f0;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 	jmp after_exit_3
 	jmp after_exit_4
@@ -184,7 +216,21 @@ after_exit_1:
 	cmp DWORD [rsp - 8], 1 ; sortie
 	je jmp5 ; sortie
 
-wait4:
+getppid:
+	mov rax, 0x6e ;getppid
+	syscall
+	ret
+
+wait4_for_parent:
+	mov rdi, r14
+	lea rsi, [rbp - 0x10]
+	mov rdx, 0x2
+	mov r10, 0
+	mov rax, 0x3d
+	syscall
+	ret
+
+wait4_for_child:
 	mov rdi, r14
 	mov rsi, 0
 	mov rdx, 0
@@ -199,61 +245,73 @@ ptrace:
 	mov rax, 0x65
 	syscall
 	ret
-child:
-	mov rax, 0x6e
+
+print_exit1:
+	db "exit1"
+print_exit0:
+	db "exit0"
+
+exit_1:	
+	;mov rdi, 1
+	;lea rsi, [print_exit1]
+	;mov rdx, 5
+	;mov rax, 1
+	;syscall
+
+	mov rax, 0x3c
+	mov rdi, 0x1
 	syscall
+
+exit_0:	
+	;mov rdi, 1
+	;lea rsi, [print_exit0]
+	;mov rdx, 5
+	;mov rax, 1
+	;syscall
+
+	mov rax, 0x3c
+	mov rdi, 0x0
+	syscall
+
+child_hash:
+	call getppid
 	mov r14, rax
 	sub rsp, 0x100 ; struct size = 0xd8
-
 	mov rdi, 0x10
 	mov r10, 0
 	call ptrace ; PTRACE_ATTACH
-
-	call wait4
-
+	cmp rax, 0
+	jl exit_1
+	call wait4_for_child
 	mov rdi, 0xc
 	lea r10, [rbp - 0xf0]
 	call ptrace ; PTRACE_GETREGS
-	
-;	mov r14, r13
 	jmp hash
-child2:
+
+child_hash2:
 	lea rax, [chiffrement]
 	mov [rbp - 0x70], rax
 	mov [rbp - 0xe0], r13 ; put r13, hash of bis
-;	mov r13, r14
 	mov rdi, 0xd
 	lea r10, [rbp - 0xf0]
 	call ptrace ; PTRACE_SETREGS
-
 	mov rdi, 0x18
 	mov r10, 0
 	call ptrace ; PTRACE_SYSCALL
-
-	call wait4
-
+	call wait4_for_child
 	mov rdi, 0xc
 	lea r10, [rbp - 0xf0]
 	call ptrace ; PTRACE_GETREGS
-
 	lea rax, [label_jmp_to_payload]
 	mov [rbp - 0x70], rax
 	mov rdi, 0xd
 	lea r10, [rbp - 0xf0]
 	call ptrace ; PTRACE_SETREGS
-
 	mov rdi, 0x07
 	mov r10, 0
 	call ptrace ; PTRACE_CONT
-
-;inf_loop:
-;	jmp inf_loop
-	
-	; exit child
-	mov rax, 0x3c
-	mov rdi, 0
-	syscall
+	call wait4_for_child ; wait end parent after exit
+	jmp exit_0
 
 last_instr_of_end:
 	nop
-
