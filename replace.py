@@ -89,11 +89,11 @@ for i in range(0, len(content)):
     	place = content[i].find("|REPLACE2|") - 7
     	content[i] = content[i][0:place] + payload_size + content[i][place + 6:]
     if content[i].find("|REPLACE3|") != -1:
-    	place = content[i].find("|REPLACE3|") - 5
-    	content[i] = content[i][0:place] + key_addr + content[i][place + 4:]
+    	place = content[i].find("|REPLACE3|") - 6
+    	content[i] = content[i][0:place] + key_addr + content[i][place + 5:]
     if content[i].find("|REPLACE4|") != -1:
-    	place = content[i].find("|REPLACE4|") - 5
-    	content[i] = content[i][0:place] + hex(int(key_addr, 16) + 4) + content[i][place + 4:]
+    	place = content[i].find("|REPLACE4|") - 6
+    	content[i] = content[i][0:place] + hex(int(key_addr, 16) + 4) + content[i][place + 5:]
     f.write(content[i])
 f.close()
 

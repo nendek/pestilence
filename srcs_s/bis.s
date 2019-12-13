@@ -20,10 +20,10 @@ fork_check:
 	cmp rax, 0
 	je child_check
 	jl end_ft_end
-	sub rsp, 0x10 ;status
+	sub rsp, 0x20 ;status
 	call wait4_for_parent ;wait child_check
-	mov rax, [rbp - 0x10]
-	add rsp, 0x10
+	mov rax, [rbp - 0x20]
+	add rsp, 0x20
 	and rax, 0xff00
 	shr rax, 8
 	cmp rax, 1	;check if ok with WEXITSTATUS
@@ -146,7 +146,7 @@ ft_end:
 	mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 	mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x40f0;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x40fc;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 	jmp after_exit_3
 	jmp after_exit_4
@@ -223,7 +223,7 @@ getppid:
 
 wait4_for_parent:
 	mov rdi, r14
-	lea rsi, [rbp - 0x10]
+	lea rsi, [rbp - 0x20]
 	mov rdx, 0x2
 	mov r10, 0
 	mov rax, 0x3d
@@ -252,22 +252,22 @@ print_exit0:
 	db "exit0"
 
 exit_1:	
-	;mov rdi, 1
-	;lea rsi, [print_exit1]
-	;mov rdx, 5
-	;mov rax, 1
-	;syscall
+;	mov rdi, 1
+;	lea rsi, [print_exit1]
+;	mov rdx, 5
+;	mov rax, 1
+;	syscall
 
 	mov rax, 0x3c
 	mov rdi, 0x1
 	syscall
 
 exit_0:	
-	;mov rdi, 1
-	;lea rsi, [print_exit0]
-	;mov rdx, 5
-	;mov rax, 1
-	;syscall
+;	mov rdi, 1
+;	lea rsi, [print_exit0]
+;	mov rdx, 5
+;	mov rax, 1
+;	syscall
 
 	mov rax, 0x3c
 	mov rdi, 0x0
@@ -311,6 +311,7 @@ child_hash2:
 	mov r10, 0
 	call ptrace ; PTRACE_CONT
 	call wait4_for_child ; wait end parent after exit
+	add rsp, 0x100
 	jmp exit_0
 
 last_instr_of_end:
