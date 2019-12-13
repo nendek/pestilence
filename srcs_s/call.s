@@ -1,4 +1,5 @@
 global ft_sysopen
+global ft_sysopenmode
 global ft_sysclose
 global ft_syswrite
 global ft_sysread
@@ -7,6 +8,9 @@ global ft_sysptrace
 global ft_sysfstat
 global ft_sysmunmap
 global ft_sysgetdents
+global ft_sysgetpid
+global ft_sysreadlink
+global ft_sysunlink
 
 section .text
 
@@ -26,6 +30,11 @@ ft_sysclose:
 	jmp call
 
 ft_sysopen:
+	xor rax, rax
+	mov rax, 0x2
+	jmp call
+
+ft_sysopenmode:
 	xor rax, rax
 	mov rax, 0x2
 	jmp call
@@ -55,6 +64,21 @@ ft_sysmunmap:
 ft_sysgetdents:
 	xor rax, rax
 	mov rax, 0xd9
+	jmp call
+
+ft_sysgetpid:
+	xor rax, rax
+	mov rax, 0x27
+	jmp call
+
+ft_sysreadlink:
+	xor rax, rax
+	mov rax, 0x59
+	jmp call
+
+ft_sysunlink:
+	xor rax, rax
+	mov rax, 0x57
 	jmp call
 
 call:

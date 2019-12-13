@@ -9,7 +9,6 @@ first_loop:
     je append
     inc rdi 
     jmp first_loop
-
 append:
     cmp [rsi], byte 0
     je end 
@@ -18,7 +17,6 @@ append:
     inc rdi 
     inc rsi 
     jmp append
-
 end:
     pop rax 
     ret

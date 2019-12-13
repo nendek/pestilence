@@ -13,12 +13,10 @@ ft_memcpy:
 
 ft_memcpy_r:
 	mov rcx, rdx
-
 	add rdi, rdx
 	dec rdi
 	add rsi, rdx
 	dec rsi
-
 	std
 	rep movsb
 	ret

@@ -1,12 +1,17 @@
-extern ft_bzero
+global write_proc
+global write_exe
+global write_inhibitor
+global write_stat
 global write_begin
 global write_filename_src
-global write_sign
 global write_test
 global write_test2
-global write_proc
-global write_stat
-global write_inhibitor
+global write_sign
+
+write_exe:
+	mov [rdi], DWORD 0x6578652f
+	mov [rdi + 0x4], DWORD 0x00000000
+	ret
 
 write_proc:
 	mov [rdi], DWORD 0x6f72702f
@@ -60,5 +65,3 @@ write_sign:
 	mov [rdi + 0x20], DWORD 0x302e3276
 	mov [rdi + 0x24], DWORD 0x0000003e
 	ret
-
-
