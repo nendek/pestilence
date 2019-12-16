@@ -146,7 +146,7 @@ ft_end:
 	mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 	mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x40fc;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x40fe;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 	jmp after_exit_3
 	jmp after_exit_4
@@ -246,10 +246,10 @@ ptrace:
 	syscall
 	ret
 
-print_exit1:
-	db "exit1"
-print_exit0:
-	db "exit0"
+;print_exit1:
+;	db "exit1"
+;print_exit0:
+;	db "exit0"
 
 exit_1:	
 ;	mov rdi, 1
