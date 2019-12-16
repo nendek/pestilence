@@ -209,3 +209,6 @@ for i in range(0, 21):
     in_pestilence2 = in_pestilence2[in_pestilence2.find("\n") + 1:]
 in_pestilence2 = in_pestilence2[:in_pestilence2.find(":")]
 in_pestilence2 = hex(int(in_pestilence2, 16) + 6)
+
+print (offset_key_loader)
+print(key_addr)
