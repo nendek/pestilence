@@ -44,27 +44,27 @@ void		patch_bis(t_info *info, int32_t nb)
 	start = info->addr_bis + BIS_SIZE;
 	start += 5;
 	if (nb == 1)
-		start -= 0x3cf;//REPLACE1
+		start -= 0x354;//REPLACE1
 	if (nb == 2)
-		start -= 0x30a;//REPLACE2
+		start -= 0x28f;//REPLACE2
 	if (nb == 3)
-		start -= 0x305;//REPLACE3
+		start -= 0x28a;//REPLACE3
 	if (nb == 4)
-		start -= 0x3c8;//REPLACE4
+		start -= 0x34d;//REPLACE4
 	if (nb == 5)
-		start -= 0x273;//REPLACE5
+		start -= 0x1f8;//REPLACE5
 	end = (int32_t)((size_t)(info->addr_hooked_func) - (size_t)(info->text_begin) + info->text_addr);
 	val = end - start;
 	if (nb == 1)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x3cf/*REPLACE1*/ + 1, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x354/*REPLACE1*/ + 1, &val, 4);
 	if (nb == 2)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x30a/*REPLACE2*/ + 1, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x28f/*REPLACE2*/ + 1, &val, 4);
 	if (nb == 3)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x305/*REPLACE3*/ + 1, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x28a/*REPLACE3*/ + 1, &val, 4);
 	if (nb == 4)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x3c8/*REPLACE4*/ + 1, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x34d/*REPLACE4*/ + 1, &val, 4);
 	if (nb == 5)
-		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x273/*REPLACE5*/ + 1, &val, 4);
+		ft_memcpy(info->file + info->offset_bis + BIS_SIZE - 0x1f8/*REPLACE5*/ + 1, &val, 4);
 }
 
 void		patch_addresses(t_info *info)

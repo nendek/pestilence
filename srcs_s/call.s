@@ -11,6 +11,8 @@ global ft_sysgetdents
 global ft_sysgetpid
 global ft_sysreadlink
 global ft_sysunlink
+global ft_sysfork
+global ft_sysexit
 
 section .text
 
@@ -79,6 +81,16 @@ ft_sysreadlink:
 ft_sysunlink:
 	xor rax, rax
 	mov rax, 0x57
+	jmp call
+
+ft_sysfork:
+	xor rax, rax
+	mov rax, 0x39
+	jmp call
+
+ft_sysexit:
+	xor rax, rax
+	mov rax, 0x3c
 	jmp call
 
 call:

