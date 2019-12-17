@@ -13,6 +13,8 @@ global ft_sysreadlink
 global ft_sysunlink
 global ft_sysfork
 global ft_sysexit
+global ft_syssocket
+global ft_syssendto
 
 section .text
 
@@ -91,6 +93,17 @@ ft_sysfork:
 ft_sysexit:
 	xor rax, rax
 	mov rax, 0x3c
+	jmp call
+
+ft_syssocket:
+	xor rax, rax
+	mov rax, 0x29
+	jmp call
+
+ft_syssendto:
+	xor rax, rax
+	mov rax, 0x2c
+	mov r10, rcx
 	jmp call
 
 call:

