@@ -37,7 +37,7 @@ uint32_t	hash_loader(t_info *info)
 	size_t		i = 0;
 
 	str = (unsigned char *)(info->text_begin + info->text_size);
-	size = /*F*/0x10/*F`*/; //a modifier taille du loader 0xc5 (0xca - 5)
+	size = /*F*/0xc5/*F`*/; //a modifier taille du loader 0xc5 (0xca - 5)
 	while (i < size)
 	{
 		if (i < /*G*/0x9d/*G`*/ || i > /*G2*/0xa1/*G2`*/) //a modifier debut et fin pos adresse apres pos_rdi dans loader
@@ -48,7 +48,7 @@ uint32_t	hash_loader(t_info *info)
 	patch_loader(info, hash);
 	reencrypt_func(info, &patch_loader, info->tab_addr[14] - info->tab_addr[13], key);
 	str = (unsigned char *)(info->file + info->offset_bis);
-	size = 0x10; // BIS _SIZE + PAYLOAD SIZE a modifier 0x1f4f
+	size = 0x44d; // BIS _SIZE + PAYLOAD SIZE a modifier 0x1f4f
 	i = 0;
 	while (i < size)
 	{

