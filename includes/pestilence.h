@@ -94,6 +94,7 @@ void		loader();
 int		main();
 void		ft_end();
 void		syscalls();
+void		ft_nothing();
 
 /*			**** FILL_BUFF ****				*/
 void		write_begin(char *buf);

