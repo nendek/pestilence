@@ -57,8 +57,8 @@ hash_loop2:
 	je last_instr_of_loader; verif step by step
 	cmp rsi, rdx
 	jl hash_loop1
-	mov rdx, 0x7 ;EXEC | READ ; syscalls
-	mov rsi, 0x59a0;|REPLACE1| size bis + payload + 1 page ; syscalls
+	mov rdx, 0x7 ;EXEC | READ | WRITE; syscalls
+	mov rsi, 0x5a36;|REPLACE1| size bis + payload + 1 page ; syscalls
 	lea rdi, [pos_rdi] ; adresse bis ; syscalls
 pos_rdi:
 	mov r14, 0x12345678

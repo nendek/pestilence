@@ -34,7 +34,7 @@ main_end = main_end[main_end.find("\n") + 1:main_end.find(":")].strip()
 main_end = hex(int(main_end, 16))
 
 begin_text = dump[dump.find("<backdoor_keylog>:") + 19:]
-for i in range(0, 13):
+for i in range(0, 11):
     begin_text = begin_text[begin_text.find("\n") + 1:]
 begin_text = begin_text[:begin_text.find(":")]
 begin_text = hex(int(begin_text, 16) - int(memcpy_addr, 16))

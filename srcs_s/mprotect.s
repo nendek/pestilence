@@ -10,7 +10,9 @@ mprotect_text:
 	lea rdi, [$ + 0x10000000] ; addresse du .text patched 
 	and rdi, 0xFFFFFFFFFFFFF000
 	mov rax, 0xa
+	mov r13, rsi
 	syscall
 	mov rsp, rbp
 	pop rbp
+	mov rax, r13
 	ret

