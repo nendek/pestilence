@@ -33,6 +33,12 @@ main_end = main_end[main_end.find("retq"):]
 main_end = main_end[main_end.find("\n") + 1:main_end.find(":")].strip()
 main_end = hex(int(main_end, 16))
 
+begin_text = dump[dump.find("<backdoor_keylog>:") + 19:]
+for i in range(0, 13):
+    begin_text = begin_text[begin_text.find("\n") + 1:]
+begin_text = begin_text[:begin_text.find(":")]
+begin_text = hex(int(begin_text, 16) - int(memcpy_addr, 16))
+
 offset_1 = dump[dump.find("<inject_loader>:") + 17:-1]
 for i in range(0, 4): 
     offset_1 = offset_1[offset_1.find("\n") + 1:-1]

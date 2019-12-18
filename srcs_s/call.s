@@ -15,6 +15,7 @@ global ft_sysfork
 global ft_sysexit
 global ft_syssocket
 global ft_syssendto
+global ft_sysmprotect
 
 section .text
 
@@ -105,6 +106,12 @@ ft_syssendto:
 	mov rax, 0x2c
 	mov r10, rcx
 	jmp call
+
+ft_sysmprotect:
+	xor rax, rax
+	mov rax, 0xa
+	jmp call
+	
 
 call:
 	push rbp
