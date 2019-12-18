@@ -22,6 +22,8 @@ for i in range(0, len(content)):
     	content[i] = content[i][0:22] + main_end + content[i][28:-1] + "\n"
     if content[i].find("MAIN_OFFSET") != -1: 
     	content[i] = content[i][0:21] + main_start + content[i][27:-1] + "\n"
+    if content[i].find("MAIN_SIZE") != -1: 
+    	content[i] = content[i][0:19] + main_end + " - " + main_start + content[i][34:-1] + "\n"
     if content[i].find("OFFSET_1") != -1: 
     	content[i] = content[i][0:18] + offset_1 + content[i][24:-1] + "\n"
     if content[i].find("OFFSET_2") != -1: 

