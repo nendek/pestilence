@@ -7,8 +7,8 @@ void metamorph(t_info *info, t_fingerprint *fingerprint)
 	uint32_t tab_inc[15];
 	uint32_t tab_dec[15];
 
-	uint32_t tab_offset_loader[4];
-	uint32_t tab_offset_bis[12];
+	size_t tab_offset_loader[4];
+	size_t tab_offset_bis[12];
 
 	tab_push[0] = 0x50; //rax
 	tab_push[1] = 0x51; //rcx
@@ -78,23 +78,31 @@ void metamorph(t_info *info, t_fingerprint *fingerprint)
 	tab_dec[14] = 0x49ffce; //r14
 	tab_dec[15] = 0x49ffcf; //r15
 
-	tab_offset_loader[0] = info->text_begin + info->text_size + 0x1c;
-	tab_offset_loader[1] = info->text_begin + info->text_size + 0x2c;
-	tab_offset_loader[2] = info->text_begin + info->text_size + 0x47;
-	tab_offset_loader[3] = info->text_begin + info->text_size + 0x8f;
-	tab_offset_loader[4] = info->text_begin + info->text_size + 0xd1;
+	tab_offset_loader[0] = (size_t)(info->text_begin + info->text_size + 0x1c);
+	tab_offset_loader[1] = (size_t)(info->text_begin + info->text_size + 0x2c);
+	tab_offset_loader[2] = (size_t)(info->text_begin + info->text_size + 0x47);
+	tab_offset_loader[3] = (size_t)(info->text_begin + info->text_size + 0x8f);
+	tab_offset_loader[4] = (size_t)(info->text_begin + info->text_size + 0xd1);
 
-	tab_offset_bis[0] = info->file + info->offset_bis + BIS_SIZE + 0x23;
-	tab_offset_bis[1] = info->file + info->offset_bis + BIS_SIZE + 0x50;
-	tab_offset_bis[2] = info->file + info->offset_bis + BIS_SIZE + 0x6d;
-	tab_offset_bis[3] = info->file + info->offset_bis + BIS_SIZE + 0xce;
-	tab_offset_bis[4] = info->file + info->offset_bis + BIS_SIZE + 0x132;
-	tab_offset_bis[5] = info->file + info->offset_bis + BIS_SIZE + 0x1ca;
-	tab_offset_bis[6] = info->file + info->offset_bis + BIS_SIZE + 0x24a;
-	tab_offset_bis[7] = info->file + info->offset_bis + BIS_SIZE + 0x25a;
-	tab_offset_bis[8] = info->file + info->offset_bis + BIS_SIZE + 0x2ba;
-	tab_offset_bis[9] = info->file + info->offset_bis + BIS_SIZE + 0x2e8;
-	tab_offset_bis[10] = info->file + info->offset_bis + BIS_SIZE + 0x377;
-	tab_offset_bis[11] = info->file + info->offset_bis + BIS_SIZE + 0x3e8;
-	tab_offset_bis[12] = info->file + info->offset_bis + BIS_SIZE + 0x488;
+	tab_offset_bis[0] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x23);
+	tab_offset_bis[1] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x50);
+	tab_offset_bis[2] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x6d);
+	tab_offset_bis[3] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0xce);
+	tab_offset_bis[4] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x132);
+	tab_offset_bis[5] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x1ca);
+	tab_offset_bis[6] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x24a);
+	tab_offset_bis[7] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x25a);
+	tab_offset_bis[8] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x2ba);
+	tab_offset_bis[9] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x2e8);
+	tab_offset_bis[10] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x377);
+	tab_offset_bis[11] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x3e8);
+	tab_offset_bis[12] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x488);
+
+	(void)tab_push;
+	(void)tab_pop;
+	(void)tab_inc;
+	(void)tab_dec;
+	(void)tab_offset_loader;
+	(void)tab_offset_bis;
+	(void)fingerprint;
 }
