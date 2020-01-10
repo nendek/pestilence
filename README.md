@@ -2,7 +2,8 @@
 
 [@arobion][arobion]
 
-Sommaire:
+### Sommaire
+
  1. Usage
  2. Description
  3. Fonctionement
