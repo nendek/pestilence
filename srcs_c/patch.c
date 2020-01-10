@@ -33,10 +33,10 @@ void		patch_payload(t_info *info)
 	val = 0x5dec8948;
 	ft_memcpy(info->file + info->offset_bis + PAYLOAD_SIZE + BIS_SIZE - 9, &val, 4);
 	// replace adresse addr_text
-	start = (int32_t)(info->addr_bis + BIS_SIZE + /*F*/0x4688/*F`*/);
+	start = (int32_t)(info->addr_bis + BIS_SIZE + /*F*/0x4659/*F`*/);
 	end = info->text_addr;
 	val = end - start;
-	ft_memcpy(info->file + info->offset_bis + BIS_SIZE + /*F*/0x4688/*F`*/ - 4, &val, 4);
+	ft_memcpy(info->file + info->offset_bis + BIS_SIZE + /*F*/0x4659/*F`*/ - 4, &val, 4);
 }
 
 void		patch_bis(t_info *info, int32_t nb)
