@@ -77,7 +77,7 @@ hash:
 	;    mov edi, 5381 ;hash
 	mov edi, r13d ; r13 got result of hash loader
 	;    mov r13d, edi ;hash bis
-	mov rdx, 0x44d ;size payload + bis_size a modifier 0x1f4f
+	mov rdx, 0x5517 ;size payload + bis_size a modifier 0x1f4f
 	mov rsi, 0 ;inc
 	nop
 	nop

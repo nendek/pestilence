@@ -51,7 +51,7 @@ common_loader:
 	nop
 	nop
 	nop
-	mov rdx, 0xc5; c5 ;size LOADER a modifier
+	mov rdx, 0xe3; c5 ;size LOADER a modifier
 	mov rsi, 0 ;inc
 	lea rcx, [loader] ;adresse syscalls
 	pop rax; verif step by step
