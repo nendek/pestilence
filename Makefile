@@ -58,6 +58,11 @@ clean:
 fclean: clean
 		rm -f $(NAME)
 
-re: fclean all
+re:
+	make fclean
+	make
+	python3 replace.py
+	make fclean
+	make
 
 .PHONY: all clean fclean re

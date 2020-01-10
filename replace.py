@@ -10,7 +10,7 @@ def open_file(name):
 	f = open(name, "w")
 	return f, content
 
-f, content = open_file("includes/pestilence.h")
+f, content = open_file("includes/death.h")
 for i in range(0, len(content)):
     if content[i].find("FT_MEMCPY_ADDR") == 9:
         content[i] = content[i][0:24] + memcpy_addr + content[i][30:-1] + "\n"

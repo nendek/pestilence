@@ -1,6 +1,6 @@
 import subprocess
 
-dump = subprocess.run(["objdump -S pestilence"], shell=True, stdout = subprocess.PIPE).stdout.decode("utf-8")
+dump = subprocess.run(["objdump -S death"], shell=True, stdout = subprocess.PIPE).stdout.decode("utf-8")
 
 memcpy_addr = dump[dump.find("<ft_memcpy>:") + 13:]
 memcpy_addr = memcpy_addr[:memcpy_addr.find(":")]
