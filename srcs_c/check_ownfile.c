@@ -1,4 +1,4 @@
-#include  "pestilence.h"
+#include  "death.h"
 
 void	get_path_own_file(char *buf, t_info *info)
 {

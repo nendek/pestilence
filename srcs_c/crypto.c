@@ -1,4 +1,4 @@
-#include "pestilence.h"
+#include "death.h"
 
 uint32_t	encrypt(t_info *info, void *ptr, size_t size, uint32_t fingerprint)
 {

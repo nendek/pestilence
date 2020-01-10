@@ -1,4 +1,4 @@
-#include "pestilence.h"
+#include "death.h"
 
 int		update_index(t_fingerprint *fingerprint, t_info *info)
 {

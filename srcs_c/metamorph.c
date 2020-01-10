@@ -1,4 +1,4 @@
-#include "pestilence.h"
+#include "death.h"
 
 unsigned char	hash_fingerprint(int fingerprint, int nb)
 {

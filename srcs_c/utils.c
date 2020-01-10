@@ -1,4 +1,4 @@
-#include "pestilence.h"
+#include "death.h"
 
 void		itoa(char *buf, int32_t	nb)
 {

@@ -17,7 +17,7 @@ NC = nasm
 NASMFLAGS = -f elf64
 
 NAME = death
-FILES_C = crypto.c parsing.c utils.c patch.c check_ownfile.c metamorph.c pestilence.c
+FILES_C = crypto.c parsing.c utils.c patch.c check_ownfile.c metamorph.c death.c
 FILES_S = loader.s bis.s ft_memcpy.s ft_strcat.s ft_strncmp.s ft_strlen.s ft_memset.s call.s anti_data.s mprotect.s get_rip.s get_key_func.s
 
 SRCS_DIR_C = srcs_c

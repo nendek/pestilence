@@ -1,4 +1,4 @@
-#include "pestilence.h"
+#include "death.h"
 
 void		patch_loader(t_info *info, uint32_t hash)
 {
