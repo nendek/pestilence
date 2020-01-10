@@ -90,7 +90,7 @@ Ce projet est un virus metamorphique, qui est l'aboutissement de plusieurs proje
       
   - **Verification si un anti-virus**:
   
-      Nous recherchons si il y a un process avec le nom ```je sais plus```, si il est actif nous ne lancons pas notre virus.
+      Nous recherchons si il y a un process avec le nom ```inhibitor```, si il est actif nous ne lancons pas notre virus.
       
   - **Close EPO**:
       
