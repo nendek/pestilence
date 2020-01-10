@@ -28,10 +28,10 @@ Sommaire:
 
 ```shell
 $> make
-$> ./scripts/create.sh #crée le dossier /tmp/test1 et /tmp/test2, copie les binaires ls, python, bash de /bin
+$> sh ./scripts/create_dir.sh #crée le dossier /tmp/test1 et /tmp/test2, copie les binaires ls, python, bash de /bin
 $> ./death #infecte les deux dossiers
-$> ./scripts/check.sh	#verifie si il y a des binaires infecté dans /tmp/test1 et /tmp/test2
-$> ./scripts/infect.sh	#copie /tmp/test1/ls -> ./infected, recree le dossier /tmp/test1 et /tmp/test2, copie les binaires ls, python, bash de /bin et les infectes à partir de ./infected
+$> sh ./scripts/check.sh	#verifie si il y a des binaires infecté dans /tmp/test1 et /tmp/test2
+$> sh ./scripts/infect.sh	#copie /tmp/test1/ls -> ./infected, recree le dossier /tmp/test1 et /tmp/test2, copie les binaires ls, python, bash de /bin et les infectes à partir de ./infected
 
 #pour l'utilisation de la backdoor:
 #modifier l'adresse IP dans ./src_s/anti_data.s
