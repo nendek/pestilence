@@ -1,8 +1,9 @@
 # Death
 
 [@arobion][arobion]
-Sommaire:
+
 ```
+Sommaire:
   I	- Usage
   II	- Description
   III	- Fonctionement
@@ -100,9 +101,17 @@ Ce projet est un virus metamorphique, qui est l'aboutissement de plusieurs proje
   
   #### Polymorphisme:
   Notre polymorphisme est basé sur un ```fingerprint``` unique, généré lors de l'infection du fichier.
-  Ce fingerprint est obtenu grace à un système de couplage ```index-fingerprint```, qui permet d'assurer un contrôle algorithmique de la génération du ```fingerprint```
-  Grâce a ce fingerprint, nous obtenons des clés unique, nous permettant d'effectuer un chiffrement du ```payload``` different a chaque infection.
-  Chaque fonction du ```Payload``` est chiffrée grace a une clé unique issue d'un assemblage du fingerprint et du hash de cette fonction. 
+  
+  Ce fingerprint est obtenu grâce à un système de couplage ```index-fingerprint```, qui permet d'assurer un contrôle algorithmique de la génération du ```fingerprint```.
+  
+  Ce fingerprint est obtenu grâce à un système de couplage ```index-fingerprint```, qui permet d'assurer un contrôle algorithmique de la génération du ```fingerprint```.
+  
+  Grâce à ce fingerprint, nous obtenons des clés unique, nous permettant d'effectuer un chiffrement du ```payload``` different à chaque infection.
+  
+  Ce fingerprint est obtenu grâce à un système de couplage ```index-fingerprint```, qui permet d'assurer un contrôle algorithmique de la génération du ```fingerprint```.
+  
+  Chaque fonction du ```Payload``` est chiffrée grace à une clé unique issue d'un assemblage du fingerprint et du hash de cette fonction. 
+  
   Lors de l'execution du ```Payload```, chaque fonction est ainsi déchiffrée avant son execution, puis rechiffrée des la fin de son execution, ce qui permet d'assurer une bonne protection contre l'analye dynamique.
   #### Metamorphisme:
   
