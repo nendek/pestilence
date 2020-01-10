@@ -1,6 +1,6 @@
 #include "pestilence.h"
 
-static unsigned char	hash_fingerprint(int fingerprint, int nb)
+unsigned char	hash_fingerprint(int fingerprint, int nb)
 {
 	int hash = 5381;
 	while (nb > 0)

