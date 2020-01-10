@@ -4,7 +4,7 @@
 
 ```
 Sommaire:
-  I	  - Usage
+  I	 - Usage
   II	- Description
   III	- Fonctionement
           - Infection
@@ -18,9 +18,9 @@ Sommaire:
             - Section header obfuscation
             - Verification si un anti-virus
             - Close EPO
-            - Polymorphisme
-            - Metamorphisme
-          - Backdoor
+           - Polymorphisme
+           - Metamorphisme
+           - Backdoor
 ```
 > ATTENTION : Ce projet est uniquement à **but pedagogique**.
 
