@@ -8,16 +8,16 @@ Sommaire:
   II	- Description
   III	- Fonctionement
           - Infection
-            - Entry-Point Obscuring (EPO) technique
+           - Entry-Point Obscuring (EPO) technique
            - Insertion
           - Obfuscation
             - Anti debug
-              - Anti breackpoint
-              - Anti ptrace
-              - Anti step by step
-             - Section header obfuscation
-              - Verification si un anti-virus
-             - Close EPO
+            - Anti breackpoint
+            - Anti ptrace
+            - Anti step by step
+            - Section header obfuscation
+            - Verification si un anti-virus
+            - Close EPO
             - Polymorphisme
             - Metamorphisme
           - Backdoor
