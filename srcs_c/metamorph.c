@@ -122,22 +122,49 @@ void			metamorph(t_info *info, t_fingerprint *fingerprint)
 	{
 
 		ret = hash_fingerprint(fingerprint->fingerprint, i);
-		i_regs = (ret * 15) / 255;
-		i_tab = (ret * 2) / 255;
+		i_regs = ret & 0xF;
+		i_tab = (ret & 0x10) >> 4;
 		ft_memset((void*)tab_offset[i], 0x6, '\x90');
-		if (i_tab == 1)
+		if (i_tab == 0)
 		{
 			int		len = 0;
 			if (i_regs < 8)
 				len = 0x1;
 			else
 				len = 0x2;
-			ft_memcpy((void*)tab_offset[i], &tab_push[i_regs], len);
-			ft_memcpy((void*)tab_offset[i] + 0x4, &tab_pop[i_regs], len);
-		} else if (i_tab == 2)
+			if (((ret & 0x60) >> 5) == 0) // nop en bas
+			{
+				ft_memcpy((void*)tab_offset[i], &tab_push[i_regs], len);
+				ft_memcpy((void*)tab_offset[i] + len, &tab_pop[i_regs], len);
+			}
+			else if (((ret & 0x60) >> 5) == 1) // nop en haut
+			{
+				ft_memcpy((void*)tab_offset[i] + (6 - (2 * len)), &tab_push[i_regs], len);
+				ft_memcpy((void*)tab_offset[i] + (6 - len), &tab_pop[i_regs], len);
+			}
+			else if (((ret & 0x60) >> 5) == 2) // nop entre
+			{
+				ft_memcpy((void*)tab_offset[i], &tab_push[i_regs], len);
+				ft_memcpy((void*)tab_offset[i] + (6 - len), &tab_pop[i_regs], len);
+			}
+			else if (((ret & 0x60) >> 5) == 3) // nop ext
+			{
+				ft_memcpy((void*)tab_offset[i] + (3 - len) , &tab_push[i_regs], len);
+				ft_memcpy((void*)tab_offset[i] + 3, &tab_pop[i_regs], len);
+			}
+		}
+		else if (i_tab == 1)
 		{
-			ft_memcpy((void*)tab_offset[i], &tab_inc[i_regs], 0x3);
-			ft_memcpy((void*)tab_offset[i] + 0x4, &tab_dec[i_regs], 0x3);
+			if (((ret & 0x80) >> 7) == 0)
+			{
+				ft_memcpy((void*)tab_offset[i], &tab_inc[i_regs], 0x3);
+				ft_memcpy((void*)tab_offset[i] + 0x3, &tab_dec[i_regs], 0x3);
+			}
+			else
+			{
+				ft_memcpy((void*)tab_offset[i], &tab_dec[i_regs], 0x3);
+				ft_memcpy((void*)tab_offset[i] + 0x3, &tab_inc[i_regs], 0x3);
+			}
 		}
 		i++;
 	}

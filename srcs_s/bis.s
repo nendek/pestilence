@@ -181,7 +181,7 @@ ft_end:
 	nop
 	mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x4e7a;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x50a0;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 	jmp after_exit_3
 	jmp after_exit_4
