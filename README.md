@@ -2,26 +2,24 @@
 
 [@arobion][arobion]
 
-```
 Sommaire:
-  I	 - Usage
-  II	- Description
-  III	- Fonctionement
-          - Infection
-           - Entry-Point Obscuring (EPO) technique
-           - Insertion
-          - Obfuscation
-            - Anti debug
-            - Anti breackpoint
-            - Anti ptrace
-            - Anti step by step
-            - Section header obfuscation
-            - Verification si un anti-virus
-            - Close EPO
-           - Polymorphisme
-           - Metamorphisme
-           - Backdoor
-```
+ 1. Usage
+ 2. Description
+ 3. Fonctionement
+    1. Infection
+        1. Entry-Point Obscuring (EPO) technique
+        2. Insertion
+    2. Obfuscation
+        1. Anti debug
+        2. Anti breackpoint
+        3. Anti ptrace
+        4. Anti step by step
+        5. Section header obfuscation
+        6. Verification si un anti-virus
+        7. Close EPO
+    3. Polymorphisme
+    4. Metamorphisme
+    5. Backdoor
 > ATTENTION : Ce projet est uniquement à **but pedagogique**.
 
 ## I - Usage
