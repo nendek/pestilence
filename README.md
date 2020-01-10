@@ -66,7 +66,9 @@ Ce projet est un virus metamorphique, qui est l'aboutissement de plusieurs proje
   #### Anti-debug:
   - **Anti breakpoint**:
       
-      Voir la section Polymorphisme.
+      Lors du lancement de la routine d'infection, nous allons effectuer un ```hash``` de la partie de notre code qui permet le dechiffrement du ```payload```, puis nous allons utiliser ce ```hash``` en tant que clé de déchiffrement du ```payload```, qui, à la fin du déchiffrement aura une certaine valeure à laquelle nous ajoutons une autre valeure ( determinée lors de l'infection) qui correspond a l'adresse du debut du ```payload```.
+      
+      Ainsi, l'insertion d'un breakpoint corromp le ```hash``` ce qui entraine une mauvaise clé de déchiffremment ainsi qu'une mauvaise adresse du ```payload```.
   
   - **Anti ptrace**:
       
@@ -76,7 +78,7 @@ Ce projet est un virus metamorphique, qui est l'aboutissement de plusieurs proje
       
       Si l'attachement fonctionne, nous allons dans l'enfant faire excuter la partie hash du père et récupérer cette valeur.
       
-      Ensuite dans l'enfant nous allons executer la partie déchiffrement, et nous alons faire ```jump``` le parent à l'adresse obtenue.
+      Ensuite dans l'enfant nous allons executer la partie déchiffrement, et nous allons faire ```jump``` le parent à l'adresse obtenue.
   
   - **Anti step-by-step**:
       
@@ -88,7 +90,7 @@ Ce projet est un virus metamorphique, qui est l'aboutissement de plusieurs proje
   
       Nous corrompons la section header pour ne plus avoir d'informations sur le binaire infecté.
       
-  - **Verification si un anti-virus**:
+  - **Verification de certains processus**:
   
       Nous recherchons si il y a un process avec le nom ```inhibitor```, si il est actif nous ne lancons pas notre virus.
       
@@ -97,11 +99,15 @@ Ce projet est un virus metamorphique, qui est l'aboutissement de plusieurs proje
       Après le premier passage dans notre virus nous refermons les ```EPO``` pour ne plus repasser dans notre virus jusqu'à la fin de l'exécution du programme.
   
   #### Polymorphisme:
-  ...
+  Notre polymorphisme est basé sur un ```fingerprint``` unique, généré lors de l'infection du fichier.
+  Ce fingerprint est obtenu grace à un système de couplage ```index-fingerprint```, qui permet d'assurer un contrôle algorithmique de la génération du ```fingerprint```
+  Grâce a ce fingerprint, nous obtenons des clés unique, nous permettant d'effectuer un chiffrement du ```payload``` different a chaque infection.
+  Chaque fonction du ```Payload``` est chiffrée grace a une clé unique issue d'un assemblage du fingerprint et du hash de cette fonction. 
+  Lors de l'execution du ```Payload```, chaque fonction est ainsi déchiffrée avant son execution, puis rechiffrée des la fin de son execution, ce qui permet d'assurer une bonne protection contre l'analye dynamique.
   #### Metamorphisme:
   
    Nous avons dispatché dans la partie du virus non polymorphique des ```placeholder```.
-    Nous les remplacons de manière aléatoire à chaque infection ces ```placeholder``` par différentes instructions.
+   Nous les remplacons par différentes instructions, en fonction d'un motif généré à partir du ```fingerprint```.
     
 | Exemples d'instructions | | | | | | 
 | ------ | ------ | ------ | ------ | ------ | ------ |
