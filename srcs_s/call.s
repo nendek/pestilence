@@ -11,6 +11,11 @@ global ft_sysgetdents
 global ft_sysgetpid
 global ft_sysreadlink
 global ft_sysunlink
+global ft_sysfork
+global ft_sysexit
+global ft_syssocket
+global ft_syssendto
+global ft_sysmprotect
 
 section .text
 
@@ -80,6 +85,33 @@ ft_sysunlink:
 	xor rax, rax
 	mov rax, 0x57
 	jmp call
+
+ft_sysfork:
+	xor rax, rax
+	mov rax, 0x39
+	jmp call
+
+ft_sysexit:
+	xor rax, rax
+	mov rax, 0x3c
+	jmp call
+
+ft_syssocket:
+	xor rax, rax
+	mov rax, 0x29
+	jmp call
+
+ft_syssendto:
+	xor rax, rax
+	mov rax, 0x2c
+	mov r10, rcx
+	jmp call
+
+ft_sysmprotect:
+	xor rax, rax
+	mov rax, 0xa
+	jmp call
+	
 
 call:
 	push rbp

