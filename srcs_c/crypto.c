@@ -1,6 +1,6 @@
 #include "death.h"
 
-uint32_t	encrypt(t_info *info, void *ptr, size_t size, uint32_t fingerprint)
+uint32_t	encrypt_pest(t_info *info, void *ptr, size_t size, uint32_t fingerprint)
 {
 	uint32_t    *file;
 	uint32_t    key;

